@@ -150,6 +150,7 @@
 
   /* ---------- Sections ---------- */
   .section{padding:40px 0 24px;scroll-margin-top:var(--hdr);}
+  .section[hidden], #workspace[hidden] { display: none !important; }
   .home{
     min-height:calc(100vh - var(--hdr));min-height:calc(100svh - var(--hdr));
     display:flex;align-items:center;justify-content:center;
@@ -515,10 +516,11 @@
     });
   })();
 
-  // --- DOCK: active state + scrollspy ---
-  (function(){
+  // --- DOCK: active state + tab navigation (scrollspy guarded, see showTab) ---
+  var showTab = (function(){
     var links = [].slice.call(document.querySelectorAll('.dock-item[data-sec]'));
     var secs = links.map(function(a){ return document.getElementById(a.dataset.sec); }).filter(Boolean);
+    var ws = document.getElementById('workspace');
     var lockUntil = 0;
     function setActive(id){
       links.forEach(function(a){
@@ -527,24 +529,38 @@
         if(on){ a.setAttribute('aria-current', 'true'); } else { a.removeAttribute('aria-current'); }
       });
     }
+    function showTab(id){
+      secs.forEach(function(s){ s.hidden = true; });
+      if(ws){ ws.hidden = true; }
+      var t = document.getElementById(id);
+      if(t){ t.hidden = false; }
+      if(id === 'sec-goals' || id === 'sec-files' || id === 'sec-community'){ if(ws){ ws.hidden = false; } }
+      lockUntil = Date.now() + 900;
+      setActive(id);
+    }
     links.forEach(function(a){
-      a.addEventListener('click', function(){ lockUntil = Date.now() + 900; setActive(a.dataset.sec); });
+      a.addEventListener('click', function(e){ e.preventDefault(); showTab(a.dataset.sec); });
     });
     var start = document.getElementById('startBtn');
-    if(start){ start.addEventListener('click', function(){ lockUntil = Date.now() + 900; setActive('sec-study'); }); }
+    if(start){ start.addEventListener('click', function(e){ e.preventDefault(); showTab('sec-study'); }); }
     if('IntersectionObserver' in window){
       var io = new IntersectionObserver(function(entries){
+        if(document.body.dataset.tabs === '1'){ return; }
         if(Date.now() < lockUntil){ return; }
         entries.forEach(function(en){ if(en.isIntersecting){ setActive(en.target.id); } });
       }, { rootMargin: '-45% 0px -50% 0px' });
       secs.forEach(function(s){ io.observe(s); });
     }
     window.addEventListener('scroll', function(){
+      if(document.body.dataset.tabs === '1'){ return; }
       if(Date.now() < lockUntil){ return; }
       var atBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 4);
       if(atBottom && secs.length){ setActive(secs[secs.length - 1].id); }
     }, { passive: true });
+    return showTab;
   })();
+  document.body.dataset.tabs = '1';
+  showTab('sec-home');
 
   // --- HEADER: date display (independent of auth) ---
   (function(){
