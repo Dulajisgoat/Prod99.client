@@ -37,12 +37,18 @@
     --dur-mid:.28s;
     --dur-slow:.45s;
 
-    /* Background scene tokens (geometry/opacity only) */
-    --lamp-x:38%;
-    --lamp-y:8%;
-    --lamp-size:70vmin;
-    --grain-opacity:.05;
-    --vignette-strength:.24;
+    /* Scene tokens (background layers only) */
+    --scene-wall-top:   #F9F0EA;
+    --scene-wall-bot:   #E8D5CC;
+    --scene-desk-top:   #D4BDB0;
+    --scene-desk-bot:   #B09788;
+    --scene-horizon:    rgba(60,20,20,.22);
+    --scene-window:     rgba(255,240,220,.42);
+    --scene-lamp:       rgba(255,214,170,.55);
+    --scene-grain-op:   .045;
+    --scene-vignette:   .22;
+    --scene-desk-h:     38%;       /* desk height */
+    --scene-horizon-y:  62%;       /* wall/desk split */
 
     /* Background images — drop your files in /assets and adjust here */
     --bg-light-img:url("/assets/bg-light.jpg");
@@ -57,7 +63,7 @@
     --bg:#150909; --surface:#1E1010; --ink:#F3EAE8; --ink-soft:#BFA6A2;
     --wine:#D6435A; --wine-dark:#8C1C2B; --wine-soft:rgba(214,67,90,.16);
     --btn:#8C1C2B; --on-btn:#FFFFFF;
-    --glass:rgba(30,16,16,.70);
+    --glass:rgba(30,16,16,.72);
     --glass-edge:rgba(243,234,232,.16);
     --border:rgba(243,234,232,.14);
     --inset:rgba(255,255,255,.06);
@@ -67,11 +73,15 @@
     --shadow-sm:0 1px 2px rgba(0,0,0,.35);
     --shadow-md:0 8px 28px rgba(0,0,0,.40);
     --shadow-lg:0 20px 50px rgba(0,0,0,.55);
-    --lamp-x:38%;
-    --lamp-y:8%;
-    --lamp-size:75vmin;
-    --grain-opacity:.075;
-    --vignette-strength:.42;
+    --scene-wall-top:   #2A1316;
+    --scene-wall-bot:   #1A0808;
+    --scene-desk-top:   #2E1414;
+    --scene-desk-bot:   #0E0505;
+    --scene-horizon:    rgba(0,0,0,.55);
+    --scene-window:     rgba(255,180,120,.10);
+    --scene-lamp:       rgba(255,160,100,.38);
+    --scene-grain-op:   .075;
+    --scene-vignette:   .42;
   }
   html.boot, html.boot *{ transition:none!important; }
   *{box-sizing:border-box;}
@@ -86,102 +96,154 @@
   .wrap{max-width:1120px;margin:0 auto;padding:0 28px;}
   :focus-visible{outline:2px solid var(--wine);outline-offset:2px;}
 
-  /* ---------- Background layers (theme crossfade) ---------- */
+  /* ---------- Background: painted study-desk scene ---------- */
   .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg);}
-  .bg-img{
-    position:absolute;inset:0;opacity:0;transition:opacity .6s ease;
-    background-size:cover;background-repeat:no-repeat;
-  }
-  .bg-light{background-image:var(--bg-light-img),linear-gradient(160deg,#F7F1EF 0%,#EBD9D4 100%);background-position:var(--bg-pos-light),center;}
-  .bg-dark{background-image:var(--bg-dark-img),linear-gradient(160deg,#2A1013 0%,#150909 100%);background-position:var(--bg-pos-dark),center;}
-  html[data-theme="light"] .bg-light{opacity:1;}
-  html[data-theme="dark"] .bg-dark{opacity:1;}
 
-  /* New: desk lamp pool — the warm focal light */
+  /* Wall */
+  .bg-light, .bg-dark{
+    position:absolute; inset:0;
+    opacity:0;
+    transition:opacity .6s ease;
+    background-repeat:no-repeat;
+    background-size:cover;
+    background-position:center;
+  }
+  .bg-light{
+    background-image:
+      radial-gradient(ellipse 60% 45% at 30% 22%,
+        var(--scene-window) 0%, transparent 60%),
+      linear-gradient(to bottom,
+        var(--scene-wall-top) 0%,
+        var(--scene-wall-bot) var(--scene-horizon-y));
+  }
+  .bg-dark{
+    background-image:
+      radial-gradient(ellipse 60% 45% at 30% 22%,
+        var(--scene-window) 0%, transparent 60%),
+      linear-gradient(to bottom,
+        var(--scene-wall-top) 0%,
+        var(--scene-wall-bot) var(--scene-horizon-y));
+  }
+  html[data-theme="light"] .bg-light{opacity:1;}
+  html[data-theme="dark"]  .bg-dark{opacity:1;}
+
+  /* Window light shaft: diagonal band from upper-left */
+  .bg-window{
+    position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(115deg,
+      transparent 0%,
+      transparent 8%,
+      var(--scene-window) 22%,
+      transparent 38%,
+      transparent 100%);
+    mix-blend-mode:soft-light;
+    opacity:.9;
+  }
+
+  /* Lamp pool: the warm focal light */
   .bg-lamp{
     position:absolute; inset:0; pointer-events:none;
-    background:radial-gradient(circle var(--lamp-size) at var(--lamp-x) var(--lamp-y),
-      rgba(255,236,210,.28) 0%,
-      rgba(255,220,180,.12) 30%,
-      rgba(255,220,180,0) 70%);
+    background:radial-gradient(circle 46vmin at 42% 18%,
+      var(--scene-lamp) 0%,
+      transparent 65%);
     mix-blend-mode:screen;
-    transition:opacity .6s ease;
-  }
-  html[data-theme="dark"] .bg-lamp{
-    background:radial-gradient(circle var(--lamp-size) at var(--lamp-x) var(--lamp-y),
-      rgba(255,180,120,.16) 0%,
-      rgba(255,140,90,.08) 35%,
-      rgba(255,140,90,0) 70%);
   }
 
-  /* New: mesh blobs — slow drifting colour */
-  .bg-blobs{position:absolute; inset:0; pointer-events:none;}
+  /* Desk plane: horizon line and wooden surface */
+  .bg-desk{
+    position:absolute; left:0; right:0;
+    bottom:0; height:var(--scene-desk-h);
+    background:linear-gradient(to bottom,
+      var(--scene-desk-top) 0%,
+      var(--scene-desk-bot) 100%);
+    pointer-events:none;
+  }
+  .bg-desk::before{
+    content:""; position:absolute;
+    left:0; right:0; top:-6px; height:12px;
+    background:var(--scene-horizon);
+    filter:blur(6px);
+  }
+
+  /* Object suggestions: soft shadows on the desk (book left, cup right, pen centre) */
+  .bg-objects{
+    position:absolute; left:0; right:0;
+    bottom:0; height:var(--scene-desk-h);
+    pointer-events:none; overflow:hidden;
+  }
+  .bg-objects i{
+    position:absolute; display:block;
+    border-radius:50%;
+    background:radial-gradient(ellipse at center,
+      rgba(0,0,0,.28) 0%,
+      rgba(0,0,0,.10) 45%,
+      transparent 75%);
+    filter:blur(14px);
+    mix-blend-mode:multiply;
+  }
+  .bg-objects i:nth-child(1){        /* book, left */
+    width:22vmin; height:8vmin;
+    left:8%; bottom:14%;
+    border-radius:6px; filter:blur(10px);
+  }
+  .bg-objects i:nth-child(2){        /* cup, right */
+    width:12vmin; height:12vmin;
+    right:10%; bottom:22%;
+  }
+  .bg-objects i:nth-child(3){        /* pen, centre */
+    width:14vmin; height:3vmin;
+    left:48%; bottom:32%;
+    border-radius:99px; filter:blur(8px);
+    transform:rotate(-8deg);
+  }
+
+  /* Ambient drift: two slow blobs for warmth */
+  .bg-blobs{
+    position:absolute; inset:0; pointer-events:none;
+  }
   .bg-blobs i{
-    position:absolute; display:block; border-radius:50%;
-    filter:blur(80px); opacity:.55;
+    position:absolute; display:block;
+    border-radius:50%; filter:blur(90px);
     will-change:transform;
-    animation:blob-drift 65s var(--ease-out) infinite;
+    animation:desk-drift 75s var(--ease-out, cubic-bezier(.2,.8,.2,1)) infinite;
   }
   .bg-blobs i:nth-child(1){
-    width:52vmin; height:52vmin;
-    left:-8vmin; top:6vmin;
-    background:radial-gradient(circle, var(--wine-soft) 0%, transparent 70%);
-    animation-delay:-8s;
+    width:55vmin; height:55vmin;
+    left:-10vmin; top:5vmin;
+    background:radial-gradient(circle,
+      var(--wine-soft) 0%, transparent 70%);
+    opacity:.55;
   }
   .bg-blobs i:nth-child(2){
-    width:64vmin; height:64vmin;
-    right:-14vmin; top:auto; bottom:-16vmin;
-    background:radial-gradient(circle, rgba(255,196,150,.22) 0%, transparent 70%);
-    animation-delay:-28s; animation-duration:72s;
+    width:60vmin; height:60vmin;
+    right:-14vmin; bottom:-10vmin;
+    background:radial-gradient(circle,
+      var(--scene-lamp) 0%, transparent 70%);
+    opacity:.35;
+    animation-delay:-35s;
   }
-  .bg-blobs i:nth-child(3){
-    width:44vmin; height:44vmin;
-    left:40%; top:38%;
-    background:radial-gradient(circle, var(--wine) 0%, transparent 72%);
-    opacity:.16;
-    animation-delay:-45s; animation-duration:80s;
-  }
-  html[data-theme="dark"] .bg-blobs i:nth-child(1){
-    background:radial-gradient(circle, rgba(214,67,90,.32) 0%, transparent 70%);
-  }
-  html[data-theme="dark"] .bg-blobs i:nth-child(2){
-    background:radial-gradient(circle, rgba(180,90,60,.20) 0%, transparent 70%);
-  }
-  html[data-theme="dark"] .bg-blobs i:nth-child(3){
-    background:radial-gradient(circle, rgba(120,20,40,.40) 0%, transparent 72%);
-    opacity:.28;
-  }
-
-  @keyframes blob-drift{
+  @keyframes desk-drift{
     0%   { transform:translate3d(0,0,0) scale(1); }
-    33%  { transform:translate3d(3vmin,-2vmin,0) scale(1.04); }
-    66%  { transform:translate3d(-2vmin,3vmin,0) scale(.98); }
+    50%  { transform:translate3d(2vmin,-2vmin,0) scale(1.03); }
     100% { transform:translate3d(0,0,0) scale(1); }
   }
 
-  /* New: film grain — the layer that makes it feel designed */
+  /* Grain */
   .bg-grain{
     position:absolute; inset:0; pointer-events:none;
-    opacity:var(--grain-opacity);
+    opacity:var(--scene-grain-op);
     mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-    background-size:160px 160px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size:140px 140px;
   }
 
-  /* New: vignette — pulls focus to centre, replaces .bg::after */
+  /* Vignette */
   .bg-vignette{
     position:absolute; inset:0; pointer-events:none;
-    background:radial-gradient(ellipse 90% 70% at 50% 42%,
+    background:radial-gradient(ellipse 85% 70% at 50% 42%,
       transparent 0%,
-      transparent 40%,
-      rgba(20,8,8,var(--vignette-strength)) 100%);
-    transition:background .6s ease;
-  }
-
-  /* Photo grading — calm the photo so the wine accent leads */
-  .bg-light, .bg-dark{
-    filter:saturate(.78) contrast(1.04) brightness(.98);
-    transition:opacity .6s ease, filter .6s ease;
+      transparent 38%,
+      rgba(20,8,8,var(--scene-vignette)) 100%);
   }
 
   /* ---------- Header ---------- */
@@ -523,9 +585,14 @@
     .dock{gap:2px;padding:6px;border-radius:20px;bottom:calc(12px + env(safe-area-inset-bottom));}
     .dock-item{flex-direction:column;gap:3px;padding:8px 10px;font-size:.66rem;min-width:56px;border-radius:14px;}
     .toast{bottom:calc(92px + env(safe-area-inset-bottom));}
-    .bg-blobs i:nth-child(3){ display:none; }
-    .bg-blobs i{ filter:blur(56px); animation-duration:90s; }
-    :root{ --lamp-size:85vmin; }
+    .bg-blobs i{ animation-duration:120s; filter:blur(60px); }
+    .bg-objects i{ filter:blur(12px); }
+    .bg-objects i:nth-child(3){ display:none; }
+    :root{
+      --scene-desk-h:34%;
+      --scene-horizon-y:66%;
+      --scene-grain-op:.04;
+    }
   }
   @media(max-width:360px){
     .dock-item{min-width:50px;padding:8px 6px;}
@@ -546,10 +613,11 @@
 <div class="bg" aria-hidden="true">
   <div class="bg-img bg-light"></div>
   <div class="bg-img bg-dark"></div>
+  <div class="bg-window" aria-hidden="true"></div>
   <div class="bg-lamp" aria-hidden="true"></div>
-  <div class="bg-blobs" aria-hidden="true">
-    <i></i><i></i><i></i>
-  </div>
+  <div class="bg-desk" aria-hidden="true"></div>
+  <div class="bg-objects" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="bg-blobs" aria-hidden="true"><i></i><i></i></div>
   <div class="bg-grain" aria-hidden="true"></div>
   <div class="bg-vignette" aria-hidden="true"></div>
 </div>
@@ -781,7 +849,7 @@
     if(start){ start.addEventListener('click', function(e){
       e.preventDefault();
       var tpid = P99.profile && P99.profile.id;
-      if(!tpid){ return; } // auth still resolving — tour must not open
+      if(!tpid){ toast('Loading, try again in a moment…'); return; } // auth still resolving — tour must not open
       if(localStorage.getItem('prod99_tour_' + tpid) === 'done'){ showTab('sec-study'); }
       else if(tourAPI.startTour){ tourAPI.startTour(); }
     }); }
@@ -1012,12 +1080,24 @@
       if(!s.advanceOn||!s.advanceSel)return;
       var hit=e.target&&e.target.closest&&e.target.closest(s.advanceSel);
       if(!hit)return;
+      if (s.advanceSel === '#goalForm' && !$('goalIn').value.trim()) return;
       if(e.type===s.advanceOn){ tourAdvancing=true; setTimeout(nextStep,0); }
+    }
+    function hideChrome(hide){
+      var nodes = [document.querySelector('header.topbar'),
+                   document.querySelector('nav.dock'),
+                   document.querySelector('div.bg')];
+      nodes.forEach(function(n){
+        if(!n) return;
+        if(hide){ n.setAttribute('aria-hidden','true'); }
+        else    { n.removeAttribute('aria-hidden'); }
+      });
     }
     function startTour(){
       if(!pid())return;
       tourOpen=true; tourIndex=0;
       $('tourScrim').hidden=false;
+      hideChrome(true);
       document.addEventListener('click',tourObserve,true);
       document.addEventListener('submit',tourObserve,true);
       window.addEventListener('resize', tourReposition);
@@ -1030,12 +1110,14 @@
       window.removeEventListener('resize', tourReposition);
       window.removeEventListener('scroll', tourReposition);
       $('tourScrim').classList.remove('is-interactive');
+      hideChrome(false);
       $('tourScrim').hidden=true;
       clearHighlight();
       document.removeEventListener('click',tourObserve,true);
       document.removeEventListener('submit',tourObserve,true);
       showTab('sec-study');
-      var sbtn=$('startBtn'); if(sbtn){ sbtn.focus(); }
+      var active = document.querySelector('.dock-item.active');
+      if(active){ active.focus(); }
     }
     $('tourNext').addEventListener('click',nextStep);
     $('tourBack').addEventListener('click',prevStep);
