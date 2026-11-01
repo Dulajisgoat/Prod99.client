@@ -298,6 +298,36 @@
   .dock-item.active{background:var(--btn);color:var(--on-btn);}
   .dock-item.active:hover{transform:translateY(-2px);}
 
+  /* ---------- Onboarding tour ---------- */
+  .tour-scrim{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.55);
+    -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+    display:flex;align-items:flex-end;justify-content:center;
+    padding:24px 16px calc(96px + env(safe-area-inset-bottom));}
+  .tour-scrim[hidden]{display:none!important;}
+  .tour-tip{width:100%;max-width:400px;padding:20px;border-radius:18px;
+    background:var(--glass);border:1px solid var(--glass-edge);
+    box-shadow:var(--shadow-lg);color:var(--ink);}
+  .tour-step{margin:0 0 6px;font-size:.72rem;font-weight:700;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--wine);}
+  .tour-tip h4{margin:0 0 8px;font-size:1.05rem;}
+  .tour-tip p{line-height:1.5;font-size:.92rem;color:var(--ink-soft);}
+  .tour-hint{margin:8px 0 0!important;padding:8px 10px;border-radius:10px;
+    background:var(--wine-soft);color:var(--wine)!important;
+    font-weight:600;font-size:.85rem!important;}
+  .tour-hint[hidden]{display:none!important;}
+  .tour-dots{display:flex;gap:6px;margin:14px 0 0;}
+  .tour-dots i{width:7px;height:7px;border-radius:50%;
+    background:var(--wine-soft);display:block;}
+  .tour-dots i.on{background:var(--wine);}
+  .tour-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
+  .tour-highlight{position:relative;z-index:121;outline:3px solid var(--wine);
+    outline-offset:6px;border-radius:16px;}
+  .tour-scrim.is-interactive{pointer-events:none;background:rgba(0,0,0,.25);}
+  .tour-scrim.is-interactive .tour-tip{pointer-events:auto;}
+  @media(min-width:761px){
+    .tour-scrim{align-items:center;padding-bottom:24px;}
+  }
+
   /* ---------- Responsive ---------- */
   @media(max-width:1024px){
     .grid-files{grid-template-columns:1fr;}
@@ -483,6 +513,22 @@
   </a>
 </nav>
 
+<div class="tour-scrim" id="tourScrim" role="dialog" aria-modal="true"
+     aria-labelledby="tourTitle" hidden>
+  <div class="tour-tip" id="tourTip" role="document">
+    <p class="tour-step" id="tourStep"></p>
+    <h4 id="tourTitle"></h4>
+    <p id="tourBody"></p>
+    <p class="tour-hint" id="tourHint" hidden></p>
+    <div class="tour-dots" id="tourDots" aria-hidden="true"></div>
+    <div class="tour-actions">
+      <button class="btn btn-ghost" id="tourSkip" type="button">Skip tour</button>
+      <button class="btn btn-ghost" id="tourBack" type="button">Back</button>
+      <button class="btn btn-solid" id="tourNext" type="button">Next</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 (function(){
@@ -516,6 +562,9 @@
     });
   })();
 
+  // --- Onboarding tour trigger bridge: initWorkspace fills this in once ready ---
+  var tourAPI = {};
+
   // --- DOCK: active state + tab navigation (scrollspy guarded, see showTab) ---
   var showTab = (function(){
     var links = [].slice.call(document.querySelectorAll('.dock-item[data-sec]'));
@@ -542,7 +591,13 @@
       a.addEventListener('click', function(e){ e.preventDefault(); showTab(a.dataset.sec); });
     });
     var start = document.getElementById('startBtn');
-    if(start){ start.addEventListener('click', function(e){ e.preventDefault(); showTab('sec-study'); }); }
+    if(start){ start.addEventListener('click', function(e){
+      e.preventDefault();
+      var tpid = P99.profile && P99.profile.id;
+      if(!tpid){ return; } // auth still resolving — tour must not open
+      if(localStorage.getItem('prod99_tour_' + tpid) === 'done'){ showTab('sec-study'); }
+      else if(tourAPI.startTour){ tourAPI.startTour(); }
+    }); }
     if('IntersectionObserver' in window){
       var io = new IntersectionObserver(function(entries){
         if(document.body.dataset.tabs === '1'){ return; }
@@ -633,6 +688,106 @@
     function pad(n){return ('0'+n).slice(-2)}
     function key(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
     function fmt(secs){return pad(Math.floor(secs/60))+':'+pad(secs%60)}
+
+    /* Onboarding tour */
+    var TOUR_STEPS=[
+      { tab:'sec-home',      hint:null,
+        title:'Welcome to Prod99',
+        body:'Your space to focus, plan, and make progress. Quick tour? ~20 seconds.' },
+      { tab:'sec-study',     hint:'Try it: click Pomodoro',
+        advanceOn:'click', advanceSel:'#mdPo',
+        title:'Study tracker',
+        body:'Stopwatch or Pomodoro (25/50 min). Time is logged automatically.' },
+      { tab:'sec-goals',     hint:'Try it: add a goal and press Add',
+        advanceOn:'submit', advanceSel:'#goalForm',
+        title:'Goals',
+        body:'Add a goal, then bump it 10% each time you make headway.' },
+      { tab:'sec-files',     hint:null,
+        title:'Files & backup',
+        body:'Upload up to 10 MB per file. Export your data as JSON anytime.' },
+      { tab:'sec-community', hint:null,
+        title:'Community',
+        body:'Share tips with other students and teachers. Posts update live.' }
+    ];
+    var tourIndex=0,tourOpen=false,tourAdvancing=false;
+    function buildDots(idx){
+      var d=$('tourDots'); if(!d)return;
+      d.innerHTML=TOUR_STEPS.map(function(_,i){return '<i class="'+(i===idx?'on':'')+'"></i>'}).join('');
+    }
+    function highlightDock(tab){
+      clearHighlight();
+      var el=document.querySelector('.dock-item[data-sec="'+tab+'"]');
+      if(el){ el.classList.add('tour-highlight'); }
+    }
+    function clearHighlight(){
+      [].slice.call(document.querySelectorAll('.dock-item.tour-highlight')).forEach(function(el){ el.classList.remove('tour-highlight'); });
+    }
+    function renderStep(){
+      var s=TOUR_STEPS[tourIndex];
+      showTab(s.tab);
+      highlightDock(s.tab);
+      var _scrim=$('tourScrim');
+      if(s.advanceOn){ _scrim.classList.add('is-interactive'); }
+      else { _scrim.classList.remove('is-interactive'); }
+      $('tourStep').textContent='Step '+(tourIndex+1)+' of '+TOUR_STEPS.length;
+      $('tourTitle').textContent=s.title;
+      $('tourBody').textContent=s.body;
+      var hint=$('tourHint');
+      if(s.hint){ hint.textContent=s.hint; hint.hidden=false; } else { hint.hidden=true; hint.textContent=''; }
+      buildDots(tourIndex);
+      $('tourBack').disabled=(tourIndex===0);
+      $('tourNext').textContent=(tourIndex===TOUR_STEPS.length-1)?'Finish':'Next';
+      tourAdvancing=false;
+      $('tourNext').focus();
+    }
+    function nextStep(){
+      if(tourIndex===TOUR_STEPS.length-1){ finishTour(); return; }
+      tourIndex++; renderStep();
+    }
+    function prevStep(){
+      if(tourIndex===0)return;
+      tourIndex--; renderStep();
+    }
+    function tourObserve(e){
+      if(!tourOpen||tourAdvancing)return;
+      var s=TOUR_STEPS[tourIndex];
+      if(!s.advanceOn||!s.advanceSel)return;
+      var hit=e.target&&e.target.closest&&e.target.closest(s.advanceSel);
+      if(!hit)return;
+      if(e.type===s.advanceOn){ tourAdvancing=true; setTimeout(nextStep,0); }
+    }
+    function startTour(){
+      if(!pid())return;
+      tourOpen=true; tourIndex=0;
+      $('tourScrim').hidden=false;
+      document.addEventListener('click',tourObserve,true);
+      document.addEventListener('submit',tourObserve,true);
+      renderStep();
+    }
+    function finishTour(){
+      try{ localStorage.setItem('prod99_tour_'+pid(),'done'); }catch(e){}
+      tourOpen=false;
+      $('tourScrim').classList.remove('is-interactive');
+      $('tourScrim').hidden=true;
+      clearHighlight();
+      document.removeEventListener('click',tourObserve,true);
+      document.removeEventListener('submit',tourObserve,true);
+      showTab('sec-study');
+      var sbtn=$('startBtn'); if(sbtn){ sbtn.focus(); }
+    }
+    $('tourNext').addEventListener('click',nextStep);
+    $('tourBack').addEventListener('click',prevStep);
+    $('tourSkip').addEventListener('click',finishTour);
+    document.addEventListener('keydown',function(e){
+      if(!tourOpen)return;
+      if(e.key==='Escape'){ finishTour(); return; }
+      var tip=$('tourTip');
+      if(tip&&tip.contains(document.activeElement)){
+        if(e.key==='ArrowRight'){ nextStep(); }
+        else if(e.key==='ArrowLeft'){ prevStep(); }
+      }
+    });
+    tourAPI.startTour=startTour;
 
     /* Goals */
     var goalsLoadState='ok';
