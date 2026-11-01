@@ -1,0 +1,28 @@
+# Secrets and local config — never commit these
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+supabase/.temp/
+supabase/.branches/
+
+# Cloudflare / Wrangler
+.wrangler/
+.dev.vars
+
+# Node (if you add tooling later)
+node_modules/
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Exports and logs
+prod99-export-*.json
+*.log
