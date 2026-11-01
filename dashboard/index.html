@@ -299,14 +299,50 @@
   .dock-item.active:hover{transform:translateY(-2px);}
 
   /* ---------- Onboarding tour ---------- */
-  .tour-scrim{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.55);
-    -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
-    display:flex;align-items:flex-end;justify-content:center;
-    padding:24px 16px calc(96px + env(safe-area-inset-bottom));}
+  .tour-scrim{
+    position:fixed; inset:0; z-index:120;
+    background:transparent;               /* spotlight does the dimming */
+    pointer-events:auto;                  /* non-interactive: blocks page */
+  }
   .tour-scrim[hidden]{display:none!important;}
-  .tour-tip{width:100%;max-width:400px;padding:20px;border-radius:18px;
-    background:var(--glass);border:1px solid var(--glass-edge);
-    box-shadow:var(--shadow-lg);color:var(--ink);}
+  .tour-scrim.is-interactive{ pointer-events:none; }  /* interactive: pass clicks through */
+
+  #tourSpot{
+    position:fixed; top:0; left:0; width:0; height:0;
+    border-radius:16px;
+    box-shadow:0 0 0 9999px rgba(0,0,0,.58),
+               inset 0 0 0 2px var(--wine);
+    pointer-events:none;
+    transition:top .28s cubic-bezier(.2,.8,.2,1),
+               left .28s cubic-bezier(.2,.8,.2,1),
+               width .28s cubic-bezier(.2,.8,.2,1),
+               height .28s cubic-bezier(.2,.8,.2,1),
+               border-radius .28s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .tour-tip{
+    position:fixed; top:0; left:0;           /* positioned by JS */
+    width:min(360px, calc(100vw - 32px));
+    padding:18px 20px; border-radius:16px;
+    background:var(--glass); border:1px solid var(--glass-edge);
+    -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+    box-shadow:var(--shadow-lg); color:var(--ink);
+    pointer-events:auto;                     /* ALWAYS clickable */
+    transition:top .22s ease, left .22s ease, opacity .18s ease;
+  }
+  .tour-tip::before{                         /* arrow */
+    content:""; position:absolute; width:12px; height:12px;
+    background:var(--glass); border-left:1px solid var(--glass-edge);
+    border-top:1px solid var(--glass-edge);
+    transform:rotate(45deg);
+  }
+  .tour-tip.arrow-up::before{                /* tip below target, arrow points up */
+    top:-7px; left:calc(var(--arrow-x, 24px) - 6px);
+  }
+  .tour-tip.arrow-down::before{              /* tip above target, arrow points down */
+    bottom:-7px; left:calc(var(--arrow-x, 24px) - 6px); transform:rotate(225deg);
+  }
+  .tour-tip.arrow-none::before{ display:none; }
   .tour-step{margin:0 0 6px;font-size:.72rem;font-weight:700;
     letter-spacing:.06em;text-transform:uppercase;color:var(--wine);}
   .tour-tip h4{margin:0 0 8px;font-size:1.05rem;}
@@ -322,8 +358,6 @@
   .tour-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
   .tour-highlight{position:relative;z-index:121;outline:3px solid var(--wine);
     outline-offset:6px;border-radius:16px;}
-  .tour-scrim.is-interactive{pointer-events:none;background:rgba(0,0,0,.25);}
-  .tour-scrim.is-interactive .tour-tip{pointer-events:auto;}
   @media(min-width:761px){
     .tour-scrim{align-items:center;padding-bottom:24px;}
   }
@@ -357,6 +391,7 @@
   @media(prefers-reduced-motion:reduce){
     html{scroll-behavior:auto;}
     *,*::before,*::after{animation:none!important;transition-duration:.01ms!important;}
+    #tourSpot, .tour-tip{ transition:none!important; }
   }
 </style>
 </head>
@@ -515,6 +550,7 @@
 
 <div class="tour-scrim" id="tourScrim" role="dialog" aria-modal="true"
      aria-labelledby="tourTitle" hidden>
+  <div id="tourSpot" aria-hidden="true"></div>
   <div class="tour-tip" id="tourTip" role="document">
     <p class="tour-step" id="tourStep"></p>
     <h4 id="tourTitle"></h4>
@@ -691,21 +727,21 @@
 
     /* Onboarding tour */
     var TOUR_STEPS=[
-      { tab:'sec-home',      hint:null,
+      { tab:'sec-home',      target:'.welcome',              hint:null,
         title:'Welcome to Prod99',
         body:'Your space to focus, plan, and make progress. Quick tour? ~20 seconds.' },
-      { tab:'sec-study',     hint:'Try it: click Pomodoro',
+      { tab:'sec-study',     target:'#trk',                  hint:'Try it: click Pomodoro',
         advanceOn:'click', advanceSel:'#mdPo',
         title:'Study tracker',
         body:'Stopwatch or Pomodoro (25/50 min). Time is logged automatically.' },
-      { tab:'sec-goals',     hint:'Try it: add a goal and press Add',
+      { tab:'sec-goals',     target:'#sec-goals .card',      hint:'Try it: add a goal and press Add',
         advanceOn:'submit', advanceSel:'#goalForm',
         title:'Goals',
         body:'Add a goal, then bump it 10% each time you make headway.' },
-      { tab:'sec-files',     hint:null,
+      { tab:'sec-files',     target:'#sec-files .card',      hint:null,
         title:'Files & backup',
         body:'Upload up to 10 MB per file. Export your data as JSON anytime.' },
-      { tab:'sec-community', hint:null,
+      { tab:'sec-community', target:'#sec-community .card',  hint:null,
         title:'Community',
         body:'Share tips with other students and teachers. Posts update live.' }
     ];
@@ -722,6 +758,63 @@
     function clearHighlight(){
       [].slice.call(document.querySelectorAll('.dock-item.tour-highlight')).forEach(function(el){ el.classList.remove('tour-highlight'); });
     }
+    function resolveTarget(step){
+      try {
+        var t = step.target ? document.querySelector(step.target) : null;
+        if (t && t.getBoundingClientRect().width > 0) return t;
+      } catch(e){}
+      return document.getElementById(step.tab);   // fallback: the section
+    }
+    function positionSpotlight(el){
+      var spot = $('tourSpot'); if (!spot || !el) return;
+      var r = el.getBoundingClientRect();
+      var pad = 8;
+      spot.style.top    = Math.max(0, r.top    - pad) + 'px';
+      spot.style.left   = Math.max(0, r.left   - pad) + 'px';
+      spot.style.width  = (r.width  + pad*2) + 'px';
+      spot.style.height = (r.height + pad*2) + 'px';
+      // match the target's radius if it has one, clamped
+      var radius = 16;
+      try { var cs = getComputedStyle(el); var br = parseFloat(cs.borderTopLeftRadius)||0;
+            if (br >= 4 && br <= 28) radius = br; } catch(e){}
+      spot.style.borderRadius = radius + 'px';
+    }
+    function positionTip(el){
+      var tip = $('tourTip'); if (!tip || !el) return;
+      var r = el.getBoundingClientRect();
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var tw = Math.min(360, vw - 32);
+      var th = tip.offsetHeight || 200;   // measured; tip must be visible
+      var gap = 16;
+      var left = r.left + r.width/2 - tw/2;
+      left = Math.max(16, Math.min(vw - tw - 16, left));
+
+      var belowY = r.top + r.height + gap;
+      var aboveY = r.top - gap - th;
+      var top, dir;
+      if (belowY + th + 16 <= vh)          { top = belowY; dir = 'arrow-up';   }
+      else if (aboveY >= 16)               { top = aboveY; dir = 'arrow-down'; }
+      else                                 { top = vh - th - 16; dir = 'arrow-none'; }
+
+      tip.style.left = left + 'px';
+      tip.style.top  = top  + 'px';
+      tip.classList.remove('arrow-up','arrow-down','arrow-none');
+      tip.classList.add(dir);
+
+      // re-aim the arrow at the target's horizontal center
+      var arrowX = r.left + r.width/2 - left;
+      arrowX = Math.max(16, Math.min(tw - 28, arrowX));
+      tip.style.setProperty('--arrow-x', arrowX + 'px');
+    }
+    function positionForStep(step){
+      var el = resolveTarget(step);
+      positionSpotlight(el);
+      positionTip(el);
+    }
+    function tourReposition(){
+      if(!tourOpen) return;
+      positionForStep(TOUR_STEPS[tourIndex]);
+    }
     function renderStep(){
       var s=TOUR_STEPS[tourIndex];
       showTab(s.tab);
@@ -729,6 +822,10 @@
       var _scrim=$('tourScrim');
       if(s.advanceOn){ _scrim.classList.add('is-interactive'); }
       else { _scrim.classList.remove('is-interactive'); }
+      // measure AFTER layout (section was just unhidden)
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ positionForStep(s); });
+      });
       $('tourStep').textContent='Step '+(tourIndex+1)+' of '+TOUR_STEPS.length;
       $('tourTitle').textContent=s.title;
       $('tourBody').textContent=s.body;
@@ -762,11 +859,15 @@
       $('tourScrim').hidden=false;
       document.addEventListener('click',tourObserve,true);
       document.addEventListener('submit',tourObserve,true);
+      window.addEventListener('resize', tourReposition);
+      window.addEventListener('scroll', tourReposition, { passive:true });
       renderStep();
     }
     function finishTour(){
       try{ localStorage.setItem('prod99_tour_'+pid(),'done'); }catch(e){}
       tourOpen=false;
+      window.removeEventListener('resize', tourReposition);
+      window.removeEventListener('scroll', tourReposition);
       $('tourScrim').classList.remove('is-interactive');
       $('tourScrim').hidden=true;
       clearHighlight();
