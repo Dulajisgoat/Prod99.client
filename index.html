@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#F7F1EF;
@@ -22,6 +22,16 @@
     --wine-soft:rgba(122,12,30,0.08);
     --border:rgba(28,20,18,0.14);
     --radius:3px;
+    --grid-line:rgba(122,12,30,.055);
+    --mesh-1:rgba(255,180,140,.30);
+    --mesh-2:var(--wine-soft);
+    --mesh-3:rgba(255,214,170,.22);
+    --mesh-4:var(--bg);
+    --vignette-strength:.18;
+    --grain-opacity:.035;
+    --shadow-sm:0 1px 2px rgba(28,20,18,.06);
+    --shadow-md:0 8px 28px rgba(60,20,20,.12), 0 2px 6px rgba(28,20,18,.05);
+    --shadow-lg:0 20px 50px rgba(60,20,20,.20);
   }
   html[data-theme="dark"]{
     --bg:#150909;
@@ -32,6 +42,16 @@
     --wine-dark:#8C1C2B;
     --wine-soft:rgba(214,67,90,0.14);
     --border:rgba(243,234,232,0.16);
+    --grid-line:rgba(214,67,90,.09);
+    --mesh-1:rgba(255,140,90,.20);
+    --mesh-2:rgba(214,67,90,.20);
+    --mesh-3:rgba(140,28,43,.28);
+    --mesh-4:var(--bg);
+    --vignette-strength:.34;
+    --grain-opacity:.06;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.35);
+    --shadow-md:0 8px 28px rgba(0,0,0,.40);
+    --shadow-lg:0 20px 50px rgba(0,0,0,.55);
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -199,17 +219,76 @@
     .feature-row{grid-template-columns:1fr;gap:10px;}
     h1.display{max-width:none;}
   }
+
+  /* ---------- Dashboard-aligned mesh background ---------- */
+  .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg);}
+  .bg-light,.bg-dark{position:absolute;inset:0;opacity:0;
+    transition:opacity .6s ease;}
+  .bg-light{background:
+    radial-gradient(circle at 12% 18%, var(--mesh-1) 0%, transparent 42%),
+    radial-gradient(circle at 88% 22%, var(--mesh-2) 0%, transparent 50%),
+    radial-gradient(circle at 72% 88%, var(--mesh-3) 0%, transparent 45%),
+    linear-gradient(135deg, var(--mesh-4) 0%, var(--bg) 100%);}
+  .bg-dark{background:
+    radial-gradient(circle at 12% 18%, var(--mesh-1) 0%, transparent 42%),
+    radial-gradient(circle at 88% 22%, var(--mesh-2) 0%, transparent 50%),
+    radial-gradient(circle at 72% 88%, var(--mesh-3) 0%, transparent 45%),
+    linear-gradient(135deg, var(--mesh-4) 0%, var(--bg) 100%);}
+  html[data-theme="light"] .bg-light{opacity:1;}
+  html[data-theme="dark"]  .bg-dark {opacity:1;}
+  .bg-mesh{position:absolute;inset:0;pointer-events:none;background:
+    radial-gradient(ellipse 45% 55% at 20% 30%,
+      var(--mesh-1) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 50% at 80% 70%,
+      var(--mesh-3) 0%, transparent 60%);
+    mix-blend-mode:soft-light;
+    animation:mesh-breathe 48s var(--ease-out,cubic-bezier(.2,.8,.2,1)) infinite;}
+  @keyframes mesh-breathe{
+    0%,100%{transform:translate3d(0,0,0) scale(1);}
+    50%    {transform:translate3d(1.5vmin,-1vmin,0) scale(1.02);}
+  }
+  .bg-lines{
+    position:absolute; inset:-20vmax; pointer-events:none;
+    background-image:
+      linear-gradient(115deg,
+        transparent 0,
+        transparent calc(50% - .5px),
+        var(--grid-line) calc(50% - .5px),
+        var(--grid-line) calc(50% + .5px),
+        transparent calc(50% + .5px),
+        transparent 100%),
+      linear-gradient(115deg,
+        transparent 0,
+        transparent calc(33% - .5px),
+        var(--grid-line) calc(33% - .5px),
+        var(--grid-line) calc(33% + .5px),
+        transparent calc(33% + .5px),
+        transparent 100%),
+      linear-gradient(115deg,
+        transparent 0,
+        transparent calc(67% - .5px),
+        var(--grid-line) calc(67% - .5px),
+        var(--grid-line) calc(67% + .5px),
+        transparent calc(67% + .5px),
+        transparent 100%);
+    background-size:40vmax 40vmax;
+    background-repeat:repeat;
+    transform:rotate(-2deg);
+    opacity:.9;
+  }
+  .bg-grain{position:absolute;inset:0;pointer-events:none;
+    opacity:var(--grain-opacity); mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size:140px 140px;}
+  .bg-vignette{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse 90% 80% at 50% 40%,
+      transparent 0%, transparent 50%,
+      rgba(20,8,8,var(--vignette-strength)) 100%);}
 </style>
 <style id="liquid-glass">
 :root{--glass:rgba(255,255,255,.52);--glass-b:rgba(255,255,255,.75);--shadow-c:rgba(74,8,18,.12);--shadow:0 10px 36px var(--shadow-c);--r:20px}
 html[data-theme="dark"]{--glass:rgba(44,20,22,.5);--glass-b:rgba(255,255,255,.12);--shadow-c:rgba(0,0,0,.45)}
 body{overflow-x:hidden}
-.orbs{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
-.orbs i{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;animation:drift 18s ease-in-out infinite alternate}
-.orbs i:nth-child(1){width:440px;height:440px;background:var(--wine);top:-140px;left:-120px}
-.orbs i:nth-child(2){width:360px;height:360px;background:#d49a6a;right:-90px;top:32%;opacity:.32;animation-delay:-6s}
-.orbs i:nth-child(3){width:340px;height:340px;background:var(--wine-dark);bottom:-120px;left:35%;animation-delay:-11s}
-@keyframes drift{to{transform:translate(70px,44px) scale(1.18)}}
 nav{background:var(--glass);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border-bottom:1px solid var(--glass-b)}
 .feature-row,.card,.modal{background:var(--glass);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border:1px solid var(--glass-b);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.4);border-radius:var(--r)}
 .feature-row{padding:26px 30px;margin-bottom:14px;transition:transform .35s ease,box-shadow .35s ease}
@@ -220,10 +299,6 @@ nav{background:var(--glass);backdrop-filter:blur(22px) saturate(180%);-webkit-ba
 @keyframes pop{from{opacity:0;transform:translateY(24px) scale(.92)}}
 .form-panel.active{animation:fade .4s ease}
 @keyframes fade{from{opacity:0;transform:translateX(10px)}}
-.btn{border-radius:999px;position:relative;overflow:hidden}
-.btn-solid{background:linear-gradient(135deg,var(--wine),var(--wine-dark));box-shadow:0 6px 20px rgba(122,12,30,.3),inset 0 1px 0 rgba(255,255,255,.3)}
-.btn-solid::after{content:"";position:absolute;top:0;left:-70%;width:50%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent);transform:skewX(-20deg);transition:left .6s ease}
-.btn-solid:hover::after{left:130%}
 .btn:hover{transform:translateY(-2px)}
 .btn-ghost{background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 input,select,textarea{border-radius:12px;background:var(--glass);backdrop-filter:blur(8px);color:var(--ink);border:1px solid var(--border);font-family:inherit;font-size:.95rem;padding:11px 12px;width:100%;transition:border-color .2s,box-shadow .2s}
@@ -330,13 +405,6 @@ html.logo-swap .brand img{opacity:0}
 <style id="redesign">
 :root{--ease:cubic-bezier(.2,.8,.2,1);--shadow:0 20px 60px -20px var(--shadow-c)}
 html{scroll-padding-top:84px}
-.orbs{display:none}
-#aurora,#shapes{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
-#shapes{transform-origin:50% 50%}
-body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;display:none;background:radial-gradient(60% 50% at 12% 0%,rgba(122,12,30,.2),transparent 70%),radial-gradient(50% 45% at 92% 45%,rgba(212,154,106,.2),transparent 70%),radial-gradient(55% 50% at 40% 105%,rgba(74,8,18,.2),transparent 70%)}
-html[data-theme="dark"] body::before{opacity:.85}
-html.no-gl body::before{display:block}
-@media(prefers-reduced-motion:reduce){#aurora,#shapes{display:none}body::before{display:block}}
 /* glass: nav, mockup, feature cards, modal, faq, cta only */
 .gl{background:var(--glass);border:1px solid var(--glass-b);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.4);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border-radius:var(--r)}
 nav{transition:box-shadow .3s var(--ease)}
@@ -875,12 +943,186 @@ footer .brand span{font-size:1.4rem}
 }
 @media(prefers-reduced-motion:reduce){.rw-ch{animation:none}}
 html[data-power="low"] .rw-ch{animation:none}
+
+/* ===== Dashboard alignment: motion tokens, solid cards, flat buttons, type scale ===== */
+:root{
+  --ease-out:cubic-bezier(.2,.8,.2,1);
+  --ease-spring:cubic-bezier(.2,1.4,.4,1);
+  --dur-fast:.18s;
+  --dur-mid:.28s;
+  --dur-slow:.45s;
+}
+/* Dashboard alignment: solid cards */
+.card,
+.fcard,
+.feature-row,
+.faq details,
+.frame,
+.modal,
+.gl,
+#inside .frame,
+#inside .fbar {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,.6) inset,
+    0 1px 2px 0 rgba(28,20,18,.05),
+    0 4px 12px -2px rgba(60,20,20,.06),
+    0 16px 40px -8px rgba(60,20,20,.08);
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+  transition:box-shadow var(--dur-fast, .18s) var(--ease-out, cubic-bezier(.2,.8,.2,1)),
+             border-color var(--dur-fast, .18s) var(--ease-out, cubic-bezier(.2,.8,.2,1)),
+             transform var(--dur-mid, .28s) var(--ease-out, cubic-bezier(.2,.8,.2,1));
+}
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .fcard,
+html[data-theme="dark"] .feature-row,
+html[data-theme="dark"] .faq details,
+html[data-theme="dark"] .frame,
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .gl,
+html[data-theme="dark"] #inside .frame,
+html[data-theme="dark"] #inside .fbar {
+  background:var(--surface);
+  border-color:var(--border);
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,.04) inset,
+    0 1px 2px 0 rgba(0,0,0,.30),
+    0 4px 12px -2px rgba(0,0,0,.28),
+    0 16px 40px -8px rgba(0,0,0,.35);
+}
+.card:hover,
+.fcard:hover,
+.feature-row:hover {
+  border-color:rgba(122,12,30,.28);
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-lg);
+}
+html[data-theme="dark"] .card:hover,
+html[data-theme="dark"] .fcard:hover,
+html[data-theme="dark"] .feature-row:hover {
+  border-color:rgba(214,67,90,.35);
+}
+/* Bigger cards get slightly bigger radius for hierarchy */
+.fcard { border-radius:20px; }
+.frame { border-radius:20px; }
+.cta { border-radius:24px; }
+.modal { border-radius:16px; }
+
+/* Dashboard alignment: flat buttons, no shine sweep */
+.btn,
+.modal .btn-solid,
+.cta .btn,
+.hero-ctas .btn,
+nav .btn {
+  border-radius:10px;
+  padding:10px 18px;
+  font-weight:600;
+  font-size:.9rem;
+  transition:transform .18s ease, box-shadow .18s ease,
+             background .18s ease, border-color .18s ease,
+             color .18s ease;
+  box-shadow:none;
+}
+.btn-lg,
+.hero-ctas .btn {
+  border-radius:12px;
+  padding:14px 26px;
+  font-size:1.02rem;
+}
+/* Solid buttons: flat wine, inset highlight, no gradient, no shine */
+.btn-solid,
+.modal .btn-solid {
+  background:var(--wine);
+  background-image:none;
+  color:var(--on-btn, #fff);
+  border:1px solid var(--wine);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 1px 2px rgba(0,0,0,.06);
+}
+.btn-solid:hover:not(:disabled),
+.modal .btn-solid:hover:not(:disabled) {
+  background:var(--wine-dark);
+  filter:none;
+  transform:translateY(-1px);
+  box-shadow:var(--shadow-md, 0 8px 20px -8px var(--shadow-c));
+}
+.btn-solid::after,
+.modal .btn-solid::after {
+  display:none !important;
+}
+.btn:active:not(:disabled) {
+  transform:scale(.96);
+  transition-duration:80ms;
+}
+/* Ghost buttons: solid surface, wine hover */
+.btn-ghost {
+  background:var(--surface);
+  color:var(--ink);
+  border:1px solid var(--border);
+}
+.btn-ghost:hover:not(:disabled) {
+  background:var(--wine-soft);
+  border-color:var(--wine);
+  color:var(--wine);
+}
+
+/* Dashboard alignment: type scale */
+h1, h2, h3 {
+  font-weight:700;
+  letter-spacing:-.02em;
+}
+.h1 {
+  font-size:clamp(3rem, 10vw, 5.4rem);
+  line-height:.95;
+  letter-spacing:-.045em;
+  font-weight:800;
+}
+#top .h1 {
+  font-size:clamp(3rem, 6.6vw, 6.6rem);
+  line-height:.92;
+  letter-spacing:-.06em;
+}
+.sec h2,
+#inside h2,
+#features h2,
+#built h2,
+#faq h2 {
+  font-size:clamp(1.8rem, 5vw, 2.6rem);
+  line-height:1.05;
+  letter-spacing:-.035em;
+  font-weight:700;
+}
+.fcard h3,
+.card h3 {
+  font-size:1.1rem;
+  letter-spacing:-.02em;
+  font-weight:700;
+}
+.sub,
+.lede,
+.header-sub {
+  font-size:1rem;
+  letter-spacing:-.005em;
+}
+.fine, .backup-foot, .daily-row, .empty {
+  font-size:.92rem;
+  letter-spacing:-.005em;
+}
 </style>
 </head>
 <body>
-<div class="orbs"><i></i><i></i><i></i></div>
-<canvas id="aurora" aria-hidden="true"></canvas>
-<canvas id="shapes" aria-hidden="true"></canvas>
+<div class="bg" aria-hidden="true">
+  <div class="bg-light"></div>
+  <div class="bg-dark"></div>
+  <div class="bg-mesh" aria-hidden="true"></div>
+  <div class="bg-lines" aria-hidden="true"></div>
+  <div class="bg-grain" aria-hidden="true"></div>
+  <div class="bg-vignette" aria-hidden="true"></div>
+</div>
 <div class="geo" aria-hidden="true"><b class="g1"><i class="cube"><u></u><u></u><u></u><u></u><u></u><u></u></i></b><b class="g2"><i class="pyr"><u class="bs"></u><u></u><u></u><u></u><u></u></i></b><b class="g3"><i class="sph"><u></u><u></u><u></u><u></u></i></b><b class="g4"><i class="cube"><u></u><u></u><u></u><u></u><u></u><u></u></i></b><b class="g5"><i class="pyr"><u class="bs"></u><u></u><u></u><u></u><u></u></i></b><b class="g6"><i class="cube"><u></u><u></u><u></u><u></u><u></u><u></u></i></b><b class="g7"><i class="sph"><u></u><u></u><u></u><u></u></i></b></div>
 
 <nav aria-label="Primary">
@@ -1002,7 +1244,7 @@ html[data-power="low"] .rw-ch{animation:none}
     <div class="rx">
       <p><strong>Vanilla JavaScript.</strong> Plain HTML, CSS and JavaScript in one file. No framework and no build step.</p>
       <p><strong>Supabase.</strong> Goals, study logs and posts live in Supabase tables, and sign-in runs through Supabase functions.</p>
-      <p><strong>WebGL.</strong> The aurora behind the page is a small fragment shader. If WebGL is unavailable, a CSS gradient takes over.</p>
+      <p><strong>CSS mesh.</strong> The page background is a stack of radial gradients, a diagonal grid, and a subtle grain layer — no images, no shader, no script.</p>
       <p><strong>localStorage.</strong> Your theme and session are remembered in the browser.</p>
     </div>
     <div class="rx">
@@ -1934,126 +2176,7 @@ if(window.MutationObserver)new MutationObserver(function(){subs.forEach(function
 if(rm&&rm.addEventListener)rm.addEventListener("change",function(){subs.forEach(function(f){f()})});
 var DPR=Math.min(window.devicePixelRatio||1,1.5),lastT=0;
 
-/* ---- Layer 1: aurora (WebGL, eases between themes in ~700ms) ---- */
-var AU=(function(){
-var cv=$("aurora"),gl=null,ok=false,failed=false,raf=0,t0=0,cur=null,prog,U={},K=["b","a","c","d"];
-function fail(){R.classList.add("no-gl");cv.style.display="none"}
-function hx(s){return[1,3,5].map(function(i){return parseInt(s.substr(i,2),16)/255})}
-// In dark mode, --wine is #D6435A. Match that so the aurora and the rest of the
-// page don't show two different wine colours.
-var TH={light:{k:.3,b:hx("#F7F1EF"),a:hx("#7A0C1E"),c:hx("#D49A6A"),d:hx("#4A0812")},dark:{k:1,b:hx("#150909"),a:hx("#D6435A"),c:hx("#E0795A"),d:hx("#4A0812")}};
-function tgt(){return TH[R.getAttribute("data-theme")==="dark"?"dark":"light"]}
-function cp(o){return JSON.parse(JSON.stringify(o))}
-var FS="precision mediump float;uniform vec2 r;uniform float t,k;uniform vec3 b,a,c,d;float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y);}float fb(vec2 p){float s=0.,m=.5;for(int i=0;i<4;i++){s+=m*n(p);p*=2.;m*=.5;}return s;}void main(){vec2 u=gl_FragCoord.xy/r;vec2 p=u*vec2(r.x/r.y,1.)*1.4;float q=fb(p+vec2(t*.05,0.));float w=fb(p*1.3+q*2.+vec2(0.,-t*.04));vec3 o=b;o=mix(o,a,smoothstep(.35,.85,w)*.6*k*(1.-u.y*.5));o=mix(o,c,smoothstep(.45,.9,fb(p*.8+q+7.+t*.03))*.4*k*u.x);o=mix(o,d,smoothstep(.4,.9,fb(p*1.1-q+3.))*.5*k*(1.-u.x));gl_FragColor=vec4(o,1.);}";
-function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return gl.getShaderParameter(o,gl.COMPILE_STATUS)?o:null}
-// Listen for context loss exactly once, and reset state so the next sync() can
-// rebuild a fresh context.
-cv.addEventListener("webglcontextlost",function(e){
-  e.preventDefault();
-  cancelAnimationFrame(raf); raf=0;
-  ok=false; failed=true;
-  cv.style.display="none";
-  R.classList.add("no-gl");
-});
-cv.addEventListener("webglcontextrestored",function(e){
-  // Reset the failed flag so sync() will try init() again.
-  failed=false; ok=false;
-  R.classList.remove("no-gl");
-  sync();
-});
-function init(){
-  if(failed){ return false; }
-  try{gl=cv.getContext("webgl",{antialias:false,alpha:false,powerPreference:"low-power"})}catch(e){}
-  if(!gl){ return false; }
-  var v=sh(gl.VERTEX_SHADER,"attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}"),f=sh(gl.FRAGMENT_SHADER,FS);
-  if(!v||!f){
-    // Clean up shaders we just created so we don't leak GPU memory.
-    if(v){ gl.deleteShader(v); }
-    if(f){ gl.deleteShader(f); }
-    return false;
-  }
-  prog=gl.createProgram();gl.attachShader(prog,v);gl.attachShader(prog,f);gl.linkProgram(prog);
-  if(!gl.getProgramParameter(prog,gl.LINK_STATUS)){
-    // Link failed: delete the program and the shaders.
-    gl.deleteProgram(prog); gl.deleteShader(v); gl.deleteShader(f);
-    prog=null; return false;
-  }
-  gl.useProgram(prog);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
-  var lp=gl.getAttribLocation(prog,"p");gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
-  ["r","t","k","b","a","c","d"].forEach(function(n){U[n]=gl.getUniformLocation(prog,n)});cur=cp(tgt());
-  return true;
-}
-function size(){var w=Math.max(2,innerWidth*DPR*.5|0),h=Math.max(2,innerHeight*DPR*.5|0);if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;gl.viewport(0,0,w,h)}}
-function frame(ts){var dt=Math.min(.1,(ts-lastA)/1000);lastA=ts;var e=1-Math.exp(-dt/.23),T=tgt();cur.k+=(T.k-cur.k)*e;
-K.forEach(function(n){for(var i=0;i<3;i++)cur[n][i]+=(T[n][i]-cur[n][i])*e});size();
-gl.uniform2f(U.r,cv.width,cv.height);gl.uniform1f(U.t,(ts-t0)/1000);gl.uniform1f(U.k,cur.k);K.forEach(function(n){gl.uniform3fv(U[n],cur[n])});
-gl.drawArrays(gl.TRIANGLES,0,3);raf=requestAnimationFrame(frame)}
-var lastA=0;
-function stop(){cancelAnimationFrame(raf);raf=0}
-function sync(){stop();if(calm()){cv.style.display="none";return}
-if(!ok){
-  if(failed){ return; }  // wait for webglcontextrestored
-  ok=init();
-  if(!ok){
-    if(!failed){ fail(); }  // only mark as no-gl on genuine init failure, not context loss
-    return;
-  }
-}
-cv.style.display="";R.classList.remove("no-gl");t0=t0||performance.now();lastA=performance.now();raf=requestAnimationFrame(frame)}
-return{sync:sync}})();
-
-/* ---- Layer 2: wireframe shapes (2D canvas, pauses when calm) ---- */
-var SHP=(function(){
-var cv=$("shapes"),cx=cv.getContext("2d"),raf=0,sA=.09,tx=0,ty=0,px=0,py=0,last=0,S=[];
-function octa(){var v=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]],e=[];for(var i=0;i<6;i++)for(var j=i+1;j<6;j++)if(j!==(i^1))e.push([i,j]);return{v:v,e:e}}
-var sp=0,sv=0,lastScroll=(typeof scrollY!=="undefined"?scrollY:0);
-S=[
-    Object.assign(octa(),{x:.88,y:.84,r:.05,wx:.12,wy:.09,ampX:-40,ampY:80,rotX:-1.5,rotY:1.1,rotBoost:3,sc:.5,k:0})
-  ];
-var tcx=document.createElement("canvas").getContext("2d");
-// Cache the parsed wine colour so we don't run getComputedStyle on every frame.
-// It's recomputed only when the theme attribute on <html> changes.
-var cachedWine=null, cachedWineTheme=null;
-function wine(){
-  var theme = R.getAttribute("data-theme");
-  if(cachedWineTheme !== theme){
-    cachedWineTheme = theme;
-    tcx.fillStyle = "#7A0C1E";
-    tcx.fillStyle = getComputedStyle(R).getPropertyValue("--wine").trim() || "#7A0C1E";
-    var h = tcx.fillStyle;
-    cachedWine = h.charAt(0) === "#"
-      ? [parseInt(h.substr(1,2),16), parseInt(h.substr(3,2),16), parseInt(h.substr(5,2),16)]
-      : [122,12,30];
-  }
-  return cachedWine;
-}
-function frame(ts){raf=requestAnimationFrame(frame);var dt=Math.min(.1,(ts-last)/1000),t=ts/1000;last=ts;
-var w=innerWidth,h=innerHeight,W=w*DPR|0,H=h*DPR|0;
-var rawScroll=window.scrollY||window.pageYOffset||0;
-var sd=Math.max(-150,Math.min(150,rawScroll-lastScroll));
-lastScroll=rawScroll;
-sv+=sd*0.02;
-sv*=Math.exp(-dt*4);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
-cx.setTransform(DPR,0,0,DPR,0,0);cx.clearRect(0,0,w,h);
-var e=1-Math.exp(-dt/.23);sA+=((R.getAttribute("data-theme")==="dark"?.14:.09)-sA)*e;
-tx+=(px-tx)*e;ty+=(py-ty)*e;cv.style.transform="perspective(1200px) rotateX("+(-ty*1.5).toFixed(3)+"deg) rotateY("+(tx*1.5).toFixed(3)+"deg)";
-var m=Math.min(w,h),sc=Math.max(1,R.scrollHeight-h),p=Math.min(1,Math.max(0,scrollY/sc)),c=wine();
-sp=p;
-cx.lineWidth=1.2;
-S.forEach(function(o,n){var al=sA*(n===S.length-1?Math.max(0,Math.min(1,(p-.6)/.3)):1);if(al<.004)return;
-cx.strokeStyle="rgba("+c[0]+","+c[1]+","+c[2]+","+al.toFixed(3)+")";
-var ax=t*o.wx + sp*o.rotX + sv*o.rotBoost;
-var ay=t*o.wy + sp*o.rotY + sv*o.rotBoost;
-var ca=Math.cos(ax),sa=Math.sin(ax),cb=Math.cos(ay),sb=Math.sin(ay);
-var rad=o.r*m*(1+sp*o.sc);
-var X=o.x*w + sp*o.ampX;
-var Y=o.y*h - sp*o.ampY + Math.sin(t*0.6+n)*4;
-var P=o.v.map(function(q){var y1=q[1]*ca-q[2]*sa,z1=q[1]*sa+q[2]*ca,x2=q[0]*cb+z1*sb,z2=-q[0]*sb+z1*cb,s=2.5/(2.5+z2);return[X+x2*rad*s,Y+y1*rad*s]});
-cx.beginPath();o.e.forEach(function(g){cx.moveTo(P[g[0]][0],P[g[0]][1]);cx.lineTo(P[g[1]][0],P[g[1]][1])});cx.stroke()})}
-function sync(){cancelAnimationFrame(raf);raf=0;if(calm()){cv.style.display="none";return}cv.style.display="";last=performance.now();raf=requestAnimationFrame(frame)}
-d.addEventListener("pointermove",function(e){px=e.clientX/innerWidth*2-1;py=e.clientY/innerHeight*2-1},{passive:true});
-return{sync:sync}})();
-function visuals(){AU.sync();SHP.sync()}
+function visuals(){}
 subs.push(visuals);
 if(d.readyState==="complete")visuals();else addEventListener("load",visuals);
 
