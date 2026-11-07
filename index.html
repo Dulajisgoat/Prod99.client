@@ -530,7 +530,10 @@ header.hero{padding:72px 0 80px}
 .kick{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--wine)}
 .fcard h3{font-size:1.3rem}
 .fcard p{margin:0;color:var(--ink-soft);line-height:1.6;font-size:.95rem}
-.fcard svg{width:72px;height:72px;color:var(--wine);margin-top:var(--sp-2)}
+.fcard svg{width:72px;height:72px;color:var(--wine);margin-top:var(--sp-2);
+  filter:url(#inkRough);transition:transform .35s ease}
+.fcard:hover svg{transform:rotate(-3deg) scale(1.04)}
+@media(prefers-reduced-motion:reduce){.fcard svg{filter:none}.fcard:hover svg{transform:none}}
 /* built */
 .two{display:grid;grid-template-columns:1.2fr 1fr;gap:56px;align-items:start}
 .two p{color:var(--ink-soft);line-height:1.65;margin:0 0 16px}
@@ -716,64 +719,66 @@ nav .btn{height:40px}
 </style>
 <script>document.documentElement.classList.add('rx-on')</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<style id="geo">
-/* ===== 3D geometry: real CSS 3D solids (cubes, pyramids, wire spheres) =====
-   Outer <b> slides sideways + turns with page scroll; inner solid spins on its own.
-   Edge/face colours derive from --wine so both themes stay on-palette and ease with the theme change. */
-:root{--sp:0}
-.geo{--edge:color-mix(in srgb,var(--wine) 52%,transparent);--edge2:color-mix(in srgb,var(--wine) 30%,transparent)}
-html[data-theme="dark"] .geo{--edge:color-mix(in srgb,var(--wine) 70%,transparent);--edge2:color-mix(in srgb,var(--wine) 42%,transparent)}
-.geo{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;perspective:900px;perspective-origin:50% 38%}
-.geo b{position:absolute;left:var(--x);top:var(--y);width:0;height:0;transform-style:preserve-3d;will-change:transform}
-.geo i{position:absolute;display:block;width:var(--s);height:var(--s);left:calc(var(--s)/-2);top:calc(var(--s)/-2);transform-style:preserve-3d;
-  transform:rotateX(-24deg) rotateY(32deg);animation:spin3d var(--t,22s) linear infinite var(--dir,normal);animation-delay:var(--dl,0s)}
-.geo u{position:absolute;display:block;backface-visibility:visible;transition:border-color .6s cubic-bezier(.4,0,.2,1),background-color .6s cubic-bezier(.4,0,.2,1)}
-html.boot .geo u{transition:none}
-@keyframes spin3d{from{transform:rotateX(-24deg) rotateY(0)}to{transform:rotateX(-24deg) rotateY(360deg)}}
-/* cube */
-.cube u{inset:0;border:1.5px solid var(--edge);background:color-mix(in srgb,var(--wine) var(--a,9%),transparent)}
-.cube u:nth-child(1){transform:translateZ(calc(var(--s)/2));--a:13%}
-.cube u:nth-child(2){transform:rotateY(180deg) translateZ(calc(var(--s)/2));--a:5%}
-.cube u:nth-child(3){transform:rotateY(90deg) translateZ(calc(var(--s)/2));--a:9%}
-.cube u:nth-child(4){transform:rotateY(-90deg) translateZ(calc(var(--s)/2));--a:7%}
-.cube u:nth-child(5){transform:rotateX(90deg) translateZ(calc(var(--s)/2));--a:16%}
-.cube u:nth-child(6){transform:rotateX(-90deg) translateZ(calc(var(--s)/2));--a:4%}
-/* square pyramid (height .9 x base, slant face tilted 29deg) */
-.pyr{--L:calc(var(--s)*1.03)}
-.pyr u{left:0;width:var(--s);top:calc(var(--s)/2 - var(--L));height:var(--L);transform-origin:50% 100%;
-  background:color-mix(in srgb,var(--wine) var(--a,10%),transparent);clip-path:polygon(50% 0,100% 100%,0 100%)}
-.pyr u::after{content:"";position:absolute;inset:0;background:var(--edge);
-  clip-path:polygon(evenodd,50% 0,100% 100%,0 100%,50% 0,50% 5%,5% 96%,95% 96%,50% 5%)}
-.pyr u:nth-child(2){transform:translateZ(calc(var(--s)/2)) rotateX(29deg);--a:15%}
-.pyr u:nth-child(3){transform:rotateY(90deg) translateZ(calc(var(--s)/2)) rotateX(29deg);--a:8%}
-.pyr u:nth-child(4){transform:rotateY(180deg) translateZ(calc(var(--s)/2)) rotateX(29deg);--a:5%}
-.pyr u:nth-child(5){transform:rotateY(270deg) translateZ(calc(var(--s)/2)) rotateX(29deg);--a:11%}
-.pyr u.bs{top:0;height:var(--s);transform:rotateX(90deg);transform-origin:50% 50%;clip-path:none;border:1.5px solid var(--edge);background:color-mix(in srgb,var(--wine) 4%,transparent)}
-.pyr u.bs::after{display:none}
-.pyr{margin-top:calc(var(--s)*.18)}
-/* wire sphere: four great circles */
-.sph u{inset:0;border:1.5px solid var(--edge2);border-radius:50%}
-.sph u:nth-child(2){transform:rotateY(45deg)}.sph u:nth-child(3){transform:rotateY(90deg)}.sph u:nth-child(4){transform:rotateY(135deg)}
-.sph::after{content:"";position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--edge);transform:rotateX(90deg)}
-/* placement: sizes in px, travel sideways in vw */
-.g1{--x:14%;--y:20%;--s:70px;--dx:62;--dy:40;--r:140;--t:26s}
-.g2{--x:84%;--y:28%;--s:110px;--dx:-66;--dy:90;--r:-120;--t:30s;--dir:reverse;--dl:-6s}
-.g3{--x:72%;--y:80%;--s:120px;--dx:-58;--dy:-70;--r:180;--t:34s}
-.g4{--x:20%;--y:74%;--s:96px;--dx:64;--dy:-60;--r:-160;--t:24s;--dir:reverse;--dl:-3s}
-.g5{--x:50%;--y:14%;--s:60px;--dx:-50;--dy:120;--r:200;--t:20s;--dl:-9s}
-.g6{--x:92%;--y:62%;--s:44px;--dx:-72;--dy:-90;--r:240;--t:18s;--dl:-5s}
-.g7{--x:8%;--y:46%;--s:140px;--dx:58;--dy:60;--r:100;--t:38s;--dir:reverse}
-/* slide sideways on scroll: pure CSS scroll timeline, GPU transform only */
-@supports (animation-timeline:scroll()){
-  @keyframes geoSlide{from{transform:translate3d(0,0,0) rotateY(0) rotateX(0)}to{transform:translate3d(calc(var(--dx)*1vw),calc(var(--dy)*1px),0) rotateY(calc(var(--r)*1deg)) rotateX(calc(var(--r)*.3deg))}}
-  .geo b{animation:geoSlide linear both;animation-timeline:scroll(root block)}
-}
-/* fallback via --sp */
-html.geo-js .geo b{transform:translate3d(calc(var(--dx)*var(--sp)*1vw),calc(var(--dy)*var(--sp)*1px),0) rotateY(calc(var(--r)*var(--sp)*1deg));animation:none}
-html.geo-js .geo i{animation:spin3d var(--t,22s) linear infinite var(--dir,normal)}
+<style id="scribble">
+/* ===== College Scribble Art system =====
+   Replaces the old 3D geometry (cubes/pyramids/wire spheres) with hand-drawn
+   notebook doodles: ink stars, sketchy circles, pencil marks, a tiny ruler,
+   book, lightbulb and clock sketch. Pure CSS + inline SVG, decorative only
+   (aria-hidden, pointer-events:none), so clicking/selecting is never affected. */
 nav{position:sticky}header.hero,.sec,footer,.mq{position:relative}
-@media(prefers-reduced-motion:reduce){.geo b,.geo i{animation:none!important;transform:none}.geo i{transform:rotateX(-24deg) rotateY(32deg)}}
-@media(max-width:760px){.g7,.g6{display:none}.g1{--s:52px}.g2{--s:80px}.g3{--s:84px}.g4{--s:70px}}
+
+/* a shared "hand-drawn" roughen filter, applied to doodle strokes and icons */
+.scribble-defs{position:absolute;width:0;height:0;overflow:hidden}
+
+.doodles{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.doodles svg{position:absolute;color:var(--wine);opacity:.5;overflow:visible;
+  filter:url(#inkRough);will-change:transform}
+html[data-theme="dark"] .doodles svg{opacity:.4}
+.doodles svg path,.doodles svg circle,.doodles svg line,.doodles svg polyline{
+  fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:1;stroke-dashoffset:1;pathLength:1;
+  animation:inkDraw 1.8s ease forwards;animation-play-state:paused}
+html.rw-on .doodles svg path,html.rw-on .doodles svg circle,html.rw-on .doodles svg line,html.rw-on .doodles svg polyline{
+  animation-play-state:running}
+@keyframes inkDraw{to{stroke-dashoffset:0}}
+
+/* gentle, independent drifts per doodle — short travel, long easing, never spins wildly */
+.d1{left:10%;top:16%;width:54px;animation:doodleFloat 9s ease-in-out infinite}
+.d2{left:86%;top:22%;width:46px;animation:doodleFloat 11s ease-in-out infinite 1s}
+.d3{left:74%;top:78%;width:64px;animation:doodleSway 13s ease-in-out infinite}
+.d4{left:16%;top:72%;width:40px;animation:doodleFloat 10s ease-in-out infinite .6s}
+.d5{left:48%;top:10%;width:36px;animation:doodleSway 8s ease-in-out infinite}
+.d6{left:92%;top:58%;width:30px;animation:doodleFloat 7s ease-in-out infinite .3s}
+.d7{left:6%;top:44%;width:58px;animation:doodleSway 14s ease-in-out infinite 2s}
+@keyframes doodleFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
+@keyframes doodleSway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@media(prefers-reduced-motion:reduce){
+  .doodles svg{animation:none!important;transform:none!important}
+  .doodles svg path,.doodles svg circle,.doodles svg line,.doodles svg polyline{animation:none!important;stroke-dashoffset:0}
+}
+@media(max-width:760px){.d6,.d7{display:none}.d1{width:40px}.d2{width:34px}.d3{width:46px}.d4{width:30px}}
+
+/* hand-drawn arrow nudging toward the primary CTA */
+.cta-wrap{position:relative;display:inline-flex}
+.cta-arrow{position:absolute;left:100%;top:100%;width:56px;height:32px;margin:2px 0 0 2px;
+  color:var(--wine);opacity:.75;filter:url(#inkRough);pointer-events:none;transform:scaleX(-1) rotate(8deg)}
+.cta-arrow path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:760px){.cta-arrow{display:none}}
+
+/* scribble underline: a sketchy hand-drawn line beneath headings.
+   Always present (so it never depends on a transient reveal class); where
+   scroll-driven animations are supported it draws itself in as the heading
+   enters view, same technique the page already uses for its step rail. */
+.rx[data-scribble]{position:relative}
+.rx[data-scribble]::after{content:"";position:absolute;left:2px;bottom:-10px;width:88%;height:10px;
+  transform-origin:left center;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14'><path d='M3 8c20-6 38 7 58 1s40-9 60-2 38 8 58 1' fill='none' stroke='%237A0C1E' stroke-width='3' stroke-linecap='round'/></svg>") left center/contain no-repeat}
+html[data-theme="dark"] .rx[data-scribble]::after{filter:brightness(0) saturate(100%) invert(44%) sepia(64%) saturate(1500%) hue-rotate(316deg) brightness(95%) contrast(92%)}
+@supports(animation-timeline:view()){
+  .rx[data-scribble]::after{transform:scaleX(0);animation:scribbleDraw linear both;animation-timeline:view();animation-range:entry 0% cover 35%}
+  @keyframes scribbleDraw{to{transform:scaleX(1)}}
+}
+@media(prefers-reduced-motion:reduce){.rx[data-scribble]::after{animation:none!important;transform:none}}
 
 /* ===== Steps: slide in sideways with scroll (alternating sides) ===== */
 @keyframes slideFromL{from{opacity:0;transform:translateX(-90px)}to{opacity:1;transform:none}}
@@ -800,7 +805,9 @@ nav{position:sticky}header.hero,.sec,footer,.mq{position:relative}
 .theme-toggle{position:relative}
 .theme-toggle .ico{position:relative;display:block;width:18px;height:18px}
 .theme-toggle .ico svg{position:absolute;inset:0;width:18px;height:18px;color:currentColor;
+  filter:url(#inkRough);
   transition:opacity .5s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.5,1.4,.4,1)}
+@media(prefers-reduced-motion:reduce){.theme-toggle .ico svg{filter:none}}
 .theme-toggle .icon-sun{opacity:1;transform:rotate(0deg) scale(1)}
 .theme-toggle .icon-moon{opacity:0;transform:rotate(-90deg) scale(.4)}
 html[data-theme="dark"] .theme-toggle .icon-sun{opacity:0;transform:rotate(90deg) scale(.4)}
@@ -1276,7 +1283,26 @@ body p,
   <div class="bg-grain" aria-hidden="true"></div>
   <div class="bg-vignette" aria-hidden="true"></div>
 </div>
-<div class="geo" aria-hidden="true"><b class="g1"><i class="cube"><u></u><u></u><u></u><u></u><u></u><u></u></i></b><b class="g2"><i class="pyr"><u class="bs"></u><u></u><u></u><u></u><u></u></i></b><b class="g3"><i class="sph"><u></u><u></u><u></u><u></u></i></b><b class="g4"><i class="cube"><u></u><u></u><u></u><u></u><u></u><u></u></i></b><b class="g5"><i class="pyr"><u class="bs"></u><u></u><u></u><u></u><u></u></i></b><b class="g6"><i class="cube"><u></u><u></u><u></u><u></u><u></u><u></u></i></b><b class="g7"><i class="sph"><u></u><u></u><u></u><u></u></i></b></div>
+<svg class="scribble-defs" aria-hidden="true" focusable="false"><filter id="inkRough" x="-20%" y="-20%" width="140%" height="140%">
+  <feTurbulence type="fractalNoise" baseFrequency="0.018 0.045" numOctaves="2" seed="7" result="n"/>
+  <feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/>
+</filter></svg>
+<div class="doodles" aria-hidden="true">
+  <!-- star -->
+  <svg class="d1" viewBox="0 0 40 40"><path d="M20 4l3 11 11 1-9 7 3 11-9-6-9 6 3-11-9-7 11-1z"/></svg>
+  <!-- imperfect circle -->
+  <svg class="d2" viewBox="0 0 40 40"><path d="M20 6c9 0 15 6 15 14s-7 13-15 13S5 28 6 19C7 11 12 6 20 6z"/></svg>
+  <!-- open book -->
+  <svg class="d3" viewBox="0 0 48 32"><path d="M24 7C19 3 10 3 5 5v20c5-2 14-2 19 2 5-4 14-4 19-2V5c-5-2-14-2-19 2z"/><path d="M24 7v22"/></svg>
+  <!-- checkmark -->
+  <svg class="d4" viewBox="0 0 32 32"><path d="M5 17l8 8L28 6"/></svg>
+  <!-- lightbulb -->
+  <svg class="d5" viewBox="0 0 28 36"><path d="M14 3c-6 0-10 5-10 10 0 4 2 6 4 9h12c2-3 4-5 4-9 0-5-4-10-10-10z"/><path d="M10 26h8M11 30h6"/></svg>
+  <!-- paperclip -->
+  <svg class="d6" viewBox="0 0 24 40"><path d="M7 11v17a5 5 0 0 0 10 0V8a3 3 0 0 0-6 0v18a1 1 0 0 0 2 0V10"/></svg>
+  <!-- ruler with tick marks -->
+  <svg class="d7" viewBox="0 0 56 18"><path d="M3 4h50l2 6-2 6H3l-2-6z"/><path d="M12 4v5M20 4v7M28 4v5M36 4v7M44 4v5"/></svg>
+</div>
 
 <nav aria-label="Primary">
   <div class="wrap">
@@ -1340,7 +1366,10 @@ body p,
     <h1 class="h1"><span class="ln"><span style="--i:0">Teach anywhere.</span></span><span class="ln"><span style="--i:1"><em>Learn from everywhere.</em></span></span></h1>
     <p class="lede">Prod99 is a global classroom where teachers share their craft and students join from anywhere in the world. Set goals, track every study session, and trade ideas in a community that keeps you moving.</p>
     <div class="hero-ctas">
-      <a class="btn btn-solid" id="heroSignup" href="/login/">Open Prod99</a>
+      <span class="cta-wrap">
+        <a class="btn btn-solid" id="heroSignup" href="/login/">Open Prod99</a>
+        <svg class="cta-arrow" viewBox="0 0 70 40" aria-hidden="true" focusable="false"><path d="M4 6c14 2 30 10 40 20"/><path d="M34 16l11 11-14 4"/></svg>
+      </span>
       <a class="btn btn-ghost" href="#steps">See how it works</a>
     </div>
     <a class="scroll-cue" href="#steps" aria-label="Scroll to how it works"><span>Scroll</span><i aria-hidden="true"></i></a>
@@ -1353,7 +1382,7 @@ body p,
 </header>
 
 <section class="sec" id="steps" aria-labelledby="h-steps"><div class="wrap">
-  <h2 class="rx" id="h-steps">Five steps from sign-up to streak.</h2>
+  <h2 class="rx" data-scribble id="h-steps">Five steps from sign-up to streak.</h2>
   <p class="sub rx">Everything happens in one workspace. Here is the path most people take.</p>
   <ol class="steps" aria-label="Five steps">
     <li class="step rx"><span class="n" aria-hidden="true">1</span><h3>Create an account<span>No email needed</span></h3><p>Pick a username and a password of at least six characters.</p></li>
@@ -1365,7 +1394,7 @@ body p,
 </div></section>
 
 <section class="sec" id="inside" aria-labelledby="h-inside"><div class="wrap">
-  <h2 class="rx" id="h-inside">Inside the app.</h2>
+  <h2 class="rx" data-scribble id="h-inside">Inside the app.</h2>
   <p class="sub rx">A quick look at the three tools, drawn from sample data.</p>
   <div class="frame gl rx" aria-label="App preview with sample data">
     <div class="fbar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="url">prod99.app/workspace</span><span class="ready">Ready</span></div>
@@ -1396,7 +1425,7 @@ body p,
 </div></section>
 
 <section class="sec" id="features" aria-labelledby="h-feat"><div class="wrap">
-  <h2 class="rx" id="h-feat">Everything a borderless classroom needs.</h2>
+  <h2 class="rx" data-scribble id="h-feat">Everything a borderless classroom needs.</h2>
   <div class="fgrid" style="margin-top:36px">
     <article class="fcard gl rx"><span class="kick">Session timer</span><h3>Start the clock, forget the log</h3><p>Pick a subject and start. Prod99 logs the block automatically once you stop, so there is no guessing how long you studied.</p><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="32" cy="32" r="22"/><path d="M32 18v14l9 6"/><path d="M26 6h12"/></svg></article>
     <article class="fcard gl rx"><span class="kick">Weekly progress</span><h3>See the pattern in your week</h3><p>A seven-day chart turns effort into something you can see, so you can tell when you showed up and when you did not.</p><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 54h44"/><rect x="14" y="34" width="7" height="16" rx="2"/><rect x="26" y="24" width="7" height="26" rx="2"/><rect x="38" y="30" width="7" height="20" rx="2"/><path d="M14 18l12-6 12 8 14-12"/></svg></article>
@@ -1406,7 +1435,7 @@ body p,
 </div></section>
 
 <section class="sec" id="built" aria-labelledby="h-built"><div class="wrap">
-  <h2 class="rx" id="h-built">How it's built.</h2>
+  <h2 class="rx" data-scribble id="h-built">How it's built.</h2>
   <div class="two" style="margin-top:36px">
     <div class="rx">
       <p><strong>Vanilla JavaScript.</strong> Plain HTML, CSS and JavaScript in one file. No framework and no build step.</p>
@@ -1421,7 +1450,7 @@ body p,
 </div></section>
 
 <section class="sec" id="faq" aria-labelledby="h-faq"><div class="wrap">
-  <h2 class="rx" id="h-faq">Questions, answered.</h2>
+  <h2 class="rx" data-scribble id="h-faq">Questions, answered.</h2>
   <div class="faq" style="margin-top:36px">
     <details class="gl rx"><summary>Do I need an email address?<span class="mk" aria-hidden="true"></span></summary><p>No. You pick a username and a password of at least six characters.</p></details>
     <details class="gl rx"><summary>How does the study timer work?<span class="mk" aria-hidden="true"></span></summary><p>Press Start when you sit down and Stop &amp; log when you finish. The session is added to today's total.</p></details>
@@ -2456,14 +2485,6 @@ $("cmdBtn").addEventListener("click",openCk);
 (function(){"use strict";
 document.addEventListener("pointermove",function(e){var c=e.target.closest&&e.target.closest(".fcard");if(!c)return;var b=c.getBoundingClientRect();c.style.setProperty("--mx",(e.clientX-b.left)+"px");c.style.setProperty("--my",(e.clientY-b.top)+"px")},{passive:true});
 })();
-</script>
-<script>
-/* Geometry fallback: only where CSS scroll-driven animation is unsupported. Sets --sp (0..1). */
-(function(){var R=document.documentElement;
-if(window.CSS&&CSS.supports&&CSS.supports("animation-timeline:scroll()"))return;
-R.classList.add("geo-js");var t=false;
-function u(){var m=Math.max(1,R.scrollHeight-innerHeight);R.style.setProperty("--sp",Math.min(1,Math.max(0,scrollY/m)).toFixed(4));t=false}
-addEventListener("scroll",function(){if(!t){t=true;requestAnimationFrame(u)}},{passive:true});addEventListener("resize",u);u()})();
 </script>
 <script>
 (function(){
