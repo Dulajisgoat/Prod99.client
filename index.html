@@ -10,9 +10,14 @@
 <link rel="apple-touch-icon" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
+    --step--1:.875rem;
+    --step-0:1.0625rem;
+    --step-1:1.5rem;
+    --step-2:2rem;
+    --step-3:clamp(2.5rem, 5vw, 3.5rem);
     --bg:#F7F1EF;
     --surface:#FFFFFF;
     --ink:#1C1412;
@@ -581,7 +586,7 @@ footer .wrap{gap:10px 24px}
 <style id="premium">
 /* ===== Premium layer: sans-serif, modern surfaces, step/graph/slide motion, Stripe-style auth ===== */
 @font-face{font-family:"Inter Tight Fallback";src:local("Arial");size-adjust:96%;ascent-override:96%;descent-override:24%;line-gap-override:0%}
-:root{--font:"Inter Tight","Inter Tight Fallback","Helvetica Neue",Arial,sans-serif;--ease:cubic-bezier(.2,.8,.2,1);--shadow:0 1px 1px rgba(28,20,18,.04),0 16px 40px -16px var(--shadow-c)}
+:root{--font:"Inter","Helvetica Neue",Arial,sans-serif;--ease:cubic-bezier(.2,.8,.2,1);--shadow:0 1px 1px rgba(28,20,18,.04),0 16px 40px -16px var(--shadow-c)}
 body,button,input,select,textarea,h1,h2,h3,.brand span,.clock,.step .n,.faq summary,.mq-t span,.cmd-btn,.cmdk-box input{font-family:var(--font)}
 body{letter-spacing:-.005em;font-feature-settings:"cv11" 1}
 h1,h2,h3{font-weight:600;letter-spacing:-.035em}
@@ -1284,6 +1289,12 @@ body p,
 .tag.beta,
 .empty-chip{vertical-align:middle;padding:calc(var(--sp-1) - 1px) var(--sp-1) var(--sp-1)}
 .toast{bottom:var(--sp-5);padding:var(--sp-3) var(--sp-5)}
+body{font-family:"Inter",sans-serif;font-size:var(--step-0);line-height:1.65}
+h1,.h1,#top .h1{font-family:"Inter Tight",sans-serif;font-size:var(--step-3);line-height:1.15;letter-spacing:-.02em}
+h2,.sec h2,#landingView .sec h2,#inside h2,#features h2,#built h2,#faq h2,#cta .cta h2,.modal h2{font-family:"Inter Tight",sans-serif;font-size:var(--step-2);line-height:1.15;letter-spacing:-.02em}
+h3,.card h3,.fcard h3,#features .fcard h3,.step h3,#how-it-works .step h3,#top .cols h3{font-family:"Inter Tight",sans-serif;font-size:var(--step-1);line-height:1.15;letter-spacing:-.02em}
+p,.lede,.sub,.header-sub{font-family:"Inter",sans-serif;font-size:var(--step-0);line-height:1.65}
+h3 span,.fine,.backup-foot,.daily-row,.empty,.kick,.cap,.note{font-size:var(--step--1)}
 </style>
 </head>
 <body>
