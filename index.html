@@ -918,27 +918,31 @@ html.rw-on [data-p99="rise"]{translate:0 calc((1 - var(--e,1))*44px)}
 #inside .clock{font-size:clamp(3.6rem,9vw,7rem);letter-spacing:-.06em;line-height:1}
 #inside .cap{padding:0 var(--sp-6) var(--sp-5)}
 html.rw-on #inside .frame{animation:none;transform:perspective(1600px) rotateX(calc(var(--rx,0)*1deg)) rotateY(calc(var(--ry,0)*1deg));transition:opacity .8s var(--rw-e);will-change:transform}
-/* features: asymmetric 12-col grid, stronger spotlight, SVG weekly chart */
-#features .fgrid{grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--sp-4)}
-#features .fcard{padding:var(--sp-6);min-height:340px;gap:var(--sp-3);border-radius:var(--r-md)}
-#features .fcard:nth-child(1){grid-column:1/span 7}
-#features .fcard:nth-child(2){grid-column:8/span 5}
-#features .fcard:nth-child(3){grid-column:1/span 5}
-#features .fcard:nth-child(4){grid-column:6/span 7}
+/* features: alternating benefit and workspace preview blocks */
+#features .fgrid{grid-template-columns:minmax(0,1fr);gap:var(--sp-5)}
+#features .fcard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;gap:clamp(24px,6vw,80px);padding:clamp(24px,5vw,64px);min-height:320px;border-radius:var(--r-lg)}
+#features .feature-copy{grid-column:1;grid-row:1}
+#features .feature-visual{grid-column:2;grid-row:1;display:flex;align-items:center;justify-content:center;min-width:0;min-height:200px;padding:var(--sp-6);border:1px solid var(--glass-b);border-radius:var(--r-md);background:var(--glass)}
+#features .fcard:nth-child(even) .feature-copy{grid-column:2}
+#features .fcard:nth-child(even) .feature-visual{grid-column:1}
 #features .fcard h3{font-size:clamp(1.6rem,2.6vw,2.4rem);line-height:1.02;letter-spacing:-.045em;max-width:14ch}
 #features .fcard p{max-width:40ch}
-#features .fcard>svg:not(.rw-chart){position:absolute;top:28px;right:28px;width:64px;height:64px;margin:0}
+#features .feature-visual .clock{font-size:clamp(2.4rem,5vw,4rem);letter-spacing:-.04em}
+#features .feature-visual .running{display:grid;place-items:center;width:clamp(140px,18vw,200px);aspect-ratio:1;border:2px solid var(--wine);border-radius:50%;background:var(--wine-soft)}
+#features .feature-visual .spark{width:100%;margin:0}
+#features .feature-visual .spark .l{stroke-dashoffset:0}
+#features .feature-visual .spark .a,#features .feature-visual .spark circle{opacity:1}
+#features .feature-visual .stack{width:100%;gap:var(--sp-4)}
+#features .feature-visual .post{width:100%;max-width:320px}
+#features .feature-visual .post p{margin-bottom:0}
 #features .fcard::before{background:radial-gradient(440px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--wine) 16%,transparent),transparent 65%)}
 #features .fcard::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;opacity:0;transition:opacity .4s;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),var(--wine),transparent 70%);-webkit-mask:linear-gradient(var(--surface) 0 0) content-box,linear-gradient(var(--surface) 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
 #features .fcard:hover::after{opacity:1}
-.fcard svg.rw-chart{position:static;display:block;width:100%;height:auto;margin-top:auto;padding-top:var(--sp-4);overflow:visible}
-.rw-chart rect{fill:color-mix(in srgb,var(--wine) 24%,transparent);transform-box:fill-box;transform-origin:50% 100%}
-.rw-chart rect:nth-child(6){fill:var(--wine)}
-.rw-chart path{fill:none;stroke:var(--wine);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1}
-.rw-chart circle{fill:var(--surface);stroke:var(--wine);stroke-width:2.5}
-html.rw-on .rw-chart rect{transform:scaleY(clamp(0,calc(var(--e,1)*2.4 - var(--i,0)*.25),1))}
-html.rw-on .rw-chart path{stroke-dashoffset:calc(1 - var(--e,1))}
-html.rw-on .rw-chart circle{opacity:clamp(0,calc(var(--e,1)*4 - 3),1)}
+@media(max-width:768px){
+ #features .fcard{grid-template-columns:minmax(0,1fr);gap:var(--sp-5);min-height:0;padding:var(--sp-5)}
+ #features .feature-copy,#features .fcard:nth-child(even) .feature-copy{grid-column:1;grid-row:1}
+ #features .feature-visual,#features .fcard:nth-child(even) .feature-visual{grid-column:1;grid-row:2;min-height:180px}
+}
 /* how it's built: two-panel editorial spread */
 #built .two{grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(32px,6vw,96px);align-items:start}
 #built .two>div:first-child p{display:grid;grid-template-columns:minmax(7rem,11rem) minmax(0,1fr);gap:var(--sp-5);margin:0;padding:var(--sp-6) 0;border-top:1px solid var(--rw-l);font-size:1.12rem}
@@ -1436,10 +1440,26 @@ body p,
 <section class="sec" id="features" aria-labelledby="h-feat"><div class="wrap">
   <h2 class="rx" data-scribble id="h-feat">Everything a borderless classroom needs.</h2>
   <div class="fgrid" style="margin-top:36px">
-    <article class="fcard gl rx"><span class="kick">Session timer</span><h3>Start the clock, forget the log</h3><p>Pick a subject and start. Prod99 logs the block automatically once you stop, so there is no guessing how long you studied.</p><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="32" cy="32" r="22"/><path d="M32 18v14l9 6"/><path d="M26 6h12"/></svg></article>
-    <article class="fcard gl rx"><span class="kick">Weekly progress</span><h3>See the pattern in your week</h3><p>A seven-day chart turns effort into something you can see, so you can tell when you showed up and when you did not.</p><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 54h44"/><rect x="14" y="34" width="7" height="16" rx="2"/><rect x="26" y="24" width="7" height="26" rx="2"/><rect x="38" y="30" width="7" height="20" rx="2"/><path d="M14 18l12-6 12 8 14-12"/></svg></article>
-    <article class="fcard gl rx"><span class="kick">Goal tracker</span><h3>Watch the bar fill</h3><p>Set a goal, nudge your progress, and keep the list short. Teachers can share milestones; students make them their own.</p><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="26" width="52" height="12" rx="6"/><rect x="10" y="30" width="30" height="4" rx="2" fill="currentColor"/><path d="M50 12v8M46 16h8"/></svg></article>
-    <article class="fcard gl rx"><span class="kick">Community</span><h3>One friendly feed</h3><p>Share a tip, ask a question, or post a lesson update. Teachers and students trade ideas in the same place.</p><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14h44a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H30l-12 10V42h-8a4 4 0 0 1-4-4V18a4 4 0 0 1 4-4z"/><path d="M20 26h24M20 33h14"/></svg></article>
+    <article class="fcard gl rx">
+      <div class="feature-copy"><span class="kick">Session timer</span><h3>Focus first, log automatically</h3><p>Start a session when you sit down, then stop it when you finish to record your study time.</p></div>
+      <div class="feature-visual"><div class="running" aria-label="Timer preview"><div class="clock">25:00</div></div></div>
+    </article>
+    <article class="fcard gl rx">
+      <div class="feature-copy"><span class="kick">Weekly progress</span><h3>See your progress take shape</h3><p>Track your study time across the week with a chart that makes your habits easy to spot.</p></div>
+      <div class="feature-visual"><svg class="spark rw-chart" viewBox="0 0 300 80" role="img" aria-label="Sample weekly study minutes trend"><path class="a" d="M0 56C30 50 40 30 70 36S110 62 140 44S190 8 220 20S270 30 300 14V80H0Z"/><path class="l" pathLength="1" d="M0 56C30 50 40 30 70 36S110 62 140 44S190 8 220 20S270 30 300 14"/><circle cx="298" cy="14" r="4"/></svg></div>
+    </article>
+    <article class="fcard gl rx">
+      <div class="feature-copy"><span class="kick">Goal tracker</span><h3>Turn goals into steady progress</h3><p>Set a goal and update its progress as you work toward milestones you can share.</p></div>
+      <div class="feature-visual"><div class="stack">
+        <div><div class="gt"><span>Finish Algebra unit</span><b>70%</b></div><div class="pbar"><i style="width:70%"></i></div></div>
+        <div><div class="gt"><span>Read two chapters of Spanish</span><b>40%</b></div><div class="pbar"><i style="width:40%"></i></div></div>
+        <div><div class="gt"><span>Prep Friday's lesson</span><b>90%</b></div><div class="pbar"><i style="width:90%"></i></div></div>
+      </div></div>
+    </article>
+    <article class="fcard gl rx">
+      <div class="feature-copy"><span class="kick">Community</span><h3>Learn better, together</h3><p>Share ideas and questions with teachers and students in one friendly feed.</p></div>
+      <div class="feature-visual"><div class="post"><small><b>maya</b><span class="badge">Teacher</span></small><p>New worksheet on fractions is up. Ask me anything.</p></div></div>
+    </article>
   </div>
 </div></section>
 
