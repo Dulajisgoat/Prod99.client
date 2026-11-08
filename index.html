@@ -1295,6 +1295,24 @@ h2,.sec h2,#landingView .sec h2,#inside h2,#features h2,#built h2,#faq h2,#cta .
 h3,.card h3,.fcard h3,#features .fcard h3,.step h3,#how-it-works .step h3,#top .cols h3{font-family:"Inter Tight",sans-serif;font-size:var(--step-1);line-height:1.15;letter-spacing:-.02em}
 p,.lede,.sub,.header-sub{font-family:"Inter",sans-serif;font-size:var(--step-0);line-height:1.65}
 h3 span,.fine,.backup-foot,.daily-row,.empty,.kick,.cap,.note{font-size:var(--step--1)}
+button,.btn{min-width:44px;min-height:44px}
+.nav-links a,.mobile-nav-sheet__panel a{min-height:44px}
+a:focus-visible,button:focus-visible,[tabindex="0"]:focus-visible{outline:2px solid var(--wine);outline-offset:3px}
+a:not(.btn):not(.brand):not(.scroll-cue):hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+button:not(:disabled):hover,.btn:not(:disabled):hover{transform:translateY(-1px)}
+.fcard{transition:transform .25s ease,box-shadow .25s ease}
+.fcard:hover,.fcard:focus-visible,.fcard:focus-within{box-shadow:var(--elev-3)}
+.fcard:focus-visible{outline:2px solid var(--wine);outline-offset:3px}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .25s ease,transform .25s ease}
+.reveal.is-visible{opacity:1;transform:none}
+#inside .running{display:grid;place-items:center;min-width:44px;min-height:44px}
+#inside .running,.feature-visual .running{position:relative}
+#inside .running:focus-visible,.feature-visual .running:focus-visible{outline:2px solid var(--wine);outline-offset:4px}
+#inside .running.is-celebrating,.feature-visual .running.is-celebrating{box-shadow:0 0 0 6px var(--wine-soft);animation:timerCelebrate .65s ease-out}
+#inside .running.is-celebrating::after,.feature-visual .running.is-celebrating::after{content:"";position:absolute;top:25%;left:72%;width:12px;height:7px;border:solid var(--wine);border-width:0 0 2px 2px;transform:rotate(-45deg);animation:timerCheck .65s ease-out}
+@keyframes timerCelebrate{50%{transform:scale(1.06)}}
+@keyframes timerCheck{0%,35%{opacity:0}100%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.reveal,.reveal.is-visible{opacity:1;transform:none;transition:none}#inside .running.is-celebrating,.feature-visual .running.is-celebrating{animation:none}#inside .running.is-celebrating::after,.feature-visual .running.is-celebrating::after{animation:none}}
 </style>
 </head>
 <body>
@@ -1434,7 +1452,7 @@ h3 span,.fine,.backup-foot,.daily-row,.empty,.kick,.cap,.note{font-size:var(--st
         <div><div class="gt"><span>Prep Friday's lesson</span><b>90%</b></div><div class="pbar"><i data-w="90"></i></div></div>
         <div><div class="gt"><span>Practice piano scales</span><b>25%</b></div><div class="pbar"><i data-w="25"></i></div></div>
       </div></div>
-      <div class="mp" role="tabpanel" aria-label="Tracker"><div class="running"><div class="clock" id="mkClock">25:00</div></div>
+      <div class="mp" role="tabpanel" aria-label="Tracker"><div class="running" id="mkTimer" role="button" tabindex="0" aria-label="Stop demo timer" aria-pressed="true"><div class="clock" id="mkClock">25:00</div></div>
         <svg class="spark" viewBox="0 0 300 80" role="img" aria-label="Weekly minutes trend, sample data"><path class="a" d="M0 56C30 50 40 30 70 36S110 62 140 44S190 8 220 20S270 30 300 14V80H0Z"/><path class="l" pathLength="1" d="M0 56C30 50 40 30 70 36S110 62 140 44S190 8 220 20S270 30 300 14"/><circle cx="298" cy="14" r="4"/></svg>
         <div class="bars"><div><i data-h="30"></i>M</div><div><i data-h="52"></i>T</div><div><i data-h="22"></i>W</div><div><i data-h="64"></i>T</div><div><i data-h="48"></i>F</div><div><i data-h="70"></i>S</div><div><i data-h="36"></i>S</div></div>
       </div>
@@ -1451,15 +1469,15 @@ h3 span,.fine,.backup-foot,.daily-row,.empty,.kick,.cap,.note{font-size:var(--st
 <section class="sec" id="features" aria-labelledby="h-feat"><div class="wrap">
   <h2 class="rx" data-scribble id="h-feat">Everything a borderless classroom needs.</h2>
   <div class="fgrid" style="margin-top:36px">
-    <article class="fcard gl rx">
+    <article class="fcard gl rx" tabindex="0">
       <div class="feature-copy"><span class="kick">Session timer</span><h3>Focus first, log automatically</h3><p>Start a session when you sit down, then stop it when you finish to record your study time.</p></div>
-      <div class="feature-visual"><div class="running" aria-label="Timer preview"><div class="clock">25:00</div></div></div>
+      <div class="feature-visual"><div class="running" role="img" aria-label="Timer preview"><div class="clock">25:00</div></div></div>
     </article>
-    <article class="fcard gl rx">
+    <article class="fcard gl rx" tabindex="0">
       <div class="feature-copy"><span class="kick">Weekly progress</span><h3>See your progress take shape</h3><p>Track your study time across the week with a chart that makes your habits easy to spot.</p></div>
       <div class="feature-visual"><svg class="spark rw-chart" viewBox="0 0 300 80" role="img" aria-label="Sample weekly study minutes trend"><path class="a" d="M0 56C30 50 40 30 70 36S110 62 140 44S190 8 220 20S270 30 300 14V80H0Z"/><path class="l" pathLength="1" d="M0 56C30 50 40 30 70 36S110 62 140 44S190 8 220 20S270 30 300 14"/><circle cx="298" cy="14" r="4"/></svg></div>
     </article>
-    <article class="fcard gl rx">
+    <article class="fcard gl rx" tabindex="0">
       <div class="feature-copy"><span class="kick">Goal tracker</span><h3>Turn goals into steady progress</h3><p>Set a goal and update its progress as you work toward milestones you can share.</p></div>
       <div class="feature-visual"><div class="stack">
         <div><div class="gt"><span>Finish Algebra unit</span><b>70%</b></div><div class="pbar"><i style="width:70%"></i></div></div>
@@ -1467,7 +1485,7 @@ h3 span,.fine,.backup-foot,.daily-row,.empty,.kick,.cap,.note{font-size:var(--st
         <div><div class="gt"><span>Prep Friday's lesson</span><b>90%</b></div><div class="pbar"><i style="width:90%"></i></div></div>
       </div></div>
     </article>
-    <article class="fcard gl rx">
+    <article class="fcard gl rx" tabindex="0">
       <div class="feature-copy"><span class="kick">Community</span><h3>Learn better, together</h3><p>Share ideas and questions with teachers and students in one friendly feed.</p></div>
       <div class="feature-visual"><div class="post"><small><b>maya</b><span class="badge">Teacher</span></small><p>New worksheet on fractions is up. Ask me anything.</p></div></div>
     </article>
@@ -2448,6 +2466,17 @@ rx.forEach(function(el){
 if("IntersectionObserver" in window){var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){var el=x.target;el.classList.add("in");io.unobserve(el);setTimeout(function(){el.classList.remove("rx","in")},1300)}})},{threshold:.12});rx.forEach(function(el){io.observe(el)})}
 else rx.forEach(function(el){el.classList.remove("rx")});
 
+/* ---- One-shot section reveals ---- */
+var revealSections=$$("#landingView > section");
+if("IntersectionObserver" in window){
+  var revealObserver=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){entry.target.classList.add("is-visible");revealObserver.unobserve(entry.target)}
+    });
+  },{threshold:.12});
+  revealSections.forEach(function(section){section.classList.add("reveal");revealObserver.observe(section)});
+}else revealSections.forEach(function(section){section.classList.add("is-visible")});
+
 /* ---- Landing visibility sync ---- */
 var lv=$("landingView");function lvSync(){R.classList.toggle("in-app",lv.style.display==="none")}
 if(window.MutationObserver)new MutationObserver(lvSync).observe(lv,{attributes:true,attributeFilter:["style"]});lvSync();
@@ -2465,29 +2494,45 @@ tabs.forEach(function(b,i){b.addEventListener("click",function(){pick(i)});
 b.addEventListener("keydown",function(e){var n=e.key==="ArrowRight"?(i+1)%3:e.key==="ArrowLeft"?(i+2)%3:e.key==="Home"?0:e.key==="End"?2:-1;if(n>-1){e.preventDefault();pick(n,true)}})});
 var fr=d.querySelector(".frame");
 if(fr&&"IntersectionObserver" in window)new IntersectionObserver(function(e,o){if(e[0].isIntersecting){pick(curTab);o.disconnect()}},{threshold:.3}).observe(fr);
-var mk=$("mkClock");function p2(n){return("0"+n).slice(-2)}
+var mk=$("mkClock"),mkControl=$("mkTimer"),mkCelebrateTimer=null;function p2(n){return("0"+n).slice(-2)}
 // Use a self-managed interval that pauses when the tab is hidden, instead of
 // running forever and relying on the callback to short-circuit. This avoids
 // battery drain on background tabs.
-var mkInterval=null;
+var mkInterval=null,mkStopped=false;
 function startMkClock(){
   if(mkInterval){ return; }
+  if(mkControl){mkControl.classList.remove("is-celebrating");mkControl.setAttribute("aria-label","Stop demo timer");mkControl.setAttribute("aria-pressed","true")}
+  if(mkCelebrateTimer){clearTimeout(mkCelebrateTimer);mkCelebrateTimer=null}
   secs = 0;
   mkInterval=setInterval(function(){
     if(!panels[1].classList.contains("on")||calm()) return;
     secs++; var t=1500+secs; mk.textContent=p2(Math.floor(t/60))+":"+p2(t%60);
   },1000);
 }
-function stopMkClock(){
+function stopMkClock(celebrate){
   if(mkInterval){ clearInterval(mkInterval); mkInterval=null; }
   // Reset the mock clock to its initial display so re-entering the tab is clean.
   if(mk){ mk.textContent="25:00"; }
   secs = 0;
+  if(mkControl){
+    mkControl.setAttribute("aria-label","Start demo timer");mkControl.setAttribute("aria-pressed","false");
+    if(celebrate){
+      mkControl.classList.add("is-celebrating");
+      if(mkCelebrateTimer){clearTimeout(mkCelebrateTimer)}
+      mkCelebrateTimer=setTimeout(function(){mkControl.classList.remove("is-celebrating");mkCelebrateTimer=null},750);
+    }
+  }
+}
+function toggleMkClock(){if(mkInterval){mkStopped=true;stopMkClock(true)}else{mkStopped=false;startMkClock()}}
+if(mkControl){
+  mkControl.setAttribute("role","button");mkControl.setAttribute("tabindex","0");mkControl.setAttribute("aria-label","Stop demo timer");mkControl.setAttribute("aria-pressed","true");
+  mkControl.addEventListener("click",toggleMkClock);
+  mkControl.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleMkClock()}});
 }
 startMkClock();
 d.addEventListener("visibilitychange", function(){
-  if(d.hidden){ stopMkClock(); }
-  else { startMkClock(); }
+  if(d.hidden){ stopMkClock(false); }
+  else if(!mkStopped){ startMkClock(); }
 });
 
 var ctaBtn = $("ctaSignup"); if(ctaBtn){ ctaBtn.addEventListener("click", function(e){ e.preventDefault(); location.href='/login/'; }); }
