@@ -33,7 +33,7 @@
     --mesh-3:rgba(255,214,170,.22);
     --mesh-4:var(--bg);
     --vignette-strength:.18;
-    --grain-opacity:.035;
+    --grain-opacity:.03;
     --shadow-sm:0 1px 2px rgba(28,20,18,.06);
     --shadow-md:0 8px 28px rgba(60,20,20,.12), 0 2px 6px rgba(28,20,18,.05);
     --shadow-lg:0 20px 50px rgba(60,20,20,.20);
@@ -53,7 +53,7 @@
     --mesh-3:rgba(140,28,43,.28);
     --mesh-4:var(--bg);
     --vignette-strength:.34;
-    --grain-opacity:.06;
+    --grain-opacity:.03;
     --shadow-sm:0 1px 2px rgba(0,0,0,.35);
     --shadow-md:0 8px 28px rgba(0,0,0,.40);
     --shadow-lg:0 20px 50px rgba(0,0,0,.55);
@@ -240,14 +240,14 @@
     radial-gradient(circle at 88% 22%, var(--mesh-2) 0%, transparent 50%),
     radial-gradient(circle at 72% 88%, var(--mesh-3) 0%, transparent 45%),
     linear-gradient(135deg, var(--mesh-4) 0%, var(--bg) 100%);}
-  html[data-theme="light"] .bg-light{opacity:1;}
-  html[data-theme="dark"]  .bg-dark {opacity:1;}
+  html[data-theme="light"] .bg-light{opacity:.5;}
+  html[data-theme="dark"]  .bg-dark {opacity:.5;}
   .bg-mesh{position:absolute;inset:0;pointer-events:none;background:
     radial-gradient(ellipse 45% 55% at 20% 30%,
       var(--mesh-1) 0%, transparent 60%),
     radial-gradient(ellipse 40% 50% at 80% 70%,
       var(--mesh-3) 0%, transparent 60%);
-    mix-blend-mode:soft-light;
+    opacity:.5;mix-blend-mode:soft-light;
     animation:mesh-breathe 48s var(--ease-out,cubic-bezier(.2,.8,.2,1)) infinite;}
   @keyframes mesh-breathe{
     0%,100%{transform:translate3d(0,0,0) scale(1);}
@@ -286,7 +286,7 @@
     opacity:var(--grain-opacity); mix-blend-mode:overlay;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
     background-size:140px 140px;}
-  .bg-vignette{position:absolute;inset:0;pointer-events:none;
+  .bg-vignette{position:absolute;inset:0;pointer-events:none;opacity:.5;
     background:radial-gradient(ellipse 90% 80% at 50% 40%,
       transparent 0%, transparent 50%,
       rgba(20,8,8,var(--vignette-strength)) 100%);}
@@ -1490,7 +1490,6 @@ h3 span,.fine,.backup-foot,.daily-row,.empty,.kick,.cap,.note{font-size:var(--st
     <div class="rx">
       <p><strong>Vanilla JavaScript.</strong> Plain HTML, CSS and JavaScript in one file. No framework and no build step.</p>
       <p><strong>Supabase.</strong> Goals, study logs and posts live in Supabase tables, and sign-in runs through Supabase functions.</p>
-      <p><strong>CSS mesh.</strong> The page background is a stack of radial gradients, a diagonal grid, and a subtle grain layer — no images, no shader, no script.</p>
       <p><strong>localStorage.</strong> Your theme and session are remembered in the browser.</p>
     </div>
     <div class="rx">
