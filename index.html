@@ -873,27 +873,27 @@ html.rw-on #top .scroll-cue{opacity:calc(1 - var(--hp,0)*5)}
 #landingView .sub{font-size:clamp(1.05rem,1.3vw,1.2rem);max-width:40ch;margin-bottom:0}
 html.rw-on [data-p99="rise"]{translate:0 calc((1 - var(--e,1))*44px)}
 /* five steps: editorial timeline (default) */
-#steps .wrap{position:relative}
-#steps .sub{margin-bottom:clamp(32px,5vw,64px)}
-#steps .steps{padding:0;gap:0;display:block}
-#steps .steps::before,#steps .steps::after{display:none}
-#steps .step{--o:0;--sv:1;display:grid;grid-template-columns:minmax(64px,1fr) minmax(0,5fr);column-gap:clamp(16px,3vw,48px);align-items:start;padding:clamp(24px,3vw,40px) 0;border-top:1px solid var(--rw-l);isolation:auto;animation:none}
-#steps .step::before{display:none}
-#steps .step .n{position:static;grid-row:1/span 2;display:block;width:auto;height:auto;border-radius:0;background:none;border:0;backdrop-filter:none;-webkit-backdrop-filter:none;font-size:clamp(2.6rem,6vw,4.5rem);line-height:.85;font-weight:700;letter-spacing:-.06em;color:var(--wine);animation:none}
-#steps .step h3,#steps .step p{opacity:1;animation:none}
-#steps .step h3{font-size:clamp(1.5rem,3vw,2.4rem);line-height:1;letter-spacing:-.05em}
-#steps .step h3 span{margin-top:10px;color:var(--wine);font-size:1rem;font-weight:600;letter-spacing:-.01em}
-#steps .step p{margin-top:12px;font-size:1.05rem}
+#how-it-works .wrap{position:relative}
+#how-it-works .sub{margin-bottom:clamp(32px,5vw,64px)}
+#how-it-works .steps{padding:0;gap:0;display:block}
+#how-it-works .steps::before,#how-it-works .steps::after{display:none}
+#how-it-works .step{--o:0;--sv:1;display:grid;grid-template-columns:minmax(64px,1fr) minmax(0,5fr);column-gap:clamp(16px,3vw,48px);align-items:start;padding:clamp(24px,3vw,40px) 0;border-top:1px solid var(--rw-l);isolation:auto;animation:none}
+#how-it-works .step::before{display:none}
+#how-it-works .step .n{position:static;grid-row:1/span 2;display:block;width:auto;height:auto;border-radius:0;background:none;border:0;backdrop-filter:none;-webkit-backdrop-filter:none;font-size:clamp(2.6rem,6vw,4.5rem);line-height:.85;font-weight:700;letter-spacing:-.06em;color:var(--wine);animation:none}
+#how-it-works .step h3,#how-it-works .step p{opacity:1;animation:none}
+#how-it-works .step h3{font-size:clamp(1.5rem,3vw,2.4rem);line-height:1;letter-spacing:-.05em}
+#how-it-works .step h3 span{margin-top:10px;color:var(--wine);font-size:1rem;font-weight:600;letter-spacing:-.01em}
+#how-it-works .step p{margin-top:12px;font-size:1.05rem}
 /* five steps: sticky pin, horizontal sequence (--pin on .steps; --o/--sv per step) */
 @media(min-width:861px) and (min-height:560px){
- html.rw-on #steps .wrap::after{content:"";display:block;height:180vh}
- html.rw-on #steps .steps{position:sticky;top:0;height:100vh;display:grid;align-items:center;overflow:clip;padding:72px 0 clamp(48px,9vh,96px)}
- html.rw-on #steps .steps::before,html.rw-on #steps .steps::after{display:block;content:"";position:absolute;left:0;right:auto;top:auto;bottom:clamp(28px,6vh,64px);height:2px;width:100%;background:var(--rw-l);transform:none;transition:none}
- html.rw-on #steps .steps::after{background:var(--wine);transform-origin:left;transform:scaleX(var(--pin,0))}
- html.rw-on #steps .step{grid-area:1/1;grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:center;padding:0;border:0;opacity:var(--sv,0);transform:translateX(calc(var(--o,0)*34%)) scale(calc(.9 + var(--sv,0)*.1));will-change:transform,opacity}
- html.rw-on #steps .step .n{font-size:clamp(9rem,22vw,22rem);line-height:.78;color:color-mix(in srgb,var(--wine) calc(var(--sv,0)*22%),transparent);-webkit-text-stroke:2px color-mix(in srgb,var(--wine) 70%,transparent)}
- html.rw-on #steps .step h3{align-self:end;font-size:clamp(2.4rem,5vw,4.6rem)}
- html.rw-on #steps .step p{align-self:start;font-size:clamp(1.1rem,1.5vw,1.4rem);max-width:34ch;margin-top:22px}
+ html.rw-on #how-it-works .wrap::after{content:"";display:block;height:180vh}
+ html.rw-on #how-it-works .steps{position:sticky;top:0;height:100vh;display:grid;align-items:center;overflow:clip;padding:72px 0 clamp(48px,9vh,96px)}
+ html.rw-on #how-it-works .steps::before,html.rw-on #how-it-works .steps::after{display:block;content:"";position:absolute;left:0;right:auto;top:auto;bottom:clamp(28px,6vh,64px);height:2px;width:100%;background:var(--rw-l);transform:none;transition:none}
+ html.rw-on #how-it-works .steps::after{background:var(--wine);transform-origin:left;transform:scaleX(var(--pin,0))}
+ html.rw-on #how-it-works .step{grid-area:1/1;grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:center;padding:0;border:0;opacity:var(--sv,0);transform:translateX(calc(var(--o,0)*34%)) scale(calc(.9 + var(--sv,0)*.1));will-change:transform,opacity}
+ html.rw-on #how-it-works .step .n{font-size:clamp(9rem,22vw,22rem);line-height:.78;color:color-mix(in srgb,var(--wine) calc(var(--sv,0)*22%),transparent);-webkit-text-stroke:2px color-mix(in srgb,var(--wine) 70%,transparent)}
+ html.rw-on #how-it-works .step h3{align-self:end;font-size:clamp(2.4rem,5vw,4.6rem)}
+ html.rw-on #how-it-works .step p{align-self:start;font-size:clamp(1.1rem,1.5vw,1.4rem);max-width:34ch;margin-top:22px}
 }
 /* inside the app: hero-grade window chrome + tilt (--rx/--ry written by script) */
 #inside .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:clamp(24px,5vw,80px);row-gap:clamp(36px,5vw,72px);align-items:end}
@@ -961,6 +961,10 @@ html.rw-on .rw-chart circle{opacity:clamp(0,calc(var(--e,1)*4 - 3),1)}
 #cta .cta h2{grid-area:h;margin:0;max-width:12ch;font-size:clamp(2.6rem,7vw,6.5rem)}
 #cta .cta p{grid-area:p;margin:20px 0 0}
 #cta .cta .btn{grid-area:b;height:64px;padding:0 var(--sp-6);font-size:1.05rem}
+.mid-cta__inner{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-6);padding:var(--sp-7);border-radius:var(--r-lg)}
+.mid-cta__inner p{margin:0;font-size:1.0625rem}
+.cta-actions{display:flex;align-items:center;gap:var(--sp-4);flex-wrap:wrap}
+.cta-trust{color:var(--ink-soft)}
 /* footer */
 footer{padding:clamp(48px,8vw,96px) 0 40px;border-top:1px solid var(--rw-l)}
 footer .wrap{display:grid;grid-template-columns:1fr auto;grid-template-areas:"line line" "brand year";gap:clamp(32px,5vw,64px) 24px;align-items:center}
@@ -1236,7 +1240,7 @@ html[data-theme="dark"] .gl:hover,
 .card h3,
 .fcard h3,
 #features .fcard h3,
-#steps .step h3{line-height:1.2}
+#how-it-works .step h3{line-height:1.2}
 body p,
 .card p,
 .fcard p,
@@ -1311,7 +1315,7 @@ body p,
       <span>Prod99</span>
     </a>
     <div class="nav-links" aria-label="Sections">
-      <a href="#steps" class="lv-link">Steps</a>
+      <a href="#how-it-works" class="lv-link">Steps</a>
       <a href="#inside" class="lv-link">Inside</a>
       <a href="#features" id="navFeatures">Features</a>
       <a href="#built" class="lv-link">Built</a>
@@ -1347,7 +1351,7 @@ body p,
 
 <div class="mobile-nav-sheet" id="mobileNavSheet" hidden>
   <div class="mobile-nav-sheet__panel" role="dialog" aria-modal="true" aria-label="Mobile navigation">
-    <a href="#steps" class="lv-link">Steps</a>
+    <a href="#how-it-works" class="lv-link">Steps</a>
     <a href="#inside" class="lv-link">Inside</a>
     <a href="#features" class="lv-link">Features</a>
     <a href="#built" class="lv-link">Built</a>
@@ -1370,9 +1374,9 @@ body p,
         <a class="btn btn-solid" id="heroSignup" href="/login/">Open Prod99</a>
         <svg class="cta-arrow" viewBox="0 0 70 40" aria-hidden="true" focusable="false"><path d="M4 6c14 2 30 10 40 20"/><path d="M34 16l11 11-14 4"/></svg>
       </span>
-      <a class="btn btn-ghost" href="#steps">See how it works</a>
+      <a class="btn btn-ghost" href="#how-it-works">See how it works</a>
     </div>
-    <a class="scroll-cue" href="#steps" aria-label="Scroll to how it works"><span>Scroll</span><i aria-hidden="true"></i></a>
+    <a class="scroll-cue" href="#how-it-works" aria-label="Scroll to how it works"><span>Scroll</span><i aria-hidden="true"></i></a>
     <div class="cols" aria-label="Who it is for">
       <div><h3>Teachers</h3><p>Post lessons and milestones for students in any timezone.</p></div>
       <div><h3>Students</h3><p>Set goals, run the timer, and watch the week add up.</p></div>
@@ -1381,7 +1385,7 @@ body p,
   </div>
 </header>
 
-<section class="sec" id="steps" aria-labelledby="h-steps"><div class="wrap">
+<section class="sec" id="how-it-works" aria-labelledby="h-steps"><div class="wrap">
   <h2 class="rx" data-scribble id="h-steps">Five steps from sign-up to streak.</h2>
   <p class="sub rx">Everything happens in one workspace. Here is the path most people take.</p>
   <ol class="steps" aria-label="Five steps">
@@ -1431,6 +1435,16 @@ body p,
     <article class="fcard gl rx"><span class="kick">Weekly progress</span><h3>See the pattern in your week</h3><p>A seven-day chart turns effort into something you can see, so you can tell when you showed up and when you did not.</p><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 54h44"/><rect x="14" y="34" width="7" height="16" rx="2"/><rect x="26" y="24" width="7" height="26" rx="2"/><rect x="38" y="30" width="7" height="20" rx="2"/><path d="M14 18l12-6 12 8 14-12"/></svg></article>
     <article class="fcard gl rx"><span class="kick">Goal tracker</span><h3>Watch the bar fill</h3><p>Set a goal, nudge your progress, and keep the list short. Teachers can share milestones; students make them their own.</p><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="26" width="52" height="12" rx="6"/><rect x="10" y="30" width="30" height="4" rx="2" fill="currentColor"/><path d="M50 12v8M46 16h8"/></svg></article>
     <article class="fcard gl rx"><span class="kick">Community</span><h3>One friendly feed</h3><p>Share a tip, ask a question, or post a lesson update. Teachers and students trade ideas in the same place.</p><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14h44a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H30l-12 10V42h-8a4 4 0 0 1-4-4V18a4 4 0 0 1 4-4z"/><path d="M20 26h24M20 33h14"/></svg></article>
+  </div>
+</div></section>
+
+<section class="sec mid-cta" aria-labelledby="mid-cta-line"><div class="wrap">
+  <div class="mid-cta__inner gl">
+    <p id="mid-cta-line">Make your study sessions add up.</p>
+    <div class="cta-actions">
+      <a class="btn btn-solid" href="/login/">Open Prod99</a>
+      <span class="cta-trust">No email needed to get started.</span>
+    </div>
   </div>
 </div></section>
 
@@ -2538,8 +2552,8 @@ function $$(s,c){return Array.prototype.slice.call((c||d).querySelectorAll(s))}
 function cl(v,a,b){return v<a?a:v>b?b:v}
 function ss(t){return t*t*(3-2*t)}
 var nav=d.querySelector("nav"),hero=d.getElementById("top"),h1=d.querySelector(".h1"),fr=d.querySelector(".frame"),
- wrap=d.querySelector("#steps .wrap"),sub=d.querySelector("#steps .sub"),stage=d.querySelector("#steps .steps"),
- steps=$$("#steps .step"),mqPin=matchMedia("(min-width:861px) and (min-height:560px)"),
+ wrap=d.querySelector("#how-it-works .wrap"),sub=d.querySelector("#how-it-works .sub"),stage=d.querySelector("#how-it-works .steps"),
+ steps=$$("#how-it-works .step"),mqPin=matchMedia("(min-width:861px) and (min-height:560px)"),
  raf=0,lastY=W.scrollY||0,hidden=false,headH=0,travel=1,hp=-1,pin=-1,
  tx=0,ty=0,gx=0,gy=0,px=-1,py=-1,rise=[];
 
@@ -2578,7 +2592,7 @@ function chart(){
 
 /* 3. rise targets: rAF writes --e (0..1) next to the existing .rx observer */
 function tag(){
- $$("#steps h2,#steps .sub,#inside h2,#inside .sub,#inside .frame,#features h2,#features .fcard,#built h2,#built .two>div,#faq h2,#faq .faq details,#cta .cta").forEach(function(e){
+ $$("#how-it-works h2,#how-it-works .sub,#inside h2,#inside .sub,#inside .frame,#features h2,#features .fcard,#built h2,#built .two>div,#faq h2,#faq .faq details,#cta .cta").forEach(function(e){
   e.classList.remove('rx');e.setAttribute("data-p99","rise");e._e=-1;e._v=true;rise.push(e)})}
 function setE(e,r){
  var H=W.innerHeight,v=ss(cl((H*.94-r.top)/(H*.5),0,1));
