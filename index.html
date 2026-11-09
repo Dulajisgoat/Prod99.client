@@ -1314,8 +1314,70 @@ button:not(:disabled):hover,.btn:not(:disabled):hover{transform:translateY(-1px)
 @keyframes timerCheck{0%,35%{opacity:0}100%{opacity:1}}
 @media(prefers-reduced-motion:reduce){.reveal,.reveal.is-visible{opacity:1;transform:none;transition:none}#inside .running.is-celebrating,.feature-visual .running.is-celebrating{animation:none}#inside .running.is-celebrating::after,.feature-visual .running.is-celebrating::after{animation:none}}
 </style>
+<style id="entrance">
+/* ===== Curtain preloader ===== */
+.entrance{position:fixed;inset:0;z-index:9999;pointer-events:none}
+.entrance__curtain{position:absolute;inset:0;display:flex}
+.entrance__curtain span{flex:1;background:var(--bg);transform:translate3d(0,0,0);transition:transform 1.15s cubic-bezier(.76,0,.24,1)}
+.entrance__curtain span:nth-child(1){transition-delay:0s}
+.entrance__curtain span:nth-child(2){transition-delay:.055s}
+.entrance__curtain span:nth-child(3){transition-delay:.11s}
+.entrance__curtain span:nth-child(4){transition-delay:.165s}
+.entrance__curtain span:nth-child(5){transition-delay:.22s}
+.entrance.is-gone .entrance__curtain span{transform:translate3d(0,-101%,0)}
+.entrance__ui{position:absolute;inset:0;transition:opacity .3s ease,transform .3s ease}
+.entrance.is-counted .entrance__ui{opacity:0;transform:translateY(-24px)}
+.entrance__label{position:absolute;top:28px;left:28px;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);opacity:.75}
+.entrance__count{position:absolute;bottom:28px;right:28px;font-family:"Inter Tight",serif;font-size:clamp(3.5rem,12vw,9rem);line-height:.85;letter-spacing:-.05em;font-variant-numeric:tabular-nums;color:var(--wine)}
+.entrance__count em{font-style:normal;font-size:.22em;vertical-align:super;opacity:.5}
+.entrance__bar{position:absolute;left:0;bottom:0;height:2px;width:0%;background:var(--wine)}
+body.is-locked{overflow:hidden}
+@media(prefers-reduced-motion:reduce){.entrance{display:none}}
+
+/* ===== Ambient blob parallax ===== */
+.hero{position:relative}
+.hero__bg{position:absolute;inset:-10%;z-index:-1;overflow:hidden;opacity:0;transform:scale(1.18);transition:opacity 1.6s ease-out,transform 2s ease-out;pointer-events:none}
+html.is-ready .hero__bg{opacity:1;transform:scale(1)}
+.hero__bg .blob{position:absolute;border-radius:50%;filter:blur(90px);will-change:transform}
+.hero__bg .b1{width:46vw;height:46vw;left:4%;top:6%;opacity:.22;background:radial-gradient(circle at 30% 30%,var(--wine),transparent 68%)}
+.hero__bg .b2{width:40vw;height:40vw;right:2%;top:20%;opacity:.30;background:radial-gradient(circle at 60% 40%,#E0795A,transparent 68%)}
+.hero__bg .b3{width:52vw;height:52vw;left:26%;bottom:-18%;opacity:.28;background:radial-gradient(circle at 50% 50%,#F0B08A,transparent 68%)}
+@media(prefers-reduced-motion:reduce){.hero__bg{transition:none}}
+
+/* ===== Scroll progress bar ===== */
+.entrance-progress{position:fixed;top:0;left:0;width:100%;height:2px;transform-origin:0 50%;transform:scaleX(0);background:var(--wine);z-index:120;pointer-events:none}
+
+/* ===== Custom cursor + magnets ===== */
+.cursor{position:fixed;top:0;left:0;pointer-events:none;z-index:10000;border-radius:50%;opacity:0;transition:opacity .2s ease,width .25s ease,height .25s ease,border-width .25s ease}
+.cursor--dot{width:6px;height:6px;background:var(--wine);transform:translate3d(-3px,-3px,0)}
+.cursor--ring{width:36px;height:36px;border:1px solid var(--wine);transform:translate3d(-18px,-18px,0)}
+.cursor.is-on{opacity:1}
+.cursor--ring.is-hover{width:72px;height:72px;transform:translate3d(-36px,-36px,0)}
+@media(pointer:coarse){.cursor{display:none}}
+[data-magnetic]{transition:transform .45s cubic-bezier(.19,1,.22,1)}
+
+/* ===== Card tilt ===== */
+.fcard[data-tilt]{transform-style:preserve-3d;transition:transform .4s cubic-bezier(.19,1,.22,1)}
+
+/* ===== Marquee stroke polish ===== */
+.mq-t span:nth-child(3n){color:color-mix(in srgb,var(--ink) 40%,transparent);-webkit-text-stroke:1px color-mix(in srgb,var(--ink) 40%,transparent)}
+
+@media(prefers-reduced-motion:reduce){
+  .cursor,.hero__bg .blob{display:none!important}
+}
+</style>
 </head>
 <body>
+<div class="entrance" id="entrance" aria-hidden="true">
+  <div class="entrance__curtain">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+  <div class="entrance__ui">
+    <div class="entrance__label">Prod99</div>
+    <div class="entrance__count"><span id="entranceCount">000</span><em>%</em></div>
+  </div>
+  <div class="entrance__bar" id="entranceBar"></div>
+</div>
 <div class="bg" aria-hidden="true">
   <div class="bg-light"></div>
   <div class="bg-dark"></div>
@@ -1376,7 +1438,7 @@ button:not(:disabled):hover,.btn:not(:disabled):hover{transform:translateY(-1px)
       </button>
       <button class="cmd-btn" id="cmdBtn" type="button" aria-label="Open command palette"><kbd id="cmdKbd">Ctrl K</kbd></button>
       <div id="authButtons" style="display:flex;gap:10px;">
-        <a class="btn btn-solid" id="navAuthLink" href="/login/">Open Prod99</a>
+        <a class="btn btn-solid" id="navAuthLink" data-magnetic href="/login/">Open Prod99</a>
       </div>
       <div id="accountChip">
         <span id="accountName"></span>
@@ -1399,6 +1461,11 @@ button:not(:disabled):hover,.btn:not(:disabled):hover{transform:translateY(-1px)
 
 <div id="landingView">
 <header class="hero" id="top" aria-label="Introduction">
+  <div class="hero__bg" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+  </div>
   <div class="wrap hero-c">
     <div class="hero-logo" id="heroLogoWrap">
       <img id="logoHero" src="/logo-light.png" alt="Prod99 — schoolhouse and open book mark">
@@ -1408,10 +1475,10 @@ button:not(:disabled):hover,.btn:not(:disabled):hover{transform:translateY(-1px)
     <p class="lede">Prod99 is a global classroom where teachers share their craft and students join from anywhere in the world. Set goals, track every study session, and trade ideas in a community that keeps you moving.</p>
     <div class="hero-ctas">
       <span class="cta-wrap">
-        <a class="btn btn-solid" id="heroSignup" href="/login/">Open Prod99</a>
+        <a class="btn btn-solid" id="heroSignup" data-magnetic href="/login/">Open Prod99</a>
         <svg class="cta-arrow" viewBox="0 0 70 40" aria-hidden="true" focusable="false"><path d="M4 6c14 2 30 10 40 20"/><path d="M34 16l11 11-14 4"/></svg>
       </span>
-      <a class="btn btn-ghost" href="#how-it-works">See how it works</a>
+      <a class="btn btn-ghost" data-magnetic href="#how-it-works">See how it works</a>
     </div>
     <a class="scroll-cue" href="#how-it-works" aria-label="Scroll to how it works"><span>Scroll</span><i aria-hidden="true"></i></a>
     <div class="cols" aria-label="Who it is for">
@@ -1469,15 +1536,15 @@ button:not(:disabled):hover,.btn:not(:disabled):hover{transform:translateY(-1px)
 <section class="sec" id="features" aria-labelledby="h-feat"><div class="wrap">
   <h2 class="rx" data-scribble id="h-feat">Everything a borderless classroom needs.</h2>
   <div class="fgrid" style="margin-top:36px">
-    <article class="fcard gl rx" tabindex="0">
+    <article class="fcard gl rx" tabindex="0" data-tilt>
       <div class="feature-copy"><span class="kick">Session timer</span><h3>Focus first, log automatically</h3><p>Start a session when you sit down, then stop it when you finish to record your study time.</p></div>
       <div class="feature-visual"><div class="running" role="img" aria-label="Timer preview"><div class="clock">25:00</div></div></div>
     </article>
-    <article class="fcard gl rx" tabindex="0">
+    <article class="fcard gl rx" tabindex="0" data-tilt>
       <div class="feature-copy"><span class="kick">Weekly progress</span><h3>See your progress take shape</h3><p>Track your study time across the week with a chart that makes your habits easy to spot.</p></div>
       <div class="feature-visual"><svg class="spark rw-chart" viewBox="0 0 300 80" role="img" aria-label="Sample weekly study minutes trend"><path class="a" d="M0 56C30 50 40 30 70 36S110 62 140 44S190 8 220 20S270 30 300 14V80H0Z"/><path class="l" pathLength="1" d="M0 56C30 50 40 30 70 36S110 62 140 44S190 8 220 20S270 30 300 14"/><circle cx="298" cy="14" r="4"/></svg></div>
     </article>
-    <article class="fcard gl rx" tabindex="0">
+    <article class="fcard gl rx" tabindex="0" data-tilt>
       <div class="feature-copy"><span class="kick">Goal tracker</span><h3>Turn goals into steady progress</h3><p>Set a goal and update its progress as you work toward milestones you can share.</p></div>
       <div class="feature-visual"><div class="stack">
         <div><div class="gt"><span>Finish Algebra unit</span><b>70%</b></div><div class="pbar"><i style="width:70%"></i></div></div>
@@ -1485,7 +1552,7 @@ button:not(:disabled):hover,.btn:not(:disabled):hover{transform:translateY(-1px)
         <div><div class="gt"><span>Prep Friday's lesson</span><b>90%</b></div><div class="pbar"><i style="width:90%"></i></div></div>
       </div></div>
     </article>
-    <article class="fcard gl rx" tabindex="0">
+    <article class="fcard gl rx" tabindex="0" data-tilt>
       <div class="feature-copy"><span class="kick">Community</span><h3>Learn better, together</h3><p>Share ideas and questions with teachers and students in one friendly feed.</p></div>
       <div class="feature-visual"><div class="post"><small><b>maya</b><span class="badge">Teacher</span></small><p>New worksheet on fractions is up. Ask me anything.</p></div></div>
     </article>
@@ -1538,7 +1605,7 @@ button:not(:disabled):hover,.btn:not(:disabled):hover{transform:translateY(-1px)
   <div class="cta gl rx">
     <h2>Ready to study on your own clock?</h2>
     <p>Create an account in under a minute and start your first session.</p>
-    <a class="btn btn-solid" id="ctaSignup" href="/login/">Open Prod99</a>
+    <a class="btn btn-solid" id="ctaSignup" data-magnetic href="/login/">Open Prod99</a>
   </div>
 </div></section>
 </div>
@@ -2722,6 +2789,148 @@ if(d.fonts&&d.fonts.ready)d.fonts.ready.then(function(){metrics();if(h1)slice();
 if(mqPin.addEventListener)mqPin.addEventListener("change",function(){metrics();pin=-1;kick()});
 if(W.MutationObserver)new MutationObserver(function(){if(calm())stop()}).observe(R,{attributes:true,attributeFilter:["data-power"]});
 if(rm&&rm.addEventListener)rm.addEventListener("change",function(){if(calm())stop()});
+})();
+</script>
+<script>
+/* ===== Curtain preloader ===== */
+(function(){"use strict";
+var d=document,R=d.documentElement,B=d.body;
+var rm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)");
+var entrance=d.getElementById("entrance");
+function calm(){return R.getAttribute("data-power")==="low"||!!(rm&&rm.matches)}
+
+function openSite(){
+  try{
+    B.classList.remove("is-locked");
+    R.classList.add("is-ready");
+    if(entrance)entrance.classList.add("is-gone");
+    setTimeout(function(){if(entrance&&entrance.parentNode)entrance.parentNode.removeChild(entrance)},1600);
+  } finally {
+    startAmbient();
+    initExtras();
+  }
+}
+
+if(calm()||!entrance){
+  B.classList.remove("is-locked");
+  R.classList.add("is-ready");
+  if(entrance&&entrance.parentNode)entrance.parentNode.removeChild(entrance);
+  startAmbient();
+  initExtras();
+} else {
+  B.classList.add("is-locked");
+  var countEl=d.getElementById("entranceCount"),barEl=d.getElementById("entranceBar");
+  var p=0,target=88,loaded=false,raf=0,done=false;
+  window.addEventListener("load",function(){loaded=true});
+  setTimeout(function(){loaded=true},5000);
+  function frame(){
+    if(loaded)target=100;
+    p+=(target-p)*0.07;
+    if(p>99.4&&target===100){p=100}
+    var shown=Math.round(p);
+    if(countEl)countEl.textContent=String(shown).padStart(3,"0");
+    if(barEl)barEl.style.width=shown+"%";
+    if(p>=100&&!done){
+      done=true;
+      entrance.classList.add("is-counted");
+      setTimeout(openSite,280);
+      return;
+    }
+    raf=requestAnimationFrame(frame);
+  }
+  raf=requestAnimationFrame(frame);
+}
+
+/* ===== Ambient blob parallax ===== */
+function startAmbient(){
+  if(calm())return;
+  var blobs=Array.prototype.slice.call(d.querySelectorAll(".hero__bg .blob"));
+  if(!blobs.length)return;
+  var depths=[30,48,18];
+  var cx=0,cy=0,tx=0,ty=0,raf=0,paused=false;
+  function onMove(e){cx=(e.clientX/window.innerWidth)-0.5;cy=(e.clientY/window.innerHeight)-0.5}
+  window.addEventListener("pointermove",onMove,{passive:true});
+  d.addEventListener("visibilitychange",function(){paused=d.hidden});
+  function loop(){
+    if(!paused){
+      tx+=(cx-tx)*0.06;ty+=(cy-ty)*0.06;
+      blobs.forEach(function(b,i){
+        var depth=depths[i]||24;
+        b.style.transform="translate3d("+(-tx*depth)+"px,"+(-ty*depth)+"px,0)";
+      });
+    }
+    raf=requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/* ===== Scroll progress bar ===== */
+(function(){
+  if(calm())return;
+  var bar=d.createElement("div");
+  bar.className="entrance-progress";
+  bar.setAttribute("aria-hidden","true");
+  B.appendChild(bar);
+  var raf=0;
+  function update(){
+    raf=0;
+    var h=d.documentElement.scrollHeight-window.innerHeight;
+    var p=h>0?Math.min(1,Math.max(0,window.scrollY/h)):0;
+    bar.style.transform="scaleX("+p.toFixed(4)+")";
+  }
+  function kick(){if(!raf)raf=requestAnimationFrame(update)}
+  window.addEventListener("scroll",kick,{passive:true});
+  window.addEventListener("resize",kick,{passive:true});
+  update();
+})();
+
+/* ===== Custom cursor + magnets + card tilt ===== */
+function initExtras(){
+  if(calm())return;
+  if(!matchMedia("(pointer:fine)").matches)return;
+
+  var dot=d.createElement("div");dot.className="cursor cursor--dot";dot.id="cursorDot";
+  var ring=d.createElement("div");ring.className="cursor cursor--ring";ring.id="cursorRing";
+  B.appendChild(dot);B.appendChild(ring);
+  var mx=0,my=0,rx=0,ry=0,shown=false,raf=0;
+  window.addEventListener("pointermove",function(e){
+    mx=e.clientX;my=e.clientY;
+    if(!shown){shown=true;dot.classList.add("is-on");ring.classList.add("is-on")}
+    dot.style.transform="translate3d("+(mx-3)+"px,"+(my-3)+"px,0)";
+    var hoverEl=e.target.closest&&e.target.closest("a,button,[data-magnetic],.fcard");
+    ring.classList.toggle("is-hover",!!hoverEl);
+    if(!raf)raf=requestAnimationFrame(tick);
+  },{passive:true});
+  window.addEventListener("pointerleave",function(){dot.classList.remove("is-on");ring.classList.remove("is-on")},{passive:true});
+  function tick(){
+    raf=0;
+    rx+=(mx-18-rx)*0.15;ry+=(my-18-ry)*0.15;
+    ring.style.transform="translate3d("+rx+"px,"+ry+"px,0)";
+    if(Math.abs(mx-18-rx)>0.5||Math.abs(my-18-ry)>0.5)raf=requestAnimationFrame(tick);
+  }
+
+  /* Magnetic buttons */
+  d.querySelectorAll("[data-magnetic]").forEach(function(el){
+    el.addEventListener("pointermove",function(e){
+      var b=el.getBoundingClientRect();
+      var ox=(e.clientX-(b.left+b.width/2))*0.25;
+      var oy=(e.clientY-(b.top+b.height/2))*0.25;
+      el.style.transform="translate3d("+ox+"px,"+oy+"px,0)";
+    },{passive:true});
+    el.addEventListener("pointerleave",function(){el.style.transform=""},{passive:true});
+  });
+
+  /* Card tilt */
+  d.querySelectorAll(".fcard[data-tilt]").forEach(function(card){
+    card.addEventListener("pointermove",function(e){
+      var b=card.getBoundingClientRect();
+      var mxp=e.clientX-b.left,myp=e.clientY-b.top;
+      var ry2=(mxp/b.width-0.5)*8,rx2=(myp/b.height-0.5)*-6;
+      card.style.transform="perspective(900px) rotateX("+rx2.toFixed(2)+"deg) rotateY("+ry2.toFixed(2)+"deg) translateY(-4px)";
+    },{passive:true});
+    card.addEventListener("pointerleave",function(){card.style.transform=""},{passive:true});
+  });
+}
 })();
 </script>
 </body>
