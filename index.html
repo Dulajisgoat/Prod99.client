@@ -1419,7 +1419,7 @@ html.is-ready .hero__bg{opacity:1;transform:scale(1)}
       <a href="#features" id="navFeatures">Features</a>
       <a href="#built" class="lv-link">Built</a>
       <a href="#faq" class="lv-link">FAQ</a>
-      <a href="#workspace" id="navWorkspace" style="display:none;">Workspace</a>
+      <!-- workspace removed: see changes-link pass -->
     </div>
     <div class="nav-right">
       <a class="chg-btn" id="changesLink"
@@ -1455,7 +1455,7 @@ html.is-ready .hero__bg{opacity:1;transform:scale(1)}
     <a href="#features" class="lv-link">Features</a>
     <a href="#built" class="lv-link">Built</a>
     <a href="#faq" class="lv-link">FAQ</a>
-    <a href="#workspace" class="mobile-workspace-link" style="display:none;">Workspace</a>
+    <!-- workspace removed: see changes-link pass -->
   </div>
 </div>
 
@@ -1610,19 +1610,7 @@ html.is-ready .hero__bg{opacity:1;transform:scale(1)}
 </div></section>
 </div>
 
-<section id="workspace" style="display:none;"><div class="wrap">
-<h2>Try your workspace.</h2>
-<div class="grid3">
-<div class="card"><h3>Goals</h3>
-<form class="row" id="goalForm"><input id="goalIn" placeholder="e.g. Finish Algebra unit" maxlength="60"><button class="btn btn-solid">Add</button></form><ul id="goalList"></ul></div>
-<div class="card" id="trk"><h3>Study tracker</h3><div class="segrow"><div class="seg" role="group" aria-label="Timer mode"><button id="mdSw" type="button" aria-pressed="true">Stopwatch</button><button id="mdPo" type="button" aria-pressed="false">Pomodoro</button></div><div class="seg" id="duSeg" role="group" aria-label="Pomodoro length" hidden><button id="du25" type="button" aria-pressed="true">25</button><button id="du50" type="button" aria-pressed="false">50</button></div></div><div class="clock" id="clock">00:00</div>
-<div class="row"><button class="btn btn-solid" id="clkBtn" type="button">Start</button><span class="empty" id="today" style="align-self:center"></span></div><div class="pbar" style="height:12px; margin-top:20px;"><i id="dailyBar" style="width:0%"></i></div>
-<p style="margin-top:8px; font-size:0.9rem; color:var(--ink-soft);">Daily Goal: <span id="dailyGoalText">120</span> mins</p></div>
-<div class="card"><h3>Files</h3><p class="empty">Up to 10 MB per file. Private to your account.</p><div class="row"><input type="file" id="fileIn" style="min-width:0;padding:8px 10px"><button class="btn btn-solid" id="fileUp" type="button">Upload<span class="tag beta">Beta (might break)</span></button></div><ul id="fileList"></ul></div>
-<div class="card"><h3>Backup</h3><p class="empty">Export or import your goals, study days and posts as JSON.</p><div class="row"><button class="btn btn-ghost" id="expBtn" type="button">Export</button><button class="btn btn-ghost" id="impBtn" type="button">Import</button><input type="file" id="impIn" accept="application/json,.json" hidden></div></div>
-<div class="card wide"><h3>Community posts <span class="badge" id="liveBadge" hidden>Live</span></h3>
-<form id="postForm"><input id="postIn" placeholder="Share a tip or lesson update..." maxlength="200"><select id="postRole"><option>Student</option><option>Teacher</option></select><button class="btn btn-solid">Post</button></form><ul id="feed"></ul></div>
-</div></div></section>
+<!-- workspace removed: see changes-link pass -->
 
 <footer>
   <div class="wrap">
@@ -1918,15 +1906,15 @@ html.is-ready .hero__bg{opacity:1;transform:scale(1)}
     supabaseFailed = true;
     sb = null;
   }
-  var P99 = window.P99 = { sb: sb, profile: null, reload: null, failed: supabaseFailed };
+  var P99 = window.P99 = { sb: sb, profile: null, failed: supabaseFailed };
 
   var landingView = document.getElementById('landingView');
-  var workspace = document.getElementById('workspace');
+  // workspace removed: see changes-link pass
   var authButtons = document.getElementById('authButtons');
   var accountChip = document.getElementById('accountChip');
   var accountName = document.getElementById('accountName');
   var navFeatures = document.getElementById('navFeatures');
-  var navWorkspace = document.getElementById('navWorkspace');
+  // workspace removed: see changes-link pass
 
   // If Supabase failed to initialise, surface it on the auth button so the user
   // isn't left wondering why nothing happens when they click "Log in".
@@ -1945,43 +1933,23 @@ html.is-ready .hero__bg{opacity:1;transform:scale(1)}
   }
 
   function showView(profile){
-    var mobileWorkspaceLinks = document.querySelectorAll('.mobile-workspace-link');
     if(profile){
       landingView.style.display = 'none';
-      workspace.style.display = '';
       authButtons.style.display = 'none';
       accountChip.style.display = 'flex';
       accountName.textContent = profile.username;
       navFeatures.style.display = 'none';
-      navWorkspace.style.display = '';
-      mobileWorkspaceLinks.forEach(function(link){ link.style.display = ''; });
     } else {
       landingView.style.display = '';
-      workspace.style.display = 'none';
       authButtons.style.display = 'flex';
       accountChip.style.display = 'none';
       accountName.textContent = '';
       navFeatures.style.display = '';
-      navWorkspace.style.display = 'none';
-      mobileWorkspaceLinks.forEach(function(link){ link.style.display = 'none'; });
     }
   }
-  var workspaceReady = false;
   function setProfile(profile){
     P99.profile = profile;
     showView(profile);
-    if(profile && !workspaceReady){
-      workspaceReady = true;
-      initWorkspace();
-    } else if(profile && P99.reload){
-      // Only reload when we actually have a profile. Calling reload on logout
-      // would fire three Supabase queries with pid() === null.
-      P99.reload();
-    } else if(!profile && workspaceReady && P99.stop){
-      // Logging out: stop the study timer so it doesn't keep ticking in the
-      // background and accidentally attribute minutes to a future session.
-      P99.stop();
-    }
   }
   function clearLegacyId(){ try{ localStorage.removeItem(LEGACY_KEY); }catch(e){} }
   async function applySession(d){
@@ -1994,347 +1962,6 @@ html.is-ready .hero__bg{opacity:1;transform:scale(1)}
     sb.auth.onAuthStateChange(function(ev){ if(ev === 'SIGNED_OUT' && P99.profile){ setProfile(null); } });
   }
   function toTop(){ window.scrollTo(0, 0); }
-
-  /* ---------- Goals / Study tracker / Community posts ---------- */
-function initWorkspace(){
-var $=function(i){return document.getElementById(i)};
-function esc(t){var d=document.createElement("div");d.textContent=t;return d.innerHTML}
-// esc() is for text nodes only (it does not escape quotes). attr() is for attribute values; num() for numbers.
-function attr(v){return String(v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
-function num(v){return Number(v)||0}
-var P99=window.P99,sb=P99.sb,goals=[],logs={},posts=[];
-// Timer state. We use wall-clock time (Date.now()) for the elapsed computation so a
-// background-tab throttle can't silently drop minutes.
-var tm=null,tStart=0,tElapsed=0;
-// Per-button "in-flight" flag so rapid clicks on +10 or ♡ don't double-submit.
-var busyGoalIds={},likeInFlight={};
-function pid(){return P99.profile&&P99.profile.id}
-function need(){if(!pid()){alert('Log in first');return false}return true}
-function bad(r){if(r&&r.error){console.error(r.error);alert('Something went wrong: '+r.error.message);return true}return false}
-function pad(n){return ('0'+n).slice(-2)}
-function key(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
-function fmt(secs){return pad(Math.floor(secs/60))+':'+pad(secs%60)}
-/* goals */
-async function loadGoals(){goals=[];if(pid()){var r=await sb.from('goals').select('*').eq('profile_id',pid()).order('created_at');if(r.error)console.error(r.error);else goals=r.data||[]}drawGoals()}
-function drawGoals(){
-  var ul=$('goalList'),seen={},i,c;
-  if(!goals.length){ ul.innerHTML='<li class="empty">No goals yet. Add your first.</li>'; return; }
-  var ph=ul.querySelector('li.empty'); if(ph){ ph.remove(); }
-  goals.forEach(function(g){
-    var id=String(g.id),li=null,pct=num(g.progress),busy=!!busyGoalIds[g.id];
-    seen[id]=1;
-    for(i=0;i<ul.children.length;i++){ if(ul.children[i].dataset.gid===id){ li=ul.children[i]; break; } }
-    if(!li){
-      // Only build the row once; later calls just patch the existing nodes.
-      li=document.createElement('li'); li.dataset.gid=id;
-      li.innerHTML='<div class="gt"><span></span><b></b><button data-a="up">+10</button><button data-a="del" aria-label="Remove">&times;</button></div><div class="pbar"><i style="width:0%"></i></div>';
-      li.querySelector('span').textContent=g.title;
-      li.querySelector('[data-a="up"]').dataset.id=id;
-      li.querySelector('[data-a="del"]').dataset.id=id;
-      ul.appendChild(li);
-      void li.offsetWidth;   // commit width:0 so the first fill slides in
-    }
-    li.querySelector('b').textContent=pct+'%';
-    li.querySelector('.pbar i').style.width=pct+'%';
-    var up=li.querySelector('[data-a="up"]');
-    up.disabled=busy; up.textContent=busy?'\u2026':'+10';
-  });
-  // Remove rows for goals that no longer exist.
-  for(i=ul.children.length-1;i>=0;i--){
-    c=ul.children[i];
-    if(!c.dataset.gid||!seen[c.dataset.gid]){ c.remove(); }
-  }
-}
-$('goalForm').addEventListener('submit',async function(e){e.preventDefault();var v=$('goalIn').value.trim();if(!v)return;if(!need())return;var r=await sb.from('goals').insert({profile_id:pid(),title:v,progress:0});if(bad(r))return;$('goalIn').value='';loadGoals()});
-$('goalList').addEventListener('click',async function(e){var b=e.target.closest('button');if(!b)return;if(!need())return;var id=b.dataset.id,r;
-  if(b.dataset.a==='del'){
-    // Optimistic delete: disable + remove from local state immediately so a
-    // rapid second click has nothing to act on.
-    busyGoalIds[id]=true; b.disabled=true;
-    r=await sb.from('goals').delete().eq('id',id);
-    busyGoalIds[id]=false;
-    if(!bad(r)){ goals=goals.filter(function(x){return x.id!==id;}); drawGoals(); }
-    return;
-  }
-  // "+10" path: prevent double-submit while a request is in flight, and
-  // apply the new value optimistically so 10 quick clicks land at +100,
-  // not +10.
-  if(busyGoalIds[id]){ return; }
-  var g=goals.filter(function(x){return x.id===id;})[0];
-  if(!g){ return; }
-  var nextVal=Math.min(100, g.progress+10);
-  busyGoalIds[id]=true; b.disabled=true; b.textContent='…';
-  g.progress=nextVal; drawGoals();   // optimistic UI update
-  r=await sb.rpc('increment_goal_progress',{goal_id:id,delta:10});
-  if(r.error&&(r.error.code==='PGRST202'||r.error.code==='42883')){
-    // RPC not deployed yet: fall back to the old update so +10 keeps working. Remove once the RPC exists.
-    console.warn('increment_goal_progress missing; using direct update');
-    r=await sb.from('goals').update({progress:nextVal}).eq('id',id);
-  }
-  busyGoalIds[id]=false;
-  if(!bad(r)){ loadGoals(); }        // re-sync with server truth
-  else { loadGoals(); }              // re-sync even on error to revert
-});
-/* study tracker */
-async function loadLogs(){logs={};if(pid()){var s=new Date();s.setDate(s.getDate()-6);var r=await sb.from('study_logs').select('date,minutes').eq('profile_id',pid()).gte('date',key(s));if(r.error)console.error(r.error);else(r.data||[]).forEach(function(x){logs[x.date]=x.minutes})}drawToday()}
-var DAILY_GOAL=120;
-function drawToday(){
-  var m=logs[key(new Date())]||0;
-  var pct=Math.min(100,(m/DAILY_GOAL)*100);
-  var bar=$('dailyBar'); if(bar){ bar.style.width=pct+'%'; }
-  var gt=$('dailyGoalText'); if(gt){ gt.textContent=DAILY_GOAL; }
-  $('today').textContent=m+' min today';
-}
-var POMO_KEY='prod99_pomo',tMode='stopwatch',pomoMin=25,endAt=0;
-try{var pv=parseInt(localStorage.getItem(POMO_KEY),10);if(pv===25||pv===50)pomoMin=pv}catch(e){}
-function currentSecs(){ return tElapsed + (tm && tMode==='stopwatch' ? Math.floor((Date.now()-tStart)/1000) : 0); }
-function remainSecs(){ return Math.max(0, Math.ceil((endAt-Date.now())/1000)); }
-function tickClock(){ $('clock').textContent = tMode==='pomodoro' ? fmt(tm ? remainSecs() : pomoMin*60) : fmt(currentSecs()); }
-function lockSegs(b){ ['mdSw','mdPo','du25','du50'].forEach(function(id){ $(id).disabled=b; }); }
-function syncSegs(){
-  $('mdSw').setAttribute('aria-pressed',tMode==='stopwatch'); $('mdPo').setAttribute('aria-pressed',tMode==='pomodoro');
-  $('du25').setAttribute('aria-pressed',pomoMin===25); $('du50').setAttribute('aria-pressed',pomoMin===50);
-  $('duSeg').hidden = tMode!=='pomodoro';
-}
-function haltTimer(){
-  if(tm){ clearInterval(tm); tm=null; }
-  var t=$('trk'); if(t){ t.classList.remove('running'); }
-  var btn=$('clkBtn'); if(btn){ btn.textContent='Start'; }
-  tStart=0; tElapsed=0; endAt=0; lockSegs(false); tickClock();
-}
-function stopTimer(logIfRunning){
-  // Read elapsed BEFORE halting: the old code cleared tm first, so currentSecs() was always 0 and Stop & log never logged.
-  var secs=currentSecs();
-  haltTimer();
-  if(logIfRunning && tMode==='stopwatch' && secs>0 && need()){ logMinutes(Math.max(1,Math.round(secs/60))); }
-}
-async function logMinutes(min,mode){ /* mode is accepted but not stored: study_logs has no mode column */ var t=key(new Date()),r=await sb.from('study_logs').select('id,minutes').eq('profile_id',pid()).eq('date',t).maybeSingle();if(bad(r))return;if(r.data)r=await sb.from('study_logs').update({minutes:r.data.minutes+min}).eq('id',r.data.id);else r=await sb.from('study_logs').insert({profile_id:pid(),date:t,minutes:min});if(!bad(r))loadLogs()}
-function finishPomo(){
-  var m=pomoMin; haltTimer();
-  if(pid()){ logMinutes(m,'pomodoro'); }
-  try{ if('Notification' in window && Notification.permission==='granted'){ new Notification('Pomodoro complete',{body:m+' minutes logged. Time for a break.'}); } }catch(e){}
-}
-function pomoTick(){ if(remainSecs()<=0){ finishPomo(); } else { tickClock(); } }
-$('clkBtn').addEventListener('click',function(){
-  if(tm){ stopTimer(true); return; }  // stopwatch: stop & log; pomodoro: cancel without logging
-  var t=$('trk'); if(t){ t.classList.add('running'); }
-  lockSegs(true);
-  if(tMode==='pomodoro'){
-    this.textContent='Cancel';
-    endAt=Date.now()+pomoMin*60000;   // absolute end time, so tab throttling can't drift the display
-    try{ if('Notification' in window && Notification.permission==='default'){ Notification.requestPermission(); } }catch(e){}
-    tm=setInterval(pomoTick,500);
-  } else {
-    this.textContent='Stop & log'; tStart=Date.now(); tm=setInterval(tickClock,1000);
-  }
-  tickClock();
-});
-$('mdSw').addEventListener('click',function(){ tMode='stopwatch'; syncSegs(); tickClock(); });
-$('mdPo').addEventListener('click',function(){ tMode='pomodoro'; syncSegs(); tickClock(); });
-[25,50].forEach(function(n){ $('du'+n).addEventListener('click',function(){ pomoMin=n; try{ localStorage.setItem(POMO_KEY,String(n)); }catch(e){} syncSegs(); tickClock(); }); });
-document.addEventListener('visibilitychange',function(){ if(!document.hidden && tm){ if(tMode==='pomodoro'){ pomoTick(); } else { tickClock(); } } });
-syncSegs();
-/* posts */
-var likedPosts=[],likesPidLoaded=null,postsLoadState='ok',postBusy=false;
-// likedPosts is scoped to the signed-in profile so a logout/login on the same
-// device never hands the next account the previous account's liked state.
-function likesKey(p){return 'prod99_likes_'+p}
-function ensureLikesLoaded(){
-  var p=pid();
-  if(p===likesPidLoaded)return;
-  likesPidLoaded=p;
-  if(!p){likedPosts=[];return}
-  try{var raw=JSON.parse(localStorage.getItem(likesKey(p))||'[]');likedPosts=Array.isArray(raw)?raw:[]}catch(e){likedPosts=[]}
-}
-function saveLikes(){var p=pid();if(!p)return;try{localStorage.setItem(likesKey(p),JSON.stringify(likedPosts))}catch(e){}}
-async function loadPosts(){
-  ensureLikesLoaded();
-  var r=await sb.from('posts').select('*').order('created_at',{ascending:false});
-  if(r.error){ console.error(r.error); postsLoadState='error'; }
-  else { posts=r.data||[]; postsLoadState='ok'; }
-  drawFeed();
-}
-function drawFeed(){
-  if(postsLoadState==='error'){ $('feed').innerHTML='<li class="empty">Couldn\'t load posts. <button data-a="retry">Retry</button></li>'; return; }
-  $('feed').innerHTML=posts.map(function(p){var on=likedPosts.indexOf(p.id)>-1;return '<li class="post"><small><b>'+esc(p.name)+'</b><span class="badge">'+esc(p.role)+'</span></small><p>'+esc(p.content)+'</p><button class="like'+(on?' liked':'')+'" data-id="'+attr(p.id)+'" aria-pressed="'+(on?'true':'false')+'"'+(on?' style="color:var(--wine);box-shadow:inset 0 0 0 1.5px var(--wine)"':'')+(likeInFlight[p.id]?' disabled':'')+'>'+(on?'&#9829;':'&#9825;')+' '+num(p.likes)+'</button></li>'}).join('')||'<li class="empty">No posts yet. Start the conversation.</li>';
-}
-$('postForm').addEventListener('submit',async function(e){
-  e.preventDefault();
-  if(postBusy)return;
-  var v=$('postIn').value.trim();
-  if(!v)return;
-  if(!need())return;
-  var btn=$('postForm').querySelector('button');
-  postBusy=true; if(btn)btn.disabled=true;
-  $('postIn').value='';
-  try{
-    var r=await sb.from('posts').insert({profile_id:pid(),name:P99.profile.username||'Guest',role:$('postRole').value,content:v,likes:0});
-    if(bad(r)){ $('postIn').value=v; return; }
-    loadPosts();
-  } finally {
-    postBusy=false; if(btn)btn.disabled=false;
-  }
-});
-$('feed').addEventListener('click',async function(e){
-  var retryBtn=e.target.closest('[data-a="retry"]');
-  if(retryBtn){ loadPosts(); return; }
-  var b=e.target.closest('.like');if(!b)return;if(!need())return;
-  var id=b.dataset.id;
-  if(likeInFlight[id]){ return; }  // debounce rapid double-clicks
-  var wasLiked=likedPosts.indexOf(id)>-1,delta=wasLiked?-1:1;
-  likeInFlight[id]=true; b.disabled=true;
-  // Optimistic: toggle local liked state and count immediately.
-  if(wasLiked){ likedPosts=likedPosts.filter(function(x){return x!==id;}); }
-  else { likedPosts.push(id); }
-  saveLikes();
-  var p=posts.filter(function(x){return x.id===id;})[0];
-  if(p){ p.likes=Math.max(0,(p.likes||0)+delta); }
-  drawFeed();
-  try{
-    var r=await sb.rpc('increment_like',{post_id:id,delta:delta});
-    if(r.error&&(r.error.code==='PGRST202'||r.error.code==='42883')&&p){
-      // RPC not deployed yet: fall back to the old update so likes keep working. Remove once the RPC exists.
-      console.warn('increment_like missing; using direct update');
-      r=await sb.from('posts').update({likes:p.likes}).eq('id',id);
-    }
-    if(r.error){ throw r.error; }
-  }catch(err){
-    // Revert the optimistic toggle (liked state and local count) if the server rejected it.
-    if(wasLiked){ if(likedPosts.indexOf(id)<0){ likedPosts.push(id); } }
-    else { likedPosts=likedPosts.filter(function(x){return x!==id;}); }
-    if(p){ p.likes=Math.max(0,(p.likes||0)-delta); }
-    saveLikes();
-    bad({error:err});
-  } finally {
-    likeInFlight[id]=false;
-  }
-  loadPosts();   // re-sync with server truth
-});
-/* export / import */
-function toast(m){var t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove()},5000)}
-async function fetchAll(t,ord){var all=[],f=0,r,q;while(true){q=sb.from(t).select('*').eq('profile_id',pid());if(ord)q=q.order(ord);r=await q.order('id').range(f,f+999);if(r.error)return r;all=all.concat(r.data||[]);if(!r.data||r.data.length<1000)return{data:all};f+=1000}}
-async function exportAll(){
-  if(!need())return;
-  var out={version:1,exportedAt:new Date().toISOString()},sp=[['goals','created_at'],['study_logs','date'],['posts','created_at'],['tasks',null]],i,r;
-  for(i=0;i<sp.length;i++){
-    r=await fetchAll(sp[i][0],sp[i][1]);
-    if(r.error){
-      // Only a missing tasks table is tolerated; any other error aborts so we never hand out a silently incomplete backup.
-      if(sp[i][0]==='tasks'&&(r.error.code==='42P01'||r.error.code==='PGRST205')){out.tasks=[];continue}
-      bad(r);return;
-    }
-    out[sp[i][0]]=r.data||[];
-  }
-  var url=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}));
-  var a=document.createElement('a');a.href=url;a.download='prod99-export-'+key(new Date())+'.json';document.body.appendChild(a);a.click();a.remove();
-  setTimeout(function(){URL.revokeObjectURL(url)},1000);
-  toast('Exported '+out.goals.length+' goals, '+out.study_logs.length+' study days, '+out.posts.length+' posts.');
-}
-var UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,DATE_RE=/^\d{4}-\d{2}-\d{2}$/;
-function cut(v,n){return typeof v==='string'?v.slice(0,n):''}
-function stamp(v){var t=typeof v==='string'?Date.parse(v):NaN;return isNaN(t)?null:new Date(t).toISOString()}
-// Rebuild each row from a whitelist; profile_id/name are forced to the current user, likes reset, so a file can't forge ownership or counts.
-function cleanRow(t,x){
-  if(!x||typeof x.id!=='string'||!UUID_RE.test(x.id))return null;
-  var b={id:x.id,profile_id:pid()},c=stamp(x.created_at),v;
-  if(t==='goals'){v=cut(x.title,60).trim();if(!v)return null;b.title=v;b.progress=Math.min(100,Math.max(0,Math.round(Number(x.progress)||0)));if(c)b.created_at=c}
-  else if(t==='study_logs'){if(typeof x.date!=='string'||!DATE_RE.test(x.date))return null;b.date=x.date;b.minutes=Math.min(1440,Math.max(0,Math.round(Number(x.minutes)||0)))}
-  else if(t==='posts'){v=cut(x.content,200).trim();if(!v)return null;b.content=v;b.name=P99.profile.username||'Guest';b.role=(x.role==='Teacher'?'Teacher':'Student');b.likes=0;if(c)b.created_at=c}
-  else return null;
-  return b;
-}
-async function importJson(file){
-  if(!need()||!file)return;
-  if(file.size>5*1024*1024){toast('Import refused: file is over 5 MB.');return}
-  var d;try{d=JSON.parse(await file.text())}catch(e){toast('Import refused: not valid JSON.');return}
-  if(!d||d.version!==1){toast('Import refused: unsupported file version.');return}
-  var imp=0,skp=0,order=['goals','study_logs','posts'],have={},i,j,t,src,ok,batch,r;
-  r=await sb.from('study_logs').select('date').eq('profile_id',pid());if(bad(r))return;
-  (r.data||[]).forEach(function(x){have[x.date]=1}); // one study_logs row per date, or logMinutes' maybeSingle() would error
-  for(i=0;i<order.length;i++){
-    t=order[i];src=Array.isArray(d[t])?d[t]:[];ok=[];
-    skp+=Math.max(0,src.length-5000);
-    src.slice(0,5000).forEach(function(x){var b=cleanRow(t,x);if(b&&t==='study_logs'){if(have[b.date])b=null;else have[b.date]=1}if(b)ok.push(b);else skp++});
-    for(j=0;j<ok.length;j+=200){
-      batch=ok.slice(j,j+200);
-      r=await sb.from(t).upsert(batch,{onConflict:'id',ignoreDuplicates:true}).select('id');
-      if(r.error){console.error(r.error);P99.reload();toast('Import stopped: '+r.error.message+' ('+imp+' imported before the error).');return}
-      imp+=(r.data||[]).length;skp+=batch.length-(r.data||[]).length;
-    }
-  }
-  P99.reload();
-  toast('Imported '+imp+', skipped '+skp+'.'+(Array.isArray(d.tasks)&&d.tasks.length?' Tasks are not imported yet.':''));
-}
-P99.exportAll=exportAll;P99.importJson=importJson;
-P99.reload=function(){loadGoals();loadLogs();loadPosts();loadFiles();subscribeLive()};
-
-/* ---------- File storage: private bucket "user-files", one folder per profile, 10 MB max ---------- */
-var BUCKET='user-files',MAX_FILE=10*1024*1024,fileBusy=false,live=null,liveTimer=null;
-function fileLabel(n){return n.replace(/^\d+-/,'')}
-function fmtSize(b){return b>=1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB'}
-async function loadFiles(){
-  var ul=$('fileList');
-  if(!pid()){ul.innerHTML='';return}
-  var r=await sb.storage.from(BUCKET).list(String(pid()),{limit:100,sortBy:{column:'created_at',order:'desc'}});
-  if(r.error){console.error(r.error);ul.innerHTML='<li class="empty">File storage is not available yet.</li>';return}
-  var f=(r.data||[]).filter(function(x){return x.id});
-  ul.innerHTML=f.map(function(x){
-    var sz=x.metadata&&x.metadata.size;
-    return '<li><div class="gt"><span>'+esc(fileLabel(x.name))+'</span><b>'+(sz?fmtSize(sz):'')+'</b><button data-a="get" data-n="'+attr(x.name)+'">Open</button><button data-a="rm" data-n="'+attr(x.name)+'" aria-label="Delete">&times;</button></div></li>';
-  }).join('')||'<li class="empty">No files yet.</li>';
-}
-$('fileUp').addEventListener('click',async function(){
-  if(!need()||fileBusy)return;
-  var f=$('fileIn').files[0];
-  if(!f){toast('Choose a file first.');return}
-  if(f.size>MAX_FILE){toast('That file is over 10 MB.');return}
-  var btn=this;fileBusy=true;btn.disabled=true;
-  var safe=f.name.replace(/[^\w.\-]+/g,'_').slice(-80);
-  var r=await sb.storage.from(BUCKET).upload(pid()+'/'+Date.now()+'-'+safe,f,{contentType:f.type||'application/octet-stream'});
-  fileBusy=false;btn.disabled=false;
-  if(bad(r))return;
-  $('fileIn').value='';toast('Uploaded '+f.name+'.');loadFiles();
-});
-$('fileList').addEventListener('click',async function(e){
-  var b=e.target.closest('button');if(!b||!need())return;
-  var p=pid()+'/'+b.dataset.n,r;
-  if(b.dataset.a==='get'){
-    var w=window.open('about:blank','_blank'); // opened before the await so popup blockers allow it
-    r=await sb.storage.from(BUCKET).createSignedUrl(p,60);
-    if(r.error){if(w)w.close();bad(r);return}
-    if(w){w.opener=null;w.location.href=r.data.signedUrl}
-    return;
-  }
-  if(!confirm('Delete this file?'))return;
-  b.disabled=true;
-  r=await sb.storage.from(BUCKET).remove([p]);
-  if(bad(r)){b.disabled=false;return}
-  loadFiles();
-});
-
-/* ---------- Real-time community feed (debounced) ---------- */
-function subscribeLive(){
-  if(live||!pid())return;
-  live=sb.channel('posts-live')
-    .on('postgres_changes',{event:'*',schema:'public',table:'posts'},function(){
-      clearTimeout(liveTimer);liveTimer=setTimeout(loadPosts,250);
-    })
-    .subscribe(function(s){var bd=$('liveBadge');if(bd)bd.hidden=(s!=='SUBSCRIBED')});
-}
-function unsubscribeLive(){
-  clearTimeout(liveTimer);
-  if(live){sb.removeChannel(live);live=null}
-  var bd=$('liveBadge');if(bd)bd.hidden=true;
-}
-
-/* ---------- Visible export / import buttons ---------- */
-$('expBtn').addEventListener('click',exportAll);
-$('impBtn').addEventListener('click',function(){$('impIn').click()});
-$('impIn').addEventListener('change',function(){var f=this.files[0];this.value='';if(f)importJson(f)});
-// Public stop so the outer scope can halt the timer on logout (see setProfile).
-P99.stop=function(){ stopTimer(false); unsubscribeLive(); };
-P99.reload();
-  }
 
   /* ---------- Session ---------- */
   async function restoreSession(){
@@ -2610,13 +2237,13 @@ $("cmdKbd").textContent=/Mac|iPhone|iPad/.test(navigator.platform)?"⌘K":"Ctrl 
 function go(id){return function(){var e=$(id);if(e)e.scrollIntoView({behavior:calm()?"auto":"smooth"})}}
 function build(){var inApp=R.classList.contains("in-app"),out=$("authButtons").style.display==="none";items=[];
 if(!inApp)[["Steps","steps"],["Inside","inside"],["Features","features"],["Built","built"],["FAQ","faq"]].forEach(function(x){items.push({t:"Jump to "+x[0],g:"Section",f:go(x[1])})});
-items.push({t:"Open workspace",g:"App",f:function(){
+items.push({t:"Open dashboard",g:"App",f:function(){
   if(out){ location.href='/dashboard/'; } // If logged in, go to dashboard
   else { location.href='/login/'; }       // If logged out, go to login
 }});
 if(!out){items.push({t:"Log in",g:"Account",f:function(){location.href='/login/'}});items.push({t:"Create an account",g:"Account",f:function(){location.href='/login/'}})}
 else items.push({t:"Log out",g:"Account",f:function(){$("logoutBtn").click()}});
-if(out&&window.P99&&P99.exportAll){items.push({t:"Export my data",g:"Account",b:true,f:function(){P99.exportAll()}});items.push({t:"Import data",g:"Account",b:true,f:function(){var i=d.createElement("input");i.type="file";i.accept="application/json,.json";i.addEventListener("change",function(){if(i.files[0])P99.importJson(i.files[0])});i.click()}})}
+// workspace removed: see changes-link pass
 items.push({t:"Toggle theme",g:"Settings",f:function(){$("themeToggle").click()}})}
 function mark(){$$("li",cl).forEach(function(li,i){li.setAttribute("aria-selected",i===sel)});var el=$("ck"+sel);if(el&&el.scrollIntoView)el.scrollIntoView({block:"nearest"});if(shown.length){ci.setAttribute("aria-activedescendant","ck"+sel);}else{ci.removeAttribute("aria-activedescendant");}}
 function render(){var q=ci.value.toLowerCase().trim();shown=items.filter(function(x){return!q||(x.t+" "+x.g).toLowerCase().indexOf(q)>-1});sel=Math.min(sel,Math.max(0,shown.length-1));cl.innerHTML="";
