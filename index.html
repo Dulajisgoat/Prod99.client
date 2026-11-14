@@ -1366,6 +1366,94 @@ html.is-ready .hero__bg{opacity:1;transform:scale(1)}
   .cursor,.hero__bg .blob{display:none!important}
 }
 </style>
+<style id="brand-refine">
+/* =====================================================================
+   Brand refine layer — Modern Editorial SaaS + Burgundy Minimalism
+   + Subtle Glassmorphism. Landing page (index.html) only.
+   Appended last on purpose: it overrides tokens/finishes above it
+   without touching markup, JS, IDs, selectors or link targets.
+   ===================================================================== */
+
+/* ---- 1. Brand colour tokens (same variable names, new values) ---- */
+:root{
+  --bg:#F8F3F1;            /* Warm White */
+  --surface:#FFFFFF;
+  --ink:#241820;            /* reads as near-black against warm white */
+  --ink-soft:#7A6B68;
+  --wine:#78182D;           /* Primary Burgundy */
+  --wine-dark:#4B0C1B;      /* Deep Burgundy */
+  --wine-soft:rgba(120,24,45,.08);
+  --border:rgba(66,38,49,.14);     /* Dark Border hue, light alpha */
+  --shadow-c:rgba(75,12,27,.12);
+  --glass:rgba(248,243,241,.58);
+  --glass-b:rgba(233,218,221,.65); /* Soft Rose, as a hairline */
+}
+html[data-theme="dark"]{
+  --bg:#171114;             /* Dark Background */
+  --surface:#241820;        /* Dark Surface */
+  --ink:#F8F3F1;
+  --ink-soft:#BCA8A2;
+  --wine:#A83B50;           /* Accent Red — brighter accent on dark */
+  --wine-dark:#78182D;      /* Primary Burgundy as the pressed/hover state */
+  --wine-soft:rgba(168,59,80,.18);
+  --border:#422631;         /* Dark Border */
+  --shadow-c:rgba(0,0,0,.45);
+  --glass:rgba(36,24,32,.56);
+  --glass-b:rgba(66,38,49,.7);
+}
+.ln em{background:linear-gradient(100deg,var(--wine),#A83B50);-webkit-background-clip:text;background-clip:text}
+.hero__bg .b2{background:radial-gradient(circle at 60% 40%,#A83B50,transparent 68%)}
+.hero__bg .b3{background:radial-gradient(circle at 50% 50%,#E9DADD,transparent 68%)}
+html[data-theme="dark"] .hero__bg .b3{background:radial-gradient(circle at 50% 50%,#78182D,transparent 68%)}
+
+/* ---- 2. Subtle glass, not everywhere-glass ----
+   Dial back blur/saturation so cards read as gently frosted rather
+   than heavy frosted glass, and keep borders hairline-thin. Scope
+   stays to feature/preview cards, the CTA band and nav, per spec. */
+nav,.gl,.card,.fcard,.feature-row,.modal,#built .two>div:last-child{
+  backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+  border-width:1px;
+  box-shadow:0 1px 1px rgba(28,20,18,.03),0 14px 32px -18px var(--shadow-c);
+}
+.pill,.step .n,.eyebrow,.theme-toggle,.btn-ghost,.cmd-btn{
+  backdrop-filter:blur(10px) saturate(130%);
+  -webkit-backdrop-filter:blur(10px) saturate(130%);
+}
+input,select,textarea{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.overlay{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#features .feature-visual,.steps-callout,.mid-cta__inner{
+  backdrop-filter:blur(12px) saturate(130%);
+  -webkit-backdrop-filter:blur(12px) saturate(130%);
+  box-shadow:none;
+}
+
+/* ---- 3. Typography hierarchy & CTA polish ---- */
+.h1{letter-spacing:-.04em}
+.lede{color:var(--ink-soft);max-width:48ch}
+.sec h2{letter-spacing:-.03em}
+.btn-solid{box-shadow:0 10px 24px -12px var(--shadow-c)}
+.btn-solid:hover{box-shadow:0 14px 28px -12px var(--shadow-c);transform:translateY(-1px)}
+.btn-ghost:hover{border-color:var(--wine)}
+.kick{color:var(--wine);font-weight:600;font-size:.78rem;letter-spacing:.04em;text-transform:uppercase}
+
+/* ---- 4. Scribble artwork tuned to the burgundy identity ---- */
+.rx[data-scribble]::after{
+  filter:brightness(0) saturate(100%) invert(14%) sepia(42%) saturate(3200%) hue-rotate(323deg) brightness(78%) contrast(96%);
+  opacity:.85;
+}
+
+/* ---- 5. Logo presentation ---- */
+.hero-logo img{filter:drop-shadow(0 18px 30px var(--shadow-c))}
+
+/* ---- 6. CSS-icon / card hover finishing ---- */
+.fcard svg,.feature-visual svg{color:var(--wine)}
+.fcard:hover{box-shadow:0 1px 1px rgba(28,20,18,.03),0 20px 40px -18px var(--shadow-c)}
+
+@media(prefers-reduced-motion:reduce){
+  .btn-solid:hover{transform:none}
+}
+</style>
 </head>
 <body>
 <div class="entrance" id="entrance" aria-hidden="true">
