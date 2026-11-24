@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ZEN</title>
+<meta name="description" content="A quiet, time-aware space with synthesized ambient sound.">
+<meta name="theme-color" content="#070a1c">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%239b8cff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+@property --bg1{syntax:'<color>';inherits:true;initial-value:#070a1c}
+@property --bg2{syntax:'<color>';inherits:true;initial-value:#1a1040}
+@property --accent{syntax:'<color>';inherits:true;initial-value:#9b8cff}
+@property --glow1{syntax:'<color>';inherits:true;initial-value:rgba(90,70,210,.24)}
+@property --glow2{syntax:'<color>';inherits:true;initial-value:rgba(60,90,200,.14)}
+
+body{--ink:#eceefc;--mute:rgba(236,238,252,.62);--line:rgba(255,255,255,.12);
+ --bg1:#070a1c;--bg2:#1a1040;--accent:#9b8cff;--glow1:rgba(90,70,210,.24);--glow2:rgba(60,90,200,.14);
+ transition:--bg1 1.6s,--bg2 1.6s,--accent 1.6s,--glow1 2.4s,--glow2 2.4s}
+body[data-mode=ocean]{--bg1:#03141f;--bg2:#0a3a52;--accent:#5fd0e0}
+body[data-mode=rain]{--bg1:#0a1018;--bg2:#1d2a3a;--accent:#8fb3d9}
+body[data-mode=forest]{--bg1:#07140e;--bg2:#12362a;--accent:#7fd1a0}
+body[data-mode=fire]{--bg1:#120804;--bg2:#3a1a0a;--accent:#ffa24d}
+body[data-time=morning]{--glow1:rgba(255,160,100,.38);--glow2:rgba(255,205,150,.18)}
+body[data-time=afternoon]{--glow1:rgba(70,180,255,.30);--glow2:rgba(120,230,255,.14)}
+body[data-time=evening]{--glow1:rgba(255,95,130,.34);--glow2:rgba(150,90,230,.24)}
+body[data-time=night]{--glow1:rgba(90,70,210,.24);--glow2:rgba(60,90,200,.14)}
+
+*{box-sizing:border-box}
+html{background:#070a1c}
+body{margin:0;min-height:100dvh;color:var(--ink);overflow-x:hidden;
+ font:400 18px/1.5 "Patrick Hand","Comic Sans MS",cursive,sans-serif;
+ background:radial-gradient(110% 90% at 72% 18%,var(--bg2),var(--bg1) 68%) fixed}
+h1,h2,p{margin:0}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+#scene,.sky,.fx,.flash{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#scene{z-index:0;pointer-events:auto;transition:opacity .5s;filter:url(#sketchSoft)}
+#scene.dim{opacity:0}
+.sky{z-index:1;background:radial-gradient(120% 65% at 50% 110%,var(--glow1),transparent 62%),radial-gradient(70% 45% at 85% 0%,var(--glow2),transparent 65%)}
+.fx{z-index:1;opacity:0;transition:opacity 1.4s;overflow:hidden}
+body[data-mode=ocean] .fx-ocean,body[data-mode=rain] .fx-rain,body[data-mode=forest] .fx-forest,body[data-mode=fire] .fx-fire{opacity:1}
+.flash{z-index:1;background:#cfe0ff;opacity:0;transition:opacity .08s}
+.flash.on{opacity:.14}
+
+.fx-ocean::before,.fx-ocean::after{content:"";position:absolute;left:0;width:200%;bottom:0;height:30vh;
+ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0 60Q150 20 300 60T600 60T900 60T1200 60V120H0Z' fill='rgb(95,208,224)'/%3E%3C/svg%3E") repeat-x;
+ background-size:25% 100%;opacity:.12;animation:wave 22s linear infinite}
+.fx-ocean::after{height:22vh;opacity:.1;animation-duration:14s;animation-direction:reverse}
+@keyframes wave{to{transform:translateX(-50%)}}
+.fx-rain{background:
+ radial-gradient(circle at 18% 28%,rgba(255,255,255,.16) 0 3px,transparent 4px),
+ radial-gradient(circle at 72% 18%,rgba(255,255,255,.12) 0 2px,transparent 3px),
+ radial-gradient(circle at 44% 64%,rgba(255,255,255,.15) 0 4px,transparent 5px),
+ radial-gradient(circle at 86% 58%,rgba(255,255,255,.12) 0 3px,transparent 4px),
+ radial-gradient(circle at 30% 82%,rgba(255,255,255,.10) 0 2px,transparent 3px),
+ linear-gradient(180deg,rgba(150,180,210,.07),transparent 60%)}
+.fx-forest::before{content:"";position:absolute;inset:-10% 0;background:linear-gradient(105deg,transparent 28%,rgba(160,230,180,.10) 40%,transparent 52%),linear-gradient(105deg,transparent 52%,rgba(200,255,200,.06) 60%,transparent 70%);animation:sway 16s ease-in-out infinite alternate}
+@keyframes sway{to{transform:translateX(8%) skewX(-4deg)}}
+.fx-fire{background:radial-gradient(70% 45% at 50% 108%,rgba(255,140,50,.5),transparent 70%);animation:flick 3.2s ease-in-out infinite}
+body:not([data-mode=fire]) .fx-fire{animation:none}
+@keyframes flick{0%,100%{filter:brightness(.85)}20%{filter:brightness(1.15)}45%{filter:brightness(.9)}70%{filter:brightness(1.2)}}
+
+.app{position:relative;z-index:2;min-height:100dvh;display:grid;grid-template-rows:auto 1fr auto;gap:16px;pointer-events:none;
+ padding:max(18px,env(safe-area-inset-top)) clamp(18px,4vw,56px) max(18px,env(safe-area-inset-bottom))}
+.top,.dock,.planet{pointer-events:auto}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand-group{display:flex;align-items:center;gap:10px}
+.logo{width:24px;height:24px;object-fit:contain;border-radius:6px}
+.brand{font-weight:300;letter-spacing:.42em;font-size:.95rem}
+.clock{display:flex;flex-direction:column;align-items:center;line-height:1.25;text-align:center}
+.clock time{font-size:1.15rem;font-variant-numeric:tabular-nums}
+.clock span{font-size:.78rem;color:var(--mute)}
+.tools{display:flex;gap:8px}
+
+.stage{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:center;gap:2rem}
+.copy{transition:opacity .25s,transform .25s}
+.copy.out{opacity:0;transform:translateY(6px)}
+.greet{color:var(--accent);font-size:1.05rem;margin-bottom:.5rem}
+h1{font-family:"Architects Daughter","Patrick Hand",cursive;font-weight:400;font-size:clamp(3.6rem,10vw,7.8rem);line-height:.95;letter-spacing:-.01em}
+.brand,h2,.greet,.pomo-time span,#clock,#tDisplay,#pomoTime{font-family:"Architects Daughter","Patrick Hand",cursive}
+.desc{max-width:34ch;margin-top:1.4rem;color:var(--mute);font-size:1.05rem}
+
+.orb{display:grid;place-items:center;will-change:transform}
+.planet{--p1:#8fd3ff;--p2:#2b5fb3;--p3:#0b1c4a;--glow:rgba(110,150,255,.35);--surf:none;--ring:none;
+ position:relative;width:clamp(170px,30vw,380px);aspect-ratio:1;border:0;padding:0;cursor:pointer;
+ border-radius:49% 51% 47% 53%/53% 47% 52% 48%;
+ background:
+  repeating-linear-gradient(112deg,rgba(0,0,0,.16) 0 2px,transparent 2px 10px),
+  radial-gradient(circle at 32% 30%,var(--p1),var(--p2) 55%,var(--p3) 100%);
+ outline:3px solid rgba(255,255,255,.6);outline-offset:-4px;
+ box-shadow:inset -40px -30px 70px rgba(0,0,0,.55),0 0 90px var(--glow);
+ filter:url(#sketch);
+ animation:float 9s ease-in-out infinite;transition:opacity 1s}
+.planet::before{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--surf);mix-blend-mode:overlay}
+.planet::after{content:"";display:var(--ring);position:absolute;left:-26%;right:-26%;top:38%;bottom:38%;border-radius:50%;border:4px dashed rgba(255,220,170,.5);transform:rotate(-16deg);pointer-events:none}
+.planet.pulse{animation:float 9s ease-in-out infinite,pulse .8s ease-out}
+@keyframes float{50%{translate:0 -14px}}
+@keyframes pulse{40%{scale:1.04}}
+body[data-mode=cosmic][data-planet=gas] .planet{--p1:#f3c88a;--p2:#b8743a;--p3:#3b1d0c;--glow:rgba(255,170,90,.28);--ring:block;
+ --surf:repeating-linear-gradient(8deg,rgba(255,220,170,.22) 0 14px,rgba(150,80,35,.25) 14px 30px,rgba(255,240,210,.1) 30px 40px)}
+body[data-mode=cosmic][data-planet=ember] .planet{--p1:#ff9a6b;--p2:#b3322a;--p3:#2a0a10;--glow:rgba(255,90,60,.3);
+ --surf:radial-gradient(ellipse 30% 8% at 40% 45%,rgba(255,200,120,.35),transparent),radial-gradient(ellipse 22% 7% at 62% 66%,rgba(255,200,120,.3),transparent)}
+body[data-mode=cosmic][data-planet=frost] .planet{--p1:#e6fbff;--p2:#7fc4e8;--p3:#1b3a66;--glow:rgba(150,220,255,.3)}
+body[data-mode=cosmic][data-planet=terra] .planet{--surf:radial-gradient(ellipse 30% 20% at 36% 40%,rgba(120,200,140,.5),transparent 70%),radial-gradient(ellipse 20% 28% at 64% 62%,rgba(140,210,150,.4),transparent 70%)}
+body[data-mode=ocean] .planet{--p1:rgba(210,250,255,.9);--p2:rgba(80,190,220,.45);--p3:rgba(10,60,90,0);--glow:rgba(95,208,224,.25);box-shadow:0 0 120px var(--glow)}
+body[data-mode=rain] .planet{opacity:0;pointer-events:none}
+body[data-mode=forest] .planet{--p1:#eafff0;--p2:#9bd9b0;--p3:rgba(44,93,70,.3);--glow:rgba(127,209,160,.22);box-shadow:inset -30px -20px 50px rgba(0,30,20,.5),0 0 100px var(--glow)}
+body[data-mode=fire] .planet{--p1:#ffd08a;--p2:#ff8a2a;--p3:rgba(120,30,0,0);--glow:rgba(255,140,50,.35);box-shadow:0 0 130px var(--glow)}
+
+.dock{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 28px;padding:14px 18px;
+ border:2px dashed var(--line);border-radius:22px 18px 24px 16px/18px 24px 16px 22px;background:rgba(8,12,28,.5);backdrop-filter:blur(14px);transform:rotate(-.25deg)}
+.modes{display:flex;flex-wrap:wrap;gap:4px 18px}
+.modes button{background:none;border:0;border-bottom:2px solid transparent;padding:6px 0;cursor:pointer;color:var(--mute);transition:color .2s,border-color .2s}
+.modes button:hover{color:var(--ink)}
+.modes button[aria-pressed=true]{color:var(--ink);border-color:var(--accent)}
+.audio,.timer,.presets{display:flex;align-items:center;gap:8px}
+.timer{flex-wrap:wrap;gap:10px}
+#tDisplay{font-size:1.4rem;font-weight:300;min-width:4.2ch;font-variant-numeric:tabular-nums}
+.presets button{min-width:38px;height:34px;border:2px dashed var(--line);border-radius:10px 7px 9px 6px;background:none;cursor:pointer;color:var(--mute)}
+.presets button[aria-pressed=true]{color:var(--ink);border-color:var(--accent)}
+.custom{display:flex;align-items:center;gap:6px;color:var(--mute);font-size:.85rem}
+.custom input{width:4.4rem;height:34px;border:2px dashed var(--line);border-radius:9px 6px;background:none;padding:0 8px}
+.icon{width:40px;height:40px;display:grid;place-items:center;border:2px dashed var(--line);border-radius:11px 8px 12px 7px;background:rgba(255,255,255,.04);cursor:pointer;transition:background .2s}
+.icon:hover,.btn:hover{background:rgba(255,255,255,.1)}
+.icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.btn{height:36px;padding:0 16px;border:2px dashed var(--accent);border-radius:12px 8px 13px 7px;background:rgba(255,255,255,.06);cursor:pointer}
+.btn.ghost{border-color:var(--line)}
+input[type=range],input[type=checkbox],select{accent-color:var(--accent)}
+input[type=range]{width:120px}
+
+.panel{position:fixed;z-index:5;top:0;right:0;width:min(380px,100vw);height:100dvh;overflow:auto;padding:20px 22px 32px;
+ background:rgba(8,11,26,.96);border-left:2px dashed var(--line);transform:translateX(100%);visibility:hidden;
+ transition:transform .35s,visibility 0s .35s}
+.panel.open{transform:none;visibility:visible;transition:transform .35s}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+h2{font-weight:300;font-size:1.4rem}
+fieldset{border:0;border-top:1px solid var(--line);margin:18px 0 0;padding:14px 0 0;display:grid;gap:12px}
+legend{padding:0 10px 0 0;color:var(--mute);font-size:.85rem}
+.row{display:flex;align-items:center;gap:10px}
+.row.stack{flex-direction:column;align-items:stretch;gap:6px;color:var(--mute);font-size:.9rem}
+.row.lv{justify-content:space-between}
+.row.lv input{width:150px}
+select{height:38px;border:1px solid var(--line);border-radius:8px;background:#0c1130;padding:0 8px}
+.note{color:var(--mute);font-size:.82rem}
+.toast{position:fixed;z-index:6;left:50%;bottom:110px;translate:-50% 12px;padding:10px 18px;border:1px solid var(--line);border-radius:10px;background:rgba(8,12,28,.92);opacity:0;pointer-events:none;transition:opacity .3s,translate .3s}
+.toast.show{opacity:1;translate:-50% 0}
+
+.edge-tab{position:fixed;top:50%;right:0;transform:translateY(-50%);z-index:5;width:26px;height:64px;
+ border:1px solid var(--line);border-right:0;border-radius:14px 0 0 14px;background:rgba(8,11,26,.9);
+ backdrop-filter:blur(10px);display:grid;place-items:center;cursor:grab;color:var(--mute);
+ touch-action:none;user-select:none;transition:right .35s,color .2s}
+.edge-tab:active{cursor:grabbing}
+.edge-tab:hover{color:var(--ink)}
+.edge-tab svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .35s}
+.edge-tab[aria-expanded=true]{right:320px}
+.edge-tab[aria-expanded=true] svg{transform:rotate(180deg)}
+.edge-tab.dragging,.edge-tab.dragging svg{transition:none!important}
+
+.pomo{position:fixed;z-index:4;top:0;right:0;width:min(320px,88vw);height:100dvh;overflow:auto;
+ padding:max(26px,env(safe-area-inset-top)) 22px 26px;display:flex;flex-direction:column;align-items:center;gap:22px;
+ background:rgba(8,11,26,.94);border-left:2px dashed var(--line);backdrop-filter:blur(16px);
+ transform:translateX(100%);visibility:hidden;transition:transform .35s,visibility 0s .35s}
+.pomo.open{transform:none;visibility:visible;transition:transform .35s}
+.pomo.dragging{transition:none!important;visibility:visible}
+
+.pomo-head{display:flex;align-items:center;justify-content:space-between;width:100%;gap:10px}
+.pomo-tabs{display:flex;gap:2px;padding:4px;border:2px dashed var(--line);border-radius:12px 8px;background:rgba(255,255,255,.03);flex:1;min-width:0}
+.pomo-tabs button{flex:1;border:0;background:none;padding:7px 6px;border-radius:7px;font-size:.78rem;white-space:nowrap;
+ color:var(--mute);cursor:pointer;transition:background .2s,color .2s}
+.pomo-tabs button[aria-selected=true]{background:rgba(255,255,255,.1);color:var(--ink)}
+.icon.small{width:34px;height:34px;flex:none}
+.icon.small svg{width:16px;height:16px}
+.icon.small[aria-pressed=false]{opacity:.4}
+
+.pomo-ring{position:relative;width:220px;height:220px;display:grid;place-items:center;margin-top:6px;max-width:100%}
+.pomo-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.pomo-ring .track{fill:none;stroke:rgba(255,255,255,.16);stroke-width:4;stroke-dasharray:3 9;stroke-linecap:round}
+.pomo-ring .prog{fill:none;stroke:var(--accent);stroke-width:10;stroke-linecap:round;
+ filter:drop-shadow(0 0 12px var(--accent));transition:stroke-dashoffset .3s linear}
+.pomo-time{position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px}
+.pomo-time span{font-size:2.3rem;font-weight:300;font-variant-numeric:tabular-nums}
+.pomo-time small{letter-spacing:.14em;color:var(--mute);font-size:.72rem}
+
+.pomo-dots{display:flex;gap:8px}
+.pomo-dots span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.18);transition:background .2s}
+.pomo-dots span.done{background:var(--accent)}
+
+.pomo-actions{display:flex;gap:10px;width:100%;justify-content:center;margin-top:auto}
+.btn.accent{background:var(--accent);border-color:var(--accent);color:#0a0a16;font-weight:500}
+.btn.accent:hover{filter:brightness(1.08)}
+
+@media (max-width:480px){
+ .pomo{width:100vw}
+ .edge-tab[aria-expanded=true]{right:0;z-index:6}
+}
+
+body.paused *,body.paused *::before,body.paused *::after{animation-play-state:paused!important}
+body.reduce *,body.reduce *::before,body.reduce *::after{animation:none!important;transition-duration:.01ms!important}
+
+@media (max-width:820px){
+ .stage{grid-template-columns:1fr;grid-template-rows:auto auto;align-content:center;gap:1rem;text-align:center}
+ .orb{order:-1}.planet{width:clamp(140px,44vw,240px)}
+ .desc{margin-inline:auto}
+ .dock{flex-direction:column;align-items:stretch}
+ .modes,.audio,.timer{justify-content:center}
+ .audio input[type=range]{flex:1;max-width:220px}
+ .clock span{display:none}
+}
+</style>
+</head>
+<body data-mode="cosmic" data-time="night" data-planet="terra">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+<symbol id="i-vol" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16.5 8.5a5 5 0 010 7"/></symbol>
+<symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l5 6m0-6l-5 6"/></symbol>
+<symbol id="i-set" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 5v4M6 15v4"/></symbol>
+<symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<filter id="sketch" x="-20%" y="-20%" width="140%" height="140%">
+  <feTurbulence type="fractalNoise" baseFrequency="0.012 0.018" numOctaves="2" seed="7" result="n"/>
+  <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G"/>
+</filter>
+<filter id="sketchSoft" x="-20%" y="-20%" width="140%" height="140%">
+  <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="3" result="n"/>
+  <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"/>
+</filter>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0112 0v4l2 3H4l2-3z"/><path d="M10 20a2 2 0 004 0"/></symbol>
+<symbol id="i-chevron" viewBox="0 0 24 24"><path d="M14 6l-6 6 6 6"/></symbol>
+</svg>
+
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="sky" aria-hidden="true"></div>
+<div class="fx fx-ocean" aria-hidden="true"></div>
+<div class="fx fx-rain" aria-hidden="true"></div>
+<div class="fx fx-forest" aria-hidden="true"></div>
+<div class="fx fx-fire" aria-hidden="true"></div>
+<div class="flash" aria-hidden="true"></div>
+
+<div class="app">
+  <header class="top">
+    <div class="brand-group">
+      <img class="logo" src="logo.png" alt="">
+      <span class="brand">ZEN</span>
+    </div>
+    <div class="clock"><time id="clock">--:--</time><span id="zone"></span></div>
+    <div class="tools">
+      <button class="icon" id="fsBtn" aria-label="Toggle fullscreen"><svg viewBox="0 0 24 24"><use href="#i-full"/></svg></button>
+      <button class="icon" id="setBtn" aria-label="Open settings" aria-expanded="false" aria-controls="settings"><svg viewBox="0 0 24 24"><use href="#i-set"/></svg></button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div class="copy" id="copy">
+      <p class="greet" id="greet"></p>
+      <h1 id="title">Float</h1>
+      <p class="desc" id="desc"></p>
+    </div>
+    <div class="orb" id="orb"><button class="planet" id="planet" aria-label="Pulse the planet"></button></div>
+  </main>
+
+  <footer class="dock">
+    <div class="modes" role="group" aria-label="Atmosphere">
+      <button data-mode="cosmic">Cosmic</button>
+      <button data-mode="ocean">Ocean</button>
+      <button data-mode="rain">Rain</button>
+      <button data-mode="forest">Forest</button>
+      <button data-mode="fire">Fireplace</button>
+    </div>
+    <div class="audio" role="group" aria-label="Sound">
+      <button class="icon" id="playBtn" aria-label="Play sound"><svg viewBox="0 0 24 24"><use href="#i-play"/></svg></button>
+      <button class="icon" id="muteBtn" aria-label="Mute" aria-pressed="false"><svg viewBox="0 0 24 24"><use href="#i-vol"/></svg></button>
+      <input type="range" id="vol" min="0" max="100" aria-label="Master volume">
+    </div>
+    <div class="timer" role="group" aria-label="Focus timer">
+      <span id="tDisplay" role="timer">10:00</span>
+      <div class="presets">
+        <button data-min="5">5</button><button data-min="10">10</button><button data-min="20">20</button><button data-min="30">30</button>
+        <label class="custom"><input type="number" id="custom" min="1" max="180" inputmode="numeric" aria-label="Custom minutes"><span>min</span></label>
+      </div>
+      <button class="btn" id="tStart">Start</button>
+      <button class="btn ghost" id="tReset">Reset</button>
+    </div>
+  </footer>
+</div>
+
+<aside class="panel" id="settings" aria-label="Settings">
+  <div class="panel-head"><h2>Settings</h2><button class="icon" id="closeBtn" aria-label="Close settings"><svg viewBox="0 0 24 24"><use href="#i-x"/></svg></button></div>
+
+  <fieldset><legend>Time of day</legend>
+    <label class="row"><input type="checkbox" id="auto"> Change theme with the time</label>
+    <label class="row stack">Theme<select id="theme"><option value="morning">Morning</option><option value="afternoon">Afternoon</option><option value="evening">Evening</option><option value="night">Night</option></select></label>
+    <label class="row stack">Preview a time zone<select id="tz"></select></label>
+    <button class="btn ghost" id="tzReset">Use my time zone</button>
+    <p class="note" id="tzNote"></p>
+  </fieldset>
+
+  <fieldset><legend>Planet</legend>
+    <label class="row stack">Appearance (Cosmic mode)<select id="planetSel"><option value="terra">Terra</option><option value="gas">Gas giant</option><option value="ember">Ember</option><option value="frost">Frost</option></select></label>
+  </fieldset>
+
+  <fieldset><legend>Sound layers</legend><div id="layers"></div>
+    <label class="row"><input type="checkbox" id="fade"> Fade sound out when the timer ends</label>
+  </fieldset>
+
+  <fieldset><legend>Motion</legend>
+    <label class="row"><input type="checkbox" id="paused"> Pause animations</label>
+    <label class="row"><input type="checkbox" id="parallax"> Cursor parallax</label>
+    <label class="row"><input type="checkbox" id="bubbles"> Underwater bubbles</label>
+    <label class="row"><input type="checkbox" id="reduce"> Reduce motion</label>
+  </fieldset>
+
+  <button class="btn ghost" id="resetAll">Reset all settings</button>
+</aside>
+
+<button class="edge-tab" id="pomoTab" aria-label="Open Pomodoro timer" aria-expanded="false" aria-controls="pomo">
+  <svg viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
+</button>
+<aside class="pomo" id="pomo" aria-label="Pomodoro timer">
+  <div class="pomo-head">
+    <div class="pomo-tabs" role="tablist" aria-label="Pomodoro phase">
+      <button role="tab" data-phase="focus" aria-selected="true">Focus</button>
+      <button role="tab" data-phase="short" aria-selected="false">Short break</button>
+      <button role="tab" data-phase="long" aria-selected="false">Long break</button>
+    </div>
+    <button class="icon small" id="pomoSoundBtn" aria-label="Turn off completion chime" aria-pressed="true"><svg viewBox="0 0 24 24"><use href="#i-bell"/></svg></button>
+  </div>
+  <div class="pomo-ring">
+    <svg viewBox="0 0 220 220">
+      <circle class="track" cx="110" cy="110" r="96"/>
+      <circle class="prog" id="pomoProg" cx="110" cy="110" r="96"/>
+    </svg>
+    <div class="pomo-time">
+      <span id="pomoTime">25:00</span>
+      <small id="pomoLabel">FOCUS</small>
+    </div>
+  </div>
+  <div class="pomo-dots" id="pomoDots" aria-hidden="true"></div>
+  <div class="pomo-actions">
+    <button class="btn ghost" id="pomoReset">Reset</button>
+    <button class="btn accent" id="pomoStart">Start</button>
+    <button class="btn ghost" id="pomoSkip">Skip</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+'use strict';
+(() => {
+const $ = s => document.querySelector(s);
+const R = Math.random;
+const reduceMQ = matchMedia('(prefers-reduced-motion: reduce)');
+const PENTA = [523.25, 587.33, 659.25, 783.99, 880, 1046.5];
+
+/* ---------- Config ---------- */
+const MODES = {
+  cosmic: { h: 'Float', d: 'Slow stars, a quiet planet and a low synth hum. Tap a star.', rgb: '155,140,255', mix: { ambient: .6, tones: .35, chimes: .4 } },
+  ocean:  { h: 'Sink', d: 'Deep water, rising bubbles and waves that never quite arrive.', rgb: '95,208,224', mix: { waves: .7, ambient: .25, tones: .25 } },
+  rain:   { h: 'Listen', d: 'Rain on the window, wind outside and thunder far off.', rgb: '143,179,217', mix: { rain: .7, wind: .25, ambient: .15 } },
+  forest: { h: 'Breathe', d: 'Wind in the canopy, birdsong and fireflies between the trunks.', rgb: '127,209,160', mix: { wind: .3, birds: .5, ambient: .2 } },
+  fire:   { h: 'Settle', d: 'Low flames, drifting embers and the occasional crackle.', rgb: '255,162,77', mix: { fire: .7, wind: .15, tones: .2 } }
+};
+const LAYERS = [['ambient', 'Ambient synth'], ['rain', 'Rain'], ['wind', 'Wind'], ['waves', 'Ocean waves'],
+  ['birds', 'Birds'], ['fire', 'Fireplace'], ['chimes', 'Cosmic chimes'], ['tones', 'Atmospheric tones']];
+const GREET = { morning: 'Good morning', afternoon: 'Good afternoon', evening: 'Good evening', night: 'Good night' };
+const ATMOS = { morning: 'Sunrise light.', afternoon: 'Clear daylight.', evening: 'Sunset light.', night: 'Deep night.' };
+const STAR = { morning: .45, afternoon: .3, evening: .75, night: 1 };
+
+/* ---------- State ---------- */
+const KEY = 'zen:v1';
+const DEF = { mode: 'cosmic', auto: true, theme: 'night', tz: '', volume: .7, muted: false, planet: 'terra',
+  parallax: true, bubbles: true, paused: false, reduce: null, fade: true, timerMin: 10, levels: {} };
+let state;
+try { state = { ...DEF, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { state = { ...DEF }; }
+if (state.reduce === null) state.reduce = reduceMQ.matches;
+if (!MODES[state.mode]) state.mode = 'cosmic';
+try { new Intl.DateTimeFormat([], { timeZone: state.tz || undefined }); } catch { state.tz = ''; }
+let saveT;
+const save = () => { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }, 200); };
+
+/* ---------- Sound (single AudioContext, synthesized) ---------- */
+const Sound = (() => {
+  let ctx, master, bufs, playing = false, muted = false, vol = .7, levels = {}, suspendT, fadeT;
+  const active = new Map();
+  const GAIN = { ambient: 1, rain: .55, wind: .7, waves: .9, birds: .8, fire: 1, chimes: 1, tones: .6 };
+  const gn = v => { const g = ctx.createGain(); g.gain.value = v; return g; };
+  const bq = (type, f, q = 1) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = q; return b; };
+  const chain = (...n) => n.reduce((a, b) => (a.connect(b), b));
+  const noise = (kind, ...nodes) => { const s = ctx.createBufferSource(); s.buffer = bufs[kind]; s.loop = true; chain(s, ...nodes); s.start(); return s; };
+  const lfo = (rate, depth, param) => { const o = ctx.createOscillator(), g = gn(depth); o.frequency.value = rate; o.connect(g); g.connect(param); o.start(); return o; };
+  const tone = (f, t, dur, v, out, type = 'sine', end) => {
+    const o = ctx.createOscillator(), g = gn(.0001);
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (end) o.frequency.exponentialRampToValueAtTime(end, t + dur);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + Math.min(.03, dur / 3)); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    chain(o, g, out); o.start(t); o.stop(t + dur + .05);
+  };
+  const every = (fn, min, max) => { let t, dead = false; const go = () => { if (dead) return; fn(); t = setTimeout(go, (min + R() * (max - min)) * 1000); }; t = setTimeout(go, 600); return { stop() { dead = true; clearTimeout(t); } }; };
+  const click = out => {
+    const s = ctx.createBufferSource(), g = gn(.2 + R() * .8), t = ctx.currentTime;
+    s.buffer = bufs.white; g.gain.exponentialRampToValueAtTime(.001, t + .03 + R() * .04);
+    chain(s, bq('bandpass', 1500 + R() * 4000, 2), g, out); s.start(t, R() * 1.5, .1);
+  };
+  const defs = {
+    ambient(out) {
+      const f = bq('lowpass', 650); f.connect(out);
+      const os = [55, 110, 164.81, 220].map((hz, i) => { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = hz; o.detune.value = (i - 1.5) * 7; chain(o, gn(.06), f); o.start(); return o; });
+      os.push(lfo(.06, 280, f.frequency));
+      return { stop() { os.forEach(o => o.stop()); } };
+    },
+    rain(out) { const a = noise('white', bq('highpass', 1100), bq('lowpass', 8000), gn(.5), out), b = noise('brown', bq('bandpass', 500, .6), gn(.5), out); return { stop() { a.stop(); b.stop(); } }; },
+    wind(out) { const f = bq('bandpass', 420, .7), g = gn(.7), n = noise('brown', f, g, out), l1 = lfo(.08, 260, f.frequency), l2 = lfo(.05, .3, g.gain); return { stop() { [n, l1, l2].forEach(x => x.stop()); } }; },
+    waves(out) { const g = gn(.45), n = noise('brown', bq('lowpass', 520), g, out), l = lfo(.1, .4, g.gain); return { stop() { n.stop(); l.stop(); } }; },
+    birds(out) { return every(() => { const t = ctx.currentTime, b = 2200 + R() * 1800, n = 2 + (R() * 4 | 0); for (let i = 0; i < n; i++) tone(b * (1 + (i % 2) * .18), t + i * .13, .09, .2, out, 'sine', b * 1.25); }, 3, 8); },
+    fire(out) {
+      const a = noise('brown', bq('lowpass', 260), gn(.9), out), b = noise('white', bq('highpass', 3000), bq('lowpass', 7000), gn(.05), out);
+      const c = every(() => { const n = 1 + (R() * 3 | 0); for (let i = 0; i < n; i++) setTimeout(() => active.has('fire') && click(out), i * 70); }, .25, 1.1);
+      return { stop() { a.stop(); b.stop(); c.stop(); } };
+    },
+    chimes(out) { return every(() => { const f = PENTA[R() * PENTA.length | 0], t = ctx.currentTime; tone(f, t, 5, .1, out); if (R() < .4) tone(f * 2, t + .2, 4, .04, out); }, 4, 10); },
+    tones(out) {
+      const os = [], mk = (hz, r) => { const o = ctx.createOscillator(), g = gn(.06); o.frequency.value = hz; chain(o, g, out); o.start(); os.push(o, lfo(r, .05, g.gain)); };
+      mk(196, .07); mk(293.66, .05); mk(392, .09);
+      return { stop() { os.forEach(o => o.stop()); } };
+    }
+  };
+  function init() {
+    if (ctx) return true;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    ctx = new AC(); master = gn(0); chain(master, ctx.createDynamicsCompressor(), ctx.destination);
+    const mk = k => { const len = ctx.sampleRate * 3, b = ctx.createBuffer(1, len, ctx.sampleRate), d = b.getChannelData(0); let l = 0;
+      for (let i = 0; i < len; i++) { const w = R() * 2 - 1; if (k === 'white') d[i] = w; else { l = (l + .02 * w) / 1.02; d[i] = l * 3.5; } } return b; };
+    bufs = { white: mk('white'), brown: mk('brown') };
+    return true;
+  }
+  function setLayer(id, lv) {
+    let l = active.get(id);
+    if (lv > 0 && playing) {
+      if (!l) { const g = gn(0); g.connect(master); l = { g, inst: defs[id](g) }; active.set(id, l); }
+      clearTimeout(l.kill); l.g.gain.setTargetAtTime(lv * GAIN[id], ctx.currentTime, .4);
+    } else if (l) {
+      l.g.gain.setTargetAtTime(0, ctx.currentTime, .3); clearTimeout(l.kill);
+      l.kill = setTimeout(() => { l.inst.stop(); l.g.disconnect(); if (active.get(id) === l) active.delete(id); }, 1500);
+    }
+  }
+  const apply = () => { if (ctx) LAYERS.forEach(([id]) => setLayer(id, levels[id] || 0)); };
+  const setMaster = () => { if (ctx) master.gain.setTargetAtTime(playing && !muted ? vol : 0, ctx.currentTime, .3); };
+  return {
+    play() { if (!init()) return false; clearTimeout(suspendT); clearTimeout(fadeT); ctx.resume(); playing = true; apply(); setMaster(); return true; },
+    pause() { if (!ctx) return; clearTimeout(fadeT); playing = false; apply(); setMaster(); suspendT = setTimeout(() => { if (!playing) ctx.suspend(); }, 1800); },
+    setLevels(l) { levels = l; apply(); },
+    setVolume(v) { vol = v; setMaster(); },
+    setMuted(m) { muted = m; setMaster(); },
+    isPlaying: () => playing,
+    fadeOut(sec, cb) { if (!playing) return cb && cb(); master.gain.setTargetAtTime(0, ctx.currentTime, sec / 3); fadeT = setTimeout(() => { this.pause(); cb && cb(); }, sec * 1000); },
+    chime(f) { if (playing && !muted) tone(f, ctx.currentTime, 3, .08, master); },
+    bell() { if (!ctx || muted) return; ctx.resume().then(() => { const t = ctx.currentTime; tone(660, t, 3, .18, ctx.destination); tone(990, t + .18, 3, .1, ctx.destination); }).catch(() => {}); },
+    thunder() {
+      if (!playing || muted || !active.has('rain')) return;
+      const t = ctx.currentTime + .6 + R() * 1.8, s = ctx.createBufferSource(), g = gn(.0001), f = bq('lowpass', 180);
+      s.buffer = bufs.brown; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.8, t + .4); g.gain.exponentialRampToValueAtTime(.0001, t + 4);
+      f.frequency.setValueAtTime(260, t); f.frequency.exponentialRampToValueAtTime(70, t + 4);
+      chain(s, f, g, master); s.start(t, R() * 1.5, 4.2);
+    }
+  };
+})();
+
+/* ---------- Time ---------- */
+let fmtZ, fmtT, fmtH, curP = '';
+const zone = () => state.tz || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+const periodOf = h => h >= 5 && h < 11 ? 'morning' : h >= 11 && h < 17 ? 'afternoon' : h >= 17 && h < 21 ? 'evening' : 'night';
+let starT = 1;
+function applyTheme() {
+  const th = state.auto ? curP : state.theme;
+  document.body.dataset.time = th; starT = STAR[th];
+  $('#greet').textContent = `${GREET[curP]}. ${ATMOS[th]}`;
+}
+function updateTime() {
+  const z = zone();
+  if (fmtZ !== z) {
+    fmtZ = z; fmtT = new Intl.DateTimeFormat([], { timeZone: z, hour: '2-digit', minute: '2-digit' });
+    fmtH = new Intl.DateTimeFormat('en-US', { timeZone: z, hour: 'numeric', hourCycle: 'h23' });
+    $('#zone').textContent = z.replace(/_/g, ' ') + (state.tz ? ' (preview)' : '');
+    $('#tzNote').textContent = state.tz ? `Previewing ${state.tz}. Your system clock is unchanged.` : 'Using your detected time zone.';
+    curP = '';
+  }
+  const d = new Date(), t = fmtT.format(d);
+  if ($('#clock').textContent !== t) $('#clock').textContent = t;
+  const p = periodOf(parseInt(fmtH.format(d), 10) % 24);
+  if (p !== curP) { curP = p; applyTheme(); }
+}
+
+/* ---------- Scene ---------- */
+const cv = $('#scene'), cx = cv.getContext('2d'), orb = $('#orb');
+const COUNT = { cosmic: 230, ocean: 80, rain: 170, forest: 70, fire: 70 };
+let W = 0, H = 0, parts = [], rings = [], raf = 0, last = 0, px = 0, py = 0, tx = 0, ty = 0, starA = 1;
+const canRun = () => !document.hidden && !state.paused && !state.reduce;
+function mk(m, init) {
+  const x = R() * W, y = init ? R() * H : -20;
+  switch (m) {
+    case 'cosmic': return { x, y: R() * H, r: .4 + R() * 1.3, p: R() * 6.3, s: .4 + R() * 1.6, b: 0 };
+    case 'ocean': return { x, y: init ? y : H + 10, r: 1 + R() * 3, v: .15 + R() * .4, p: R() * 6.3, u: R() < .4 };
+    case 'rain': return { x, y, l: 10 + R() * 18, v: 11 + R() * 9 };
+    case 'forest': return { x, y: R() * H, r: .8 + R() * 1.8, vx: (R() - .5) * .3, vy: (R() - .5) * .25, p: R() * 6.3, f: R() < .45 };
+    default: return { x: W * (.1 + R() * .8), y: init ? R() * H : H + 10, r: .8 + R() * 2.2, v: .4 + R() * 1.1, p: R() * 6.3 };
+  }
+}
+function seed() { const n = Math.round(COUNT[state.mode] * Math.min(1, W * H / 1.1e6 + .3)); parts = Array.from({ length: n }, () => mk(state.mode, true)); rings = []; }
+function size() { const d = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; cx.setTransform(d, 0, 0, d, 0, 0); seed(); still(); }
+function applyPar() { orb.style.transform = state.parallax ? `translate3d(${-px * 26}px,${-py * 20}px,0)` : ''; }
+function draw(ts, dt, mv) {
+  cx.clearRect(0, 0, W, H);
+  if (mv) { px += (tx - px) * .05; py += (ty - py) * .05; starA += (starT - starA) * .02; if (state.parallax) applyPar(); }
+  const m = state.mode, rgb = MODES[m].rgb;
+  cx.save(); if (state.parallax) cx.translate(-px * 14, -py * 14);
+  if (m === 'rain') { cx.strokeStyle = 'rgba(175,205,235,.32)'; cx.lineWidth = 1; cx.beginPath(); }
+  for (const p of parts) {
+    if (m === 'cosmic') {
+      p.b *= mv ? .94 : 1;
+      const a = Math.min(1, starA * (.25 + .6 * (.5 + .5 * Math.sin(ts * .0012 * p.s + p.p))) + p.b);
+      cx.fillStyle = `rgba(232,236,255,${a})`; cx.beginPath(); cx.arc(p.x, p.y, p.r * (1 + p.b * 2.5), 0, 6.283); cx.fill();
+    } else if (m === 'ocean') {
+      if (mv) { p.y -= p.v * dt; p.x += Math.sin(ts * .001 + p.p) * .25 * dt; if (p.y < -10) Object.assign(p, mk(m, false)); }
+      cx.beginPath();
+      if (p.u && state.bubbles) { cx.strokeStyle = 'rgba(190,240,250,.35)'; cx.lineWidth = 1; cx.arc(p.x, p.y, p.r + 1, 0, 6.283); cx.stroke(); }
+      else { cx.fillStyle = 'rgba(150,220,235,.22)'; cx.arc(p.x, p.y, p.r * .6, 0, 6.283); cx.fill(); }
+    } else if (m === 'rain') {
+      if (mv) { p.y += p.v * dt; p.x += p.v * .15 * dt; if (p.y > H) { p.y = -20; p.x = R() * W; } }
+      cx.moveTo(p.x, p.y); cx.lineTo(p.x - p.l * .15, p.y - p.l);
+    } else if (m === 'forest') {
+      if (mv) { p.x += p.vx * dt + Math.sin(ts * .0006 + p.p) * .1; p.y += p.vy * dt; if (p.x < 0) p.x = W; if (p.x > W) p.x = 0; if (p.y < 0) p.y = H; if (p.y > H) p.y = 0; }
+      const a = p.f ? .15 + .6 * (.5 + .5 * Math.sin(ts * .002 + p.p)) : .18;
+      cx.fillStyle = p.f ? `rgba(200,255,150,${a})` : `rgba(170,230,190,${a})`; cx.beginPath(); cx.arc(p.x, p.y, p.r * (p.f ? 1.4 : 1), 0, 6.283); cx.fill();
+    } else {
+      if (mv) { p.y -= p.v * dt; p.x += Math.sin(ts * .002 + p.p) * .5 * dt; if (p.y < -5) Object.assign(p, mk(m, false)); }
+      cx.fillStyle = `rgba(255,${120 + (p.p * 20 | 0)},60,${Math.min(.9, p.y / H * 1.2)})`; cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 6.283); cx.fill();
+    }
+  }
+  if (m === 'rain') cx.stroke();
+  cx.restore();
+  for (let i = rings.length; i--;) {
+    const g = rings[i]; if (mv) { g.r += (1.4 + g.r * .015) * dt; g.a -= .011 * dt; }
+    cx.strokeStyle = `rgba(${rgb},${Math.max(0, g.a)})`; cx.lineWidth = 1.2; cx.beginPath(); cx.arc(g.x, g.y, g.r, 0, 6.283); cx.stroke();
+    if (g.a <= 0) rings.splice(i, 1);
+  }
+}
+function frame(ts) { raf = 0; const dt = Math.min((ts - last) / 16.67 || 1, 3); last = ts; draw(ts, dt, true); if (canRun()) raf = requestAnimationFrame(frame); }
+function start() { if (!raf && canRun()) { last = performance.now(); raf = requestAnimationFrame(frame); } }
+function stop() { cancelAnimationFrame(raf); raf = 0; }
+function still() { if (!canRun()) draw(performance.now(), 1, false); }
+function ring(x, y, big) { if (!canRun()) return; rings.push({ x, y, r: 4, a: big ? .6 : .4 }); if (rings.length > 12) rings.shift(); }
+cv.addEventListener('pointerdown', e => {
+  const ox = state.parallax ? px * 14 : 0, oy = state.parallax ? py * 14 : 0;
+  let hit = null, best = 22 * 22;
+  if (state.mode === 'cosmic') for (const p of parts) { const d = (p.x - ox - e.clientX) ** 2 + (p.y - oy - e.clientY) ** 2; if (d < best) { best = d; hit = p; } }
+  if (hit) { hit.b = 1; ring(hit.x - ox, hit.y - oy, false); Sound.chime(PENTA[Math.max(0, Math.min(5, Math.floor((1 - hit.y / H) * 6)))]); }
+  else ring(e.clientX, e.clientY, true);
+});
+addEventListener('pointermove', e => { tx = e.clientX / W - .5; ty = e.clientY / H - .5; }, { passive: true });
+$('#planet').addEventListener('click', e => {
+  const pl = e.currentTarget, r = pl.getBoundingClientRect();
+  pl.classList.remove('pulse'); void pl.offsetWidth; pl.classList.add('pulse');
+  ring(r.left + r.width / 2, r.top + r.height / 2, true); Sound.chime(PENTA[R() * 3 | 0]);
+});
+$('#planet').addEventListener('animationend', e => e.animationName === 'pulse' && e.currentTarget.classList.remove('pulse'));
+
+let thT;
+function schedThunder() {
+  clearTimeout(thT); if (state.mode !== 'rain') return;
+  thT = setTimeout(() => {
+    if (!document.hidden && !state.paused) {
+      if (!state.reduce) { const fl = $('.flash'), f = () => { fl.classList.add('on'); setTimeout(() => fl.classList.remove('on'), 110); }; f(); setTimeout(f, 220); }
+      Sound.thunder();
+    }
+    schedThunder();
+  }, 20000 + R() * 35000);
+}
+
+/* ---------- Mode, levels, UI ---------- */
+let levels;
+function syncSliders() { LAYERS.forEach(([id]) => { $('#lv-' + id).value = Math.round((levels[id] || 0) * 100); }); }
+function setMode(m, instant) {
+  state.mode = m; document.body.dataset.mode = m;
+  document.querySelectorAll('.modes button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
+  levels = state.levels[m] = state.levels[m] || Object.fromEntries(LAYERS.map(([id]) => [id, MODES[m].mix[id] || 0]));
+  syncSliders(); Sound.setLevels(levels);
+  const copy = $('#copy'), set = () => { $('#title').textContent = MODES[m].h; $('#desc').textContent = MODES[m].d; };
+  if (instant) { set(); seed(); still(); }
+  else {
+    copy.classList.add('out'); cv.classList.add('dim');
+    setTimeout(() => { set(); seed(); still(); copy.classList.remove('out'); cv.classList.remove('dim'); }, 350);
+  }
+  schedThunder(); save();
+}
+function applyMotion() {
+  document.body.classList.toggle('paused', state.paused); document.body.classList.toggle('reduce', state.reduce);
+  if (canRun()) start(); else { stop(); still(); }
+  if (!state.parallax) applyPar();
+}
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 6000); }
+const icon = (btn, id) => btn.querySelector('use').setAttribute('href', '#' + id);
+
+function buildSettings() {
+  $('#layers').innerHTML = LAYERS.map(([id, name]) => `<label class="row lv" for="lv-${id}">${name}<input type="range" id="lv-${id}" min="0" max="100"></label>`).join('');
+  LAYERS.forEach(([id]) => $('#lv-' + id).addEventListener('input', e => { levels[id] = e.target.value / 100; Sound.setLevels(levels); save(); }));
+  let zones = [];
+  try { zones = Intl.supportedValuesOf('timeZone'); } catch { zones = ['UTC', 'Pacific/Honolulu', 'America/Los_Angeles', 'America/New_York', 'America/Sao_Paulo', 'Europe/London', 'Europe/Paris', 'Africa/Cairo', 'Asia/Dubai', 'Asia/Kolkata', 'Asia/Bangkok', 'Asia/Tokyo', 'Australia/Sydney', 'Pacific/Auckland']; }
+  const det = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  $('#tz').innerHTML = `<option value="">My time zone (${det})</option>` + zones.map(z => `<option value="${z}">${z.replace(/_/g, ' ')}</option>`).join('');
+  $('#tz').value = state.tz;
+  $('#tz').onchange = e => { state.tz = e.target.value; updateTime(); save(); };
+  $('#tzReset').onclick = () => { state.tz = ''; $('#tz').value = ''; updateTime(); save(); };
+  $('#theme').value = state.theme; $('#theme').disabled = state.auto;
+  $('#theme').onchange = e => { state.theme = e.target.value; applyTheme(); save(); };
+  $('#planetSel').value = state.planet; document.body.dataset.planet = state.planet;
+  $('#planetSel').onchange = e => { state.planet = e.target.value; document.body.dataset.planet = state.planet; save(); };
+  const bind = (id, key, after) => { const el = $('#' + id); el.checked = state[key]; el.onchange = () => { state[key] = el.checked; after && after(); save(); }; };
+  bind('auto', 'auto', () => { $('#theme').disabled = state.auto; applyTheme(); });
+  bind('fade', 'fade'); bind('paused', 'paused', applyMotion); bind('reduce', 'reduce', applyMotion);
+  bind('parallax', 'parallax', () => { applyPar(); still(); }); bind('bubbles', 'bubbles', still);
+  $('#resetAll').onclick = () => { try { localStorage.removeItem(KEY); } catch {} location.reload(); };
+}
+function bindDock() {
+  document.querySelectorAll('.modes button').forEach(b => b.onclick = () => b.dataset.mode !== state.mode && setMode(b.dataset.mode));
+  const play = $('#playBtn'), mute = $('#muteBtn'), vol = $('#vol');
+  const syncPlay = () => { const on = Sound.isPlaying(); icon(play, on ? 'i-pause' : 'i-play'); play.setAttribute('aria-label', on ? 'Pause sound' : 'Play sound'); };
+  play.onclick = () => {
+    if (Sound.isPlaying()) Sound.pause();
+    else if (!Sound.play()) return toast('Web Audio is not supported in this browser.');
+    syncPlay();
+  };
+  const syncMute = () => { icon(mute, state.muted ? 'i-mute' : 'i-vol'); mute.setAttribute('aria-pressed', state.muted); mute.setAttribute('aria-label', state.muted ? 'Unmute' : 'Mute'); };
+  mute.onclick = () => { state.muted = !state.muted; Sound.setMuted(state.muted); syncMute(); save(); };
+  vol.value = Math.round(state.volume * 100); Sound.setVolume(state.volume); Sound.setMuted(state.muted); syncMute();
+  vol.oninput = () => { state.volume = vol.value / 100; Sound.setVolume(state.volume); save(); };
+
+  const fs = $('#fsBtn'), de = document.documentElement;
+  if (!(de.requestFullscreen || de.webkitRequestFullscreen)) fs.hidden = true;
+  fs.onclick = () => {
+    if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    else (de.requestFullscreen || de.webkitRequestFullscreen).call(de);
+  };
+  const panel = $('#settings'), sb = $('#setBtn');
+  const toggle = open => { panel.classList.toggle('open', open); sb.setAttribute('aria-expanded', open); (open ? $('#closeBtn') : sb).focus(); if (open) closePomo(false); };
+  sb.onclick = () => toggle(!panel.classList.contains('open'));
+  $('#closeBtn').onclick = () => toggle(false);
+  addEventListener('keydown', e => { if (e.key === 'Escape' && panel.classList.contains('open')) toggle(false); });
+  $('#scene').addEventListener('pointerdown', () => panel.classList.contains('open') && toggle(false));
+  closeSettings = toggle;
+  return syncPlay;
+}
+let closeSettings = () => {}, closePomo = () => {};
+
+/* ---------- Timer (timestamp based) ---------- */
+const T = { dur: 0, left: 0, end: 0, run: false, iv: 0 };
+const remaining = () => T.run ? Math.max(0, Math.ceil((T.end - performance.now()) / 1000)) : T.left;
+function tShow() {
+  const s = remaining(), t = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  $('#tDisplay').textContent = t; document.title = T.run ? `${t} ZEN` : 'ZEN';
+  $('#tStart').textContent = T.run ? 'Pause' : (T.left < T.dur ? 'Resume' : 'Start');
+}
+function tSet(min) {
+  min = Math.max(1, Math.min(180, Math.round(min) || 10)); state.timerMin = min;
+  clearInterval(T.iv); T.run = false; T.dur = T.left = min * 60;
+  document.querySelectorAll('.presets button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.min === min));
+  $('#custom').value = [5, 10, 20, 30].includes(min) ? '' : min; tShow(); save();
+}
+function tDone() {
+  clearInterval(T.iv); T.run = false; T.left = T.dur; tShow();
+  toast('Session complete.'); Sound.bell();
+  if (state.fade && Sound.isPlaying()) Sound.fadeOut(8, () => $('#playBtn').dispatchEvent(new Event('zen-sync')));
+}
+function bindTimer() {
+  document.querySelectorAll('.presets button').forEach(b => b.onclick = () => tSet(+b.dataset.min));
+  $('#custom').onchange = e => e.target.value && tSet(+e.target.value);
+  $('#tStart').onclick = () => {
+    if (T.run) { T.left = remaining(); T.run = false; clearInterval(T.iv); }
+    else { T.end = performance.now() + T.left * 1000; T.run = true; T.iv = setInterval(() => { if (remaining() <= 0) tDone(); else tShow(); }, 250); }
+    tShow();
+  };
+  $('#tReset').onclick = () => tSet(state.timerMin);
+  tSet(state.timerMin);
+}
+
+/* ---------- Pomodoro ---------- */
+const POMO_DUR = { focus: 25 * 60, short: 5 * 60, long: 15 * 60 };
+const POMO_LABEL = { focus: 'FOCUS', short: 'SHORT BREAK', long: 'LONG BREAK' };
+const POMO_CIRC = 2 * Math.PI * 96;
+const PR = { phase: 'focus', count: 0, dur: POMO_DUR.focus, left: POMO_DUR.focus, end: 0, run: false, iv: 0, sound: true };
+const mmss = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+const pomoRemain = () => PR.run ? Math.max(0, Math.ceil((PR.end - performance.now()) / 1000)) : PR.left;
+function pomoRender() {
+  const s = pomoRemain();
+  $('#pomoTime').textContent = mmss(s);
+  $('#pomoLabel').textContent = POMO_LABEL[PR.phase];
+  $('#pomoStart').textContent = PR.run ? 'Pause' : (PR.left < PR.dur ? 'Resume' : 'Start');
+  const prog = $('#pomoProg');
+  prog.style.strokeDasharray = POMO_CIRC;
+  prog.style.strokeDashoffset = POMO_CIRC * (1 - s / PR.dur);
+  document.querySelectorAll('.pomo-tabs [role=tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.phase === PR.phase));
+  document.title = PR.run ? `${mmss(s)} ZEN` : 'ZEN';
+}
+function pomoDots() {
+  const n = PR.phase === 'long' ? 4 : PR.count % 4;
+  $('#pomoDots').innerHTML = Array.from({ length: 4 }, (_, i) => `<span class="${i < n ? 'done' : ''}"></span>`).join('');
+}
+function pomoSet(phase) {
+  PR.phase = phase; clearInterval(PR.iv); PR.run = false; PR.dur = PR.left = POMO_DUR[phase];
+  pomoRender(); pomoDots();
+}
+function pomoAdvance(announce) {
+  clearInterval(PR.iv); PR.run = false;
+  let next;
+  if (PR.phase === 'focus') { PR.count++; next = PR.count % 4 === 0 ? 'long' : 'short'; }
+  else { next = 'focus'; if (PR.phase === 'long') PR.count = 0; }
+  if (announce) { if (PR.sound) Sound.bell(); toast(`${POMO_LABEL[PR.phase].toLowerCase()} session complete.`); }
+  pomoSet(next);
+}
+function pomoTick() { if (pomoRemain() <= 0) pomoAdvance(true); else pomoRender(); }
+function bindPomo() {
+  document.querySelectorAll('.pomo-tabs [role=tab]').forEach(b => b.onclick = () => b.dataset.phase !== PR.phase && pomoSet(b.dataset.phase));
+  $('#pomoStart').onclick = () => {
+    if (PR.run) { PR.left = pomoRemain(); PR.run = false; clearInterval(PR.iv); }
+    else { PR.end = performance.now() + PR.left * 1000; PR.run = true; PR.iv = setInterval(pomoTick, 250); }
+    pomoRender();
+  };
+  $('#pomoReset').onclick = () => { clearInterval(PR.iv); PR.run = false; PR.dur = PR.left = POMO_DUR[PR.phase]; pomoRender(); };
+  $('#pomoSkip').onclick = () => pomoAdvance(false);
+  const sb = $('#pomoSoundBtn');
+  sb.onclick = () => { PR.sound = !PR.sound; sb.setAttribute('aria-pressed', PR.sound); sb.setAttribute('aria-label', PR.sound ? 'Turn off completion chime' : 'Turn on completion chime'); };
+  const tab = $('#pomoTab'), panel = $('#pomo');
+  const togglePomo = open => {
+    panel.classList.toggle('open', open); tab.setAttribute('aria-expanded', open);
+    tab.setAttribute('aria-label', open ? 'Close Pomodoro timer' : 'Open Pomodoro timer');
+    if (open) closeSettings(false);
+  };
+
+  /* Drag the edge tab to slide the drawer open or closed, like pulling a tab. */
+  let drag = null;
+  tab.addEventListener('pointerdown', e => {
+    tab.setPointerCapture(e.pointerId);
+    drag = { id: e.pointerId, startX: e.clientX, isOpen: panel.classList.contains('open'), w: panel.getBoundingClientRect().width, moved: false };
+    tab.classList.add('dragging'); panel.classList.add('dragging');
+  });
+  tab.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.startX;
+    if (Math.abs(dx) > 4) drag.moved = true;
+    const base = drag.isOpen ? 0 : drag.w;
+    const offset = Math.min(drag.w, Math.max(0, base + dx));
+    panel.style.transform = `translateX(${offset}px)`;
+    tab.style.right = `${drag.w - offset}px`;
+  });
+  const endDrag = e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    tab.classList.remove('dragging'); panel.classList.remove('dragging');
+    panel.style.transform = ''; tab.style.right = '';
+    const dx = e.clientX - drag.startX;
+    const openNow = drag.moved ? (drag.isOpen ? 0 : drag.w) + dx < drag.w / 2 : !drag.isOpen;
+    drag = null; togglePomo(openNow);
+  };
+  tab.addEventListener('pointerup', endDrag);
+  tab.addEventListener('pointercancel', endDrag);
+
+  addEventListener('keydown', e => { if (e.key === 'Escape' && panel.classList.contains('open')) togglePomo(false); });
+  closePomo = togglePomo;
+  pomoRender(); pomoDots();
+  return togglePomo;
+}
+
+/* ---------- Init ---------- */
+buildSettings();
+const syncPlay = bindDock();
+$('#playBtn').addEventListener('zen-sync', syncPlay);
+bindTimer();
+bindPomo();
+updateTime(); setInterval(updateTime, 1000);
+setMode(state.mode, true);
+size(); applyMotion();
+let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(size, 150); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else start(); });
+reduceMQ.addEventListener('change', e => { state.reduce = e.matches; $('#reduce').checked = e.matches; applyMotion(); save(); });
+})();
+</script>
+</body>
+</html>
