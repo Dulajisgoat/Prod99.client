@@ -158,9 +158,6 @@ html[data-theme="dark"] #authView .wordmark .logo-dark{ display:block; }
     color:var(--ink); padding:12px 16px; font:400 19px var(--body); transition:border-color .2s, box-shadow .2s;
   }
 #authView #authForm input:focus{ outline:none; border-color:var(--red); box-shadow:3px 3px 0 var(--ink); }
-#authView .fld-confirm{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .3s ease; }
-#authView .fld-confirm .fld-inner{ overflow:hidden; }
-#authView #authForm.is-signup .fld-confirm{ grid-template-rows:1fr; }
 #authView .field-msg{ font:700 .85rem var(--lab); color:var(--red); min-height:16px; margin:-6px 0 0; }
 #authView .btn-solid{
     position:relative; width:100%; height:48px; border:2px solid var(--ink); border-radius:var(--r3);
@@ -209,7 +206,7 @@ body[data-view="auth"]::before{ width:120px; height:120px; left:6%; top:14%; bor
 body[data-view="auth"]::after{ width:90px; height:90px; right:8%; bottom:12%; border-radius:50%; background:var(--red); opacity:.18; }
 @media(max-width:700px){ body[data-view="auth"]::before, body[data-view="auth"]::after{ display:none; } }
 #authView .card::after{
-    content:"Powered by Prod99"; display:block; text-align:center; margin-top:18px;
+    content:"Powered by Prod99 Pass"; display:block; text-align:center; margin-top:18px;
     font:700 .68rem var(--lab); letter-spacing:.1em; text-transform:uppercase; color:var(--ink2);
   }
 
@@ -661,12 +658,6 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
       <label for="auPass">Password</label>
       <input type="password" id="auPass" autocomplete="new-password" required>
     </div>
-    <div class="fld-confirm">
-      <div class="fld-inner">
-        <label for="auConfirm">Confirm password</label>
-        <input type="password" id="auConfirm" autocomplete="new-password">
-      </div>
-    </div>
     <div class="field-msg" id="authMsg" role="alert"></div>
     <div class="auth-actions">
       <button type="submit" class="btn-solid" id="authSubmit">Create account</button>
@@ -1117,7 +1108,6 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
   var authForm = document.getElementById('authForm');
   var auName = document.getElementById('auName');
   var auPass = document.getElementById('auPass');
-  var auConfirm = document.getElementById('auConfirm');
   var auMsg = document.getElementById('authMsg');
   var auTitle = document.getElementById('authTitle');
   var auHint = document.getElementById('authHint');
@@ -1139,7 +1129,6 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
     auSwitchText.textContent = signup ? 'Already have an account?' : 'New here?';
     auSwitch.textContent = signup ? 'Log in' : 'Create an account';
     auPass.setAttribute('autocomplete', signup ? 'new-password' : 'current-password');
-    auConfirm.setAttribute('autocomplete', signup ? 'new-password' : 'off');
     auMsg.textContent = '';
     document.getElementById('suMsg').textContent = '';
     document.getElementById('liMsg').textContent = '';
@@ -1150,7 +1139,6 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
     auSubmit.disabled = true;
     auName.disabled = true;
     auPass.disabled = true;
-    auConfirm.disabled = true;
     auMsg.textContent = 'Login service is unavailable. Reload to try again.';
   }
 
@@ -1162,7 +1150,7 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
     if(authMode === 'signup'){
       document.getElementById('suName').value = auName.value;
       document.getElementById('suPassword').value = auPass.value;
-      document.getElementById('suConfirm').value = auConfirm.value;
+      document.getElementById('suConfirm').value = auPass.value;
       panel = panelSignup;
     } else {
       document.getElementById('liEmail').value = auName.value;
@@ -1176,7 +1164,6 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
   function focusFirstInvalid(){
     if(!auName.value){ auName.focus(); }
     else if(!auPass.value){ auPass.focus(); }
-    else if(authForm.classList.contains('is-signup') && auConfirm.value !== auPass.value){ auConfirm.focus(); }
     else { auName.focus(); }
   }
   function mirrorMsg(){
