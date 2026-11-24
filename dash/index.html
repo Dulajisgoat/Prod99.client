@@ -191,11 +191,53 @@ html[data-theme="dark"] #authView .wordmark .logo-dark{ display:block; }
 
 body[data-view="auth"]::before,
 body[data-view="auth"]::after{
-    content:""; position:fixed; z-index:0; border:2px solid var(--border); opacity:.35; pointer-events:none;
+    content:""; position:fixed; inset:auto; z-index:0; border:2px solid var(--border); opacity:.35; pointer-events:none;
   }
 body[data-view="auth"]::before{ width:120px; height:120px; left:6%; top:14%; border-radius:var(--r1); background:var(--hl); rotate:-8deg; }
 body[data-view="auth"]::after{ width:90px; height:90px; right:8%; bottom:12%; border-radius:50%; background:var(--red); opacity:.18; }
 @media(max-width:700px){ body[data-view="auth"]::before, body[data-view="auth"]::after{ display:none; } }
+
+/* ===== 2D colored shapes scattered behind the login card ===== */
+#authView .bg-shapes{
+    position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none;
+    --sh-red:var(--red); --sh-blue:var(--blue); --sh-yellow:var(--hl);
+    --sh-green:#4E8C5F; --sh-teal:#2F7E7A; --sh-amber:#C9803B;
+    --sh-rose:#C26D6D; --sh-indigo:#5F6FA8;
+    --sh-shadow:2px 3px 0 rgba(61,55,50,.10);
+  }
+html[data-theme="dark"] #authView .bg-shapes{
+    --sh-green:#7FB98A; --sh-teal:#6FB5AD; --sh-amber:#DFA96B;
+    --sh-rose:#D98F8F; --sh-indigo:#9AA6D6;
+    --sh-shadow:2px 3px 0 rgba(0,0,0,.35);
+  }
+#authView .sh{
+    position:absolute; display:block; border:2px solid var(--border);
+    animation:shFloat var(--sh-dur,9s) ease-in-out infinite;
+    animation-delay:var(--sh-delay,0s);
+  }
+#authView .sh > i{ position:absolute; inset:2.5px; display:block; }
+#authView .sh-circle{ width:60px; height:60px; top:9%; left:19%; border-radius:50%; background:var(--sh-blue); opacity:.30; box-shadow:var(--sh-shadow); --sh-dur:9s; --sh-delay:-1.2s; }
+#authView .sh-triangle{ width:74px; height:64px; top:10%; right:13%; border:none; background:var(--border); clip-path:polygon(50% 0,100% 100%,0 100%); opacity:.45; rotate:-5deg; --sh-dur:11s; --sh-delay:-4.5s; }
+#authView .sh-triangle > i{ inset:3px 3px 0; background:var(--sh-red); clip-path:polygon(50% 0,100% 100%,0 100%); }
+#authView .sh-ring{ width:78px; height:78px; top:47%; left:4%; border:11px solid var(--sh-green); background:transparent; border-radius:50%; opacity:.4; --sh-dur:10s; --sh-delay:-2.8s; }
+#authView .sh-star{ width:62px; height:62px; top:56%; right:11%; border:none; background:var(--border); clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); opacity:.45; rotate:8deg; --sh-dur:12s; --sh-delay:-6s; }
+#authView .sh-star > i{ inset:3px; background:var(--sh-amber); clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
+#authView .sh-diamond{ width:46px; height:46px; bottom:12%; left:12%; border-radius:8px; background:var(--sh-yellow); opacity:.5; rotate:45deg; box-shadow:var(--sh-shadow); --sh-dur:8.5s; --sh-delay:-3.4s; }
+#authView .sh-plus{ width:36px; height:36px; top:4.5%; left:47%; border:none; background:var(--border); clip-path:polygon(33% 0,67% 0,67% 33%,100% 33%,100% 67%,67% 67%,67% 100%,33% 100%,33% 67%,0 67%,0 33%,33% 33%); opacity:.5; --sh-dur:7.5s; --sh-delay:-5.1s; }
+#authView .sh-plus > i{ inset:2.5px; background:var(--sh-teal); clip-path:polygon(33% 0,67% 0,67% 33%,100% 33%,100% 67%,67% 67%,67% 100%,33% 100%,33% 67%,0 67%,0 33%,33% 33%); }
+#authView .sh-blob{ width:96px; height:88px; bottom:6%; right:29%; border-radius:58% 42% 55% 45% / 52% 48% 55% 45%; background:var(--sh-rose); opacity:.30; box-shadow:var(--sh-shadow); rotate:-6deg; --sh-dur:13s; --sh-delay:-7.2s; }
+#authView .sh-arch{ width:76px; height:38px; bottom:30%; right:4%; border-radius:999px 999px 0 0; background:var(--sh-indigo); opacity:.35; box-shadow:var(--sh-shadow); --sh-dur:10.5s; --sh-delay:-8.4s; }
+@keyframes shFloat{
+    0%,100%{ transform:translateY(0); }
+    50%{ transform:translateY(-10px); }
+  }
+@media(max-width:700px){
+    #authView .sh-ring,#authView .sh-star,#authView .sh-blob,#authView .sh-arch{ display:none; }
+    #authView .sh-circle{ width:38px; height:38px; top:4%; right:9%; left:auto; }
+    #authView .sh-triangle{ width:42px; height:37px; top:3%; left:60%; right:auto; }
+    #authView .sh-diamond{ width:30px; height:30px; bottom:5%; right:9%; left:auto; }
+    #authView .sh-plus{ width:24px; height:24px; bottom:7%; left:8%; top:auto; }
+  }
 #authView .card-footer{
     display:block; text-align:center;
     font:600 .85rem var(--lab); letter-spacing:.01em; color:var(--ink2);
@@ -623,6 +665,17 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
 
 <div id="heroLogoWrap" hidden><img id="heroLogo" src="/strawberry.png" alt="" aria-hidden="true"></div>
 <img id="footerLogo" src="/strawberry.png" alt="" aria-hidden="true" hidden>
+
+<div class="bg-shapes" aria-hidden="true">
+  <span class="sh sh-circle"></span>
+  <span class="sh sh-triangle"><i></i></span>
+  <span class="sh sh-ring"></span>
+  <span class="sh sh-star"><i></i></span>
+  <span class="sh sh-diamond"></span>
+  <span class="sh sh-plus"><i></i></span>
+  <span class="sh sh-blob"></span>
+  <span class="sh sh-arch"></span>
+</div>
 
 <main class="card">
   <div class="toggles">
