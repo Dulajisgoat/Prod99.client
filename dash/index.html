@@ -102,7 +102,6 @@
     letter-spacing:0; cursor:pointer; box-shadow:var(--sh);
     transition:transform .15s ease, box-shadow .15s ease, border-color .2s, color .2s;
   }
-#authView .btn-ghost:hover{ border-color:var(--red); color:var(--red); transform:translate(-1px,-1px) rotate(-.4deg); box-shadow:var(--sh-hover); }
 #authView .btn-ghost:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 rgba(61,55,50,.16); }
 #authView .btn-ghost img{ width:18px; height:18px; display:block; }
 #authView .toggles{ position:absolute; top:16px; right:16px; display:flex; gap:10px; z-index:2; }
@@ -112,7 +111,6 @@
     cursor:pointer; box-shadow:var(--sh);
     transition:border-color .2s, color .2s, transform .15s ease, box-shadow .15s ease;
   }
-#authView .theme-toggle:hover{ border-color:var(--red); color:var(--red); transform:translate(-1px,-1px) rotate(-.4deg); box-shadow:var(--sh-hover); }
 #authView .theme-toggle:active{ transform:translate(2px,2px) scale(.98); box-shadow:1px 1px 0 rgba(61,55,50,.16); }
 #authView .theme-toggle .ico{position:relative;display:block;width:18px;height:18px;transition:transform .45s cubic-bezier(.33,1,.3,1)}
 #authView .theme-toggle .ico svg{position:absolute;inset:0;width:18px;height:18px;color:currentColor;
@@ -121,7 +119,6 @@
 #authView .theme-toggle .icon-moon{opacity:0;transform:rotate(-55deg) scale(.6)}
 html[data-theme="dark"] #authView .theme-toggle .icon-sun{opacity:0;transform:rotate(55deg) scale(.6)}
 html[data-theme="dark"] #authView .theme-toggle .icon-moon{opacity:1;transform:rotate(0deg) scale(1)}
-#authView .theme-toggle:hover .ico{transform:rotate(14deg)}
 #authView .theme-toggle.theme-pulse::before{content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px solid currentColor;
     opacity:.6;transform:scale(.6);animation:themePulse .7s cubic-bezier(.3,.8,.3,1) both}
 @keyframes themePulse{to{opacity:0;transform:scale(1.35)}}
@@ -163,7 +160,6 @@ html[data-theme="dark"] #authView .wordmark .logo-dark{ display:block; }
     background:var(--ink); color:var(--paper); font:700 18px var(--lab); cursor:pointer; box-shadow:var(--sh);
     transition:transform .15s ease, box-shadow .15s ease, background-color .2s;
   }
-#authView .btn-solid:hover{ transform:translate(-1px,-1px) rotate(-.4deg); box-shadow:var(--sh-hover); }
 #authView .btn-solid:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 rgba(61,55,50,.16); }
 #authView .btn-solid:disabled{ color:transparent; cursor:default; opacity:1; }
 #authView .btn-solid:disabled::after{
@@ -185,9 +181,20 @@ html[data-theme="dark"] #authView .wordmark .logo-dark{ display:block; }
     background:transparent; color:var(--ink); font:700 18px var(--lab); cursor:pointer;
     transition:transform .15s ease, box-shadow .15s ease, border-color .2s, color .2s;
   }
-#authView .btn-outline:hover{ border-color:var(--red); color:var(--red); transform:translate(-1px,-1px); box-shadow:var(--sh); }
 #authView .btn-outline:active{ transform:translate(1px,1px); }
 #authView .card-footer{ border-top:2px solid var(--border); padding-top:16px; margin-top:18px; }
+
+/* Hover-only visual flourishes — gated so touchscreens don't need a "ghost tap"
+   to clear a stuck :hover state before the real click registers (the bug
+   behind "I have to press the button twice"). Mouse/trackpad users still
+   get the full hover treatment. */
+@media (hover:hover){
+  #authView .btn-ghost:hover{ border-color:var(--red); color:var(--red); transform:translate(-1px,-1px) rotate(-.4deg); box-shadow:var(--sh-hover); }
+  #authView .theme-toggle:hover{ border-color:var(--red); color:var(--red); transform:translate(-1px,-1px) rotate(-.4deg); box-shadow:var(--sh-hover); }
+  #authView .theme-toggle:hover .ico{ transform:rotate(14deg); }
+  #authView .btn-solid:hover{ transform:translate(-1px,-1px) rotate(-.4deg); box-shadow:var(--sh-hover); }
+  #authView .btn-outline:hover{ border-color:var(--red); color:var(--red); transform:translate(-1px,-1px); box-shadow:var(--sh); }
+}
 
 body[data-view="auth"]::before,
 body[data-view="auth"]::after{
@@ -252,25 +259,9 @@ html[data-theme="dark"] #authView .bg-shapes{
     #authView .card{ max-width:none; padding:32px 24px 24px; margin:0 auto; }
   }
 #appView .wrap{max-width:1120px;margin:0 auto;padding:0 28px;}
-#appView .topbar{
-    position:sticky;top:0;z-index:50;height:var(--hdr);
-    display:flex;align-items:center;justify-content:space-between;gap:16px;
-    padding:0 max(20px,calc((100vw - 1120px)/2 + 28px));
-    background:var(--paper);border-bottom:2px dashed var(--border);
-    transition:box-shadow .3s;
-  }
-#appView .brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink);min-width:0;}
-#appView .brand img{height:34px;width:34px;border-radius:9px;flex:none;object-fit:cover;}
-#appView .wordmark{font:700 1.6rem var(--disp);letter-spacing:-.02em;}
-#appView .ws-label{
-    font:700 .85rem var(--lab);color:var(--hl-ink);
-    padding:3px 12px;background:var(--hl);box-shadow:1px 1px 0 rgba(61,55,50,.1);
-    border-radius:var(--r3);rotate:-1deg;white-space:nowrap;
-  }
-#appView .nav-right{display:flex;align-items:center;gap:12px;}
 #appView .theme-toggle{
     width:40px;height:40px;border-radius:var(--r3);border:2px solid var(--ink);background:var(--card);
-    display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);flex:none;
     box-shadow:var(--sh);
     transition:box-shadow .2s ease,color .2s ease,transform .2s ease;
   }
@@ -278,32 +269,6 @@ html[data-theme="dark"] #authView .bg-shapes{
 #appView .theme-toggle .i-sun{display:none;}
 html[data-theme="dark"] #appView .theme-toggle .i-sun{display:block;}
 html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
-#appView .account{position:relative;}
-#appView .avatar-btn{
-    background:var(--card);border:2px solid var(--ink);border-radius:50%;padding:3px;cursor:pointer;
-    display:flex;box-shadow:var(--sh);transition:box-shadow .2s ease, transform .2s ease;
-  }
-#appView .avatar-btn:hover,
-#appView .avatar-btn[aria-expanded="true"]{box-shadow:var(--sh-hover);transform:translate(-1px,-1px);}
-#appView .avatar{
-    width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--paper);
-    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex:none;
-  }
-#appView .menu{
-    position:absolute;right:0;top:calc(100% + 12px);min-width:210px;padding:14px;
-    background:var(--card);border:2px solid var(--ink);border-radius:var(--r2);box-shadow:var(--sh-lg);
-    animation:pop .16s ease;
-  }
-#appView .menu[hidden]{display:none;}
-#appView .menu-label{font:400 .72rem var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);}
-#appView .menu-name{font:700 1.1rem var(--disp);margin:2px 0 12px;word-break:break-word;color:var(--ink);}
-#appView .menu-item{
-    width:100%;text-align:left;font:700 .9rem var(--lab);color:var(--red);
-    background:transparent;border:2px solid var(--red);border-radius:var(--r3);padding:9px 12px;cursor:pointer;
-    transition:background .15s ease,color .15s ease;
-  }
-#appView .menu-item:hover{background:var(--red);color:var(--paper);}
-@keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 #appView .btn{
     font:700 18px var(--lab); padding:11px 22px;
     border:2px solid var(--ink); border-radius:var(--r3);
@@ -439,35 +404,101 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
 #appView .timer-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;}
 #appView .timer-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
 #appView .timer-btns .btn{min-width:92px;}
-/* --- Notes (time12-style: list + editor, pill tabs) --- */
-#appView .notes-wrap{display:grid;grid-template-columns:240px 1fr;gap:18px;align-items:start;}
-#appView .note-pane{padding:16px;}
-#appView .note-search{margin-bottom:4px;}
+/* --- App shell: sidebar + main area (time12-style dashboard) --- */
+#appView .app-shell{display:grid;grid-template-columns:1fr;height:auto;}
+#appView .sidebar{display:none;}
+#appView .main-area{display:flex;flex-direction:column;}
+#appView .tab-bar{
+    display:flex;gap:6px;padding:12px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;background:var(--paper);border-bottom:2px dashed var(--border);
+  }
+#appView .tab-bar::-webkit-scrollbar{display:none;}
+#appView .tab-item{
+    display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;text-decoration:none;flex:none;
+    color:var(--ink2);font:700 .88rem var(--lab);font-weight:600;white-space:nowrap;
+    border:2px solid transparent;
+    transition:background .2s ease,color .2s ease,transform .2s ease;
+  }
+#appView .tab-item svg{flex:none;stroke-width:1.7;}
+#appView .tab-item:hover{background:var(--hl);color:var(--red);}
+#appView .tab-item.active{background:var(--ink);color:var(--paper);box-shadow:var(--sh);}
+#appView .tab-item:active{transform:scale(.97);}
+#appView .content{flex:1;padding:20px 16px 40px;}
+/* Sidebar chrome (desktop only — see min-width:980px block) */
+#appView .sidebar-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 18px 16px;border-bottom:2px dashed var(--border);}
+#appView .sidebar-header .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);min-width:0;}
+#appView .brand-tile{width:30px;height:30px;flex:none;border-radius:8px;background:var(--red);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+#appView .brand-tile img{width:20px;height:20px;object-fit:cover;border-radius:4px;}
+#appView .brand-text{display:flex;flex-direction:column;line-height:1.1;min-width:0;}
+#appView .sidebar-header .wordmark{font:700 1.3rem var(--disp);letter-spacing:-.02em;}
+#appView .sidebar-header .ws-label{font:700 .68rem var(--lab);color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;}
+#appView .sidebar-search{padding:14px 16px 0;}
+#appView .sidebar-search .note-search{
+    width:100%;height:40px;border:2px solid var(--ink);border-radius:var(--r3);background:var(--paper);
+    color:var(--ink);padding:0 12px;font:400 .9rem var(--body);
+  }
+#appView .sidebar-search .note-search:focus{outline:none;border-color:var(--red);box-shadow:2px 2px 0 var(--ink);}
+#appView .sidebar-section-head{display:flex;align-items:center;gap:8px;padding:16px 16px 8px;}
+#appView .sidebar-label{font:700 .72rem var(--lab);color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;}
+#appView .sidebar-section-head .note-count{font:400 .76rem var(--body);color:var(--ink2);margin:0;}
+#appView .sidebar-new-btn{
+    margin-left:auto;background:var(--hl);color:var(--hl-ink);border:2px solid var(--ink);border-radius:var(--r3);
+    box-shadow:2px 2px 0 var(--ink);font:700 .78rem var(--lab);padding:5px 10px;cursor:pointer;
+    transition:transform .15s ease;
+  }
+#appView .sidebar-new-btn:hover{transform:translate(-1px,-1px);}
+#appView .sidebar-new-btn:active{transform:translate(1px,1px);}
 #appView .note-count{font:400 .78rem var(--body);color:var(--ink2);margin:0 0 4px;}
-#appView .note-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:460px;overflow-y:auto;}
+#appView .note-list{list-style:none;margin:0;padding:6px 10px 14px;display:flex;flex-direction:column;gap:7px;flex:1;overflow-y:auto;}
 #appView .note-item{
     display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:var(--r2);
-    border:2px solid var(--ink);background:var(--paper);cursor:pointer;text-align:left;width:100%;
-    font:400 .9rem var(--body);color:var(--ink);transition:background .15s ease,transform .15s ease;
+    border:2px solid transparent;background:transparent;cursor:pointer;text-align:left;width:100%;
+    font:400 .9rem var(--body);color:var(--ink);transition:background .15s ease,border-color .15s ease;
   }
-#appView .note-item:hover{transform:translateY(-1px);background:var(--hl);}
-#appView .note-item.active{background:var(--ink);color:var(--paper);}
+#appView .note-item:hover{background:var(--paper);border-color:var(--ink);}
+#appView .note-item.active{background:var(--paper);border-color:var(--ink);box-shadow:var(--sh);}
+#appView .note-item.active b{color:var(--red);}
 #appView .note-item b{font:700 1rem var(--disp);display:block;}
 #appView .note-item span{font-size:.78rem;color:inherit;opacity:.72;}
-#appView .note-editor{display:flex;flex-direction:column;gap:10px;}
-#appView .note-title-in{font:700 1.3rem var(--disp);border:2px solid var(--ink);border-radius:var(--r1);background:var(--paper);padding:10px 14px;width:100%;color:var(--ink);}
-#appView .note-title-in:focus{outline:none;border-color:var(--red);}
-#appView .note-body-in{
-    width:100%;min-height:320px;resize:vertical;border:2px solid var(--ink);border-radius:var(--r1);
-    background:var(--paper);color:var(--ink);padding:14px 16px;font:400 1rem/1.6 var(--body);
+#appView .sidebar-footer{display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:2px dashed var(--border);}
+#appView .sidebar-footer .avatar{
+    width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--paper);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex:none;
   }
-#appView .note-body-in:focus{outline:none;border-color:var(--red);}
-#appView .note-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font:400 .82rem var(--body);color:var(--ink2);}
+#appView .footer-name{flex:1;min-width:0;font:700 .88rem var(--body);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#appView .footer-logout{
+    width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;
+    border:2px solid var(--ink);border-radius:var(--r3);background:var(--card);color:var(--ink);cursor:pointer;
+    transition:border-color .2s,color .2s,transform .15s ease;
+  }
+#appView .footer-logout:hover{border-color:var(--red);color:var(--red);transform:translate(-1px,-1px);}
+/* Notes editor card (replaces old notes-wrap two-column layout) */
+#appView .editor-card{
+    background:var(--card);border:2px solid var(--ink);border-radius:var(--r1);box-shadow:var(--sh-lg);
+    padding:28px 32px 20px;min-height:calc(100dvh - 200px);rotate:-.2deg;display:flex;flex-direction:column;
+  }
+#appView .note-title-in{
+    font:700 2.2rem var(--disp);border:none;background:transparent;width:100%;color:var(--ink);
+    border-bottom:2px dashed var(--border);padding-bottom:14px;outline:none;
+  }
+#appView .note-body-in{
+    flex:1;min-height:340px;resize:none;border:none;background:transparent;color:var(--ink);
+    padding:18px 0;font:400 19px/1.7 var(--body);width:100%;
+  }
+#appView .note-body-in:focus,
+#appView .note-title-in:focus{outline:none;}
+#appView .note-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font:400 .82rem var(--body);color:var(--ink2);border-top:2px dashed var(--border);padding-top:14px;}
 #appView .note-meta b{color:var(--ink);font-weight:700;}
-@media(max-width:760px){
-#appView .notes-wrap{grid-template-columns:1fr;}
-#appView .note-list{max-height:220px;}
-}
+#appView .note-meta #noteStatus{flex:1;}
+/* Mobile notes strip (only #sec-notes, hidden on desktop — see min-width:980px block) */
+#appView .mobile-notes-bar{margin-bottom:16px;}
+#appView .mobile-notes-bar .note-search{
+    width:100%;height:40px;border:2px solid var(--ink);border-radius:var(--r3);background:var(--card);
+    color:var(--ink);padding:0 12px;font:400 .9rem var(--body);margin-bottom:10px;
+  }
+#appView .mobile-notes-bar .note-search:focus{outline:none;border-color:var(--red);}
+#appView .note-pills{list-style:none;margin:0;padding:0 0 4px;display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+#appView .note-pills .note-item{flex:none;width:180px;}
 #appView .daily-wrap{width:100%;text-align:left;}
 #appView .daily-row{display:flex;justify-content:space-between;align-items:baseline;font:400 .85rem var(--body);color:var(--ink2);margin-bottom:6px;}
 #appView .daily-row b{color:var(--ink);font-weight:700;}
@@ -494,26 +525,10 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
 #appView input[type="file"]{padding:8px 10px;min-width:0;font-size:.85rem;}
 #appView .backup-foot{color:var(--ink2);font:400 .9rem var(--body);line-height:1.5;}
 #appView .toast{
-    position:fixed;left:50%;bottom:calc(104px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:130;
+    position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:130;
     max-width:min(92vw,520px);padding:12px 18px;border-radius:var(--r3);background:var(--card);color:var(--ink);
     border:2px solid var(--ink);box-shadow:var(--sh-lg);font:700 16px var(--lab);
   }
-#appView .dock{
-    position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;
-    display:flex;gap:3px;padding:6px;max-width:calc(100vw - 24px);overflow-x:auto;-webkit-overflow-scrolling:touch;
-    scrollbar-width:none;
-    background:var(--card);border:2px solid var(--ink);border-radius:999px;box-shadow:var(--sh-lg);
-  }
-#appView .dock::-webkit-scrollbar{display:none;}
-#appView .dock-item{
-    display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:999px;text-decoration:none;flex:none;
-    color:var(--ink2);font:700 .92rem var(--lab);font-weight:600;white-space:nowrap;
-    transition:background .2s ease,color .2s ease,transform .2s ease;
-  }
-#appView .dock-item svg{flex:none;stroke-width:1.7;}
-#appView .dock-item:hover{color:var(--red);background:var(--hl);transform:translateY(-2px);}
-#appView .dock-item.active{background:var(--ink);color:var(--paper);}
-#appView .dock-item.active:hover{transform:translateY(-2px);}
 @keyframes li-in{
     from{opacity:0; transform:translateY(4px);}
     to  {opacity:1; transform:translateY(0);}
@@ -532,9 +547,6 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
   }
 #appView .gt button:active:not(:disabled){
     transform:scale(.94);
-  }
-#appView .dock-item:active{
-    transform:translateY(0) scale(.97);
   }
 #appView .tour-scrim{
     position:fixed; inset:0; z-index:120;
@@ -601,8 +613,6 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
 }
 @media(max-width:760px){
 #appView .wrap{padding:0 16px;}
-#appView .topbar{padding:0 16px;}
-#appView .ws-label{display:none;}
 #appView .section{padding:28px 0 16px;}
 #appView .home{padding:24px 16px 130px;}
 #appView .welcome{padding:40px 24px;}
@@ -611,48 +621,31 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
 #appView .timer-ring{width:176px;height:176px;}
 #appView .clock{font-size:2.2rem;}
 #appView #goalList{grid-template-columns:1fr;}
-#appView .dock{gap:2px;padding:5px;bottom:calc(12px + env(safe-area-inset-bottom));}
-#appView .dock-item{flex-direction:column;gap:3px;padding:8px 10px;font-size:.66rem;min-width:56px;border-radius:999px;}
-#appView .toast{bottom:calc(92px + env(safe-area-inset-bottom));}
 #appView .welcome h1{ font-size:clamp(2.4rem, 9vw, 4rem); }
 }
-@media(max-width:360px){
-#appView .dock-item{min-width:50px;padding:8px 6px;}
-}  @media(prefers-reduced-motion:reduce){
+@media(prefers-reduced-motion:reduce){
     html{scroll-behavior:auto;}
     *,*::before,*::after{animation:none!important;transition-duration:.01ms!important;}
     #appView #tourSpot, #appView .tour-tip{ transition:none!important; }
   }
 
-/* ===== Time12-style shell: sidebar + main workspace (desktop) ===== */
+/* ===== Two-column app shell (time12-style dashboard) ===== */
+/* Mobile / tablet (<980px): sidebar hidden, tab-bar + mobile notes strip shown — see F */
+#appView .editor-card{min-height:auto;}
+#appView .content{overflow:visible;}
 @media(min-width:980px){
-  #appView .dock{
-    position:fixed; left:0; top:0; bottom:0; transform:none; z-index:70;
-    width:236px; max-width:236px; height:100vh;
-    flex-direction:column; align-items:stretch; justify-content:flex-start;
-    gap:3px; padding:22px 14px 18px; overflow-y:auto; overflow-x:hidden;
-    border-radius:0; border:none; border-right:2px solid var(--ink);
-    box-shadow:3px 0 0 rgba(61,55,50,.06);
+  #appView .app-shell{
+    display:grid; grid-template-columns:300px 1fr;
+    height:100vh; height:100dvh; overflow:hidden;
   }
-  #appView .dock::before{
-    content:"Prod99"; display:block; font:700 1.7rem var(--disp); letter-spacing:-.02em;
-    color:var(--ink); padding:2px 10px 10px;
+  #appView .sidebar{
+    display:flex; flex-direction:column; background:var(--card);
+    border-right:2px solid var(--ink); overflow-y:auto;
   }
-  #appView .dock::after{
-    content:"Workspace"; display:block; font:700 .72rem var(--lab); letter-spacing:.08em;
-    text-transform:uppercase; color:var(--ink2); padding:0 10px 18px; border-bottom:2px dashed var(--border); margin-bottom:10px;
-  }
-  #appView .dock-item{ width:100%; justify-content:flex-start; }
-  #appView .dock-item:hover{ transform:none; }
-  #appView .dock-item.active:hover{ transform:none; }
-  #appView .dock-item:active{ transform:scale(.98); }
-
-  #appView > header.topbar{
-    margin-left:236px; justify-content:flex-end;
-    padding:0 28px;
-  }
-  #appView > header.topbar .brand{ display:none; }
-  #appView > main{ margin-left:236px; }
+  #appView .main-area{overflow:hidden;height:100%;}
+  #appView .content{flex:1;overflow-y:auto;padding:28px 32px 60px;}
+  #appView .mobile-notes-bar{display:none;}
+  #appView .editor-card{min-height:calc(100dvh - 200px);}
 }
 </style>
 </head>
@@ -750,54 +743,87 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
 </div>
 
 <div id="appView" hidden>
-<header class="topbar">
-  <a class="brand" href="../" aria-label="Prod99 home">
-    <img id="logoNav" src="/strawberry.png" alt="" width="34" height="34">
-    <span class="wordmark">Prod99</span>
-    <span class="ws-label">Workspace</span>
-  </a>
-  <div class="nav-right">
-    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme">
-      <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-      <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
-    </button>
-    <div id="accountChip" class="account">
-      <button class="avatar-btn" id="profileBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="profileMenu" aria-label="Open profile menu">
-        <span class="avatar" id="avatarInitial">·</span>
-      </button>
-      <div class="menu" id="profileMenu" hidden>
-        <p class="menu-label">Signed in as</p>
-        <p class="menu-name acct-name" id="accountName">Loading...</p>
-        <button class="menu-item" id="logoutBtn" type="button">Log out</button>
-      </div>
-    </div>
-  </div>
-</header>
+<div class="app-shell">
 
-<main>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a class="brand" href="../" aria-label="Prod99 home">
+        <span class="brand-tile"><img id="logoNav" src="/strawberry.png" alt="" width="20" height="20"></span>
+        <span class="brand-text">
+          <span class="wordmark">Prod99</span>
+          <span class="ws-label">Workspace</span>
+        </span>
+      </a>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme">
+        <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+      </button>
+    </div>
+
+    <div class="sidebar-search">
+      <input class="note-search" id="noteSearch" placeholder="Search your notes..." aria-label="Search notes">
+    </div>
+
+    <div class="sidebar-section-head">
+      <span class="sidebar-label">Notes</span>
+      <span class="note-count" id="noteCount">0 notes</span>
+      <button class="sidebar-new-btn" id="noteNewBtn" type="button">+ New</button>
+    </div>
+    <ul class="note-list" id="noteList"></ul>
+
+    <div class="sidebar-footer">
+      <span class="avatar" id="avatarInitial">·</span>
+      <span class="footer-name" id="accountName">Loading...</span>
+      <button class="footer-logout" id="logoutBtn" type="button" aria-label="Log out">
+        <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <!-- Tab bar (replaces the old floating dock) -->
+    <nav class="tab-bar" aria-label="Workspace sections">
+      <a class="tab-item active" href="#sec-notes" data-sec="sec-notes" aria-current="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M9 13h6M9 17h4"></path></svg>
+        <span>Notes</span>
+      </a>
+      <a class="tab-item" href="#sec-home" data-sec="sec-home">
+        <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10h14V10"></path><path d="M10 20v-6h4v6"></path></svg>
+        <span>Home</span>
+      </a>
+      <a class="tab-item" href="#sec-study" data-sec="sec-study">
+        <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
+        <span>Study</span>
+      </a>
+      <a class="tab-item" href="#sec-goals" data-sec="sec-goals">
+        <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        <span>Goals</span>
+      </a>
+      <a class="tab-item" href="#sec-files" data-sec="sec-files">
+        <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M13 2v7h7"></path></svg>
+        <span>Files</span>
+      </a>
+      <a class="tab-item" href="#sec-community" data-sec="sec-community">
+        <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span>Community</span>
+      </a>
+    </nav>
+
+    <main class="content">
 
   <!-- NOTES (first section — time12-style notebook) -->
   <section id="sec-notes" class="section"><div class="wrap">
-    <div class="card note-pane"><div class="card-head"><h3>
-        <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M9 13h6M9 17h4"></path></svg>
-        Notes</h3><button class="btn btn-solid" id="noteNewBtn" type="button">New note</button></div>
-      <div class="notes-wrap">
-        <div>
-          <input class="note-search" id="noteSearch" placeholder="Search your notes..." aria-label="Search notes">
-          <p class="note-count" id="noteCount">0 notes</p>
-          <ul class="note-list" id="noteList"></ul>
-        </div>
-        <div class="note-editor">
-          <input class="note-title-in" id="noteTitleIn" placeholder="Untitled" maxlength="80" aria-label="Note title">
-          <textarea class="note-body-in" id="noteBodyIn" placeholder="Start writing… it saves on its own." aria-label="Note content"></textarea>
-          <div class="note-meta">
-            <span id="noteStatus">No note selected</span>
-            <span><b id="noteWords">0</b> words · <b id="noteMins">0</b> min read</span>
-          </div>
-          <div class="row">
-            <button class="btn btn-ghost" id="noteDelBtn" type="button" disabled>Delete note</button>
-          </div>
-        </div>
+    <div class="mobile-notes-bar">
+      <input class="note-search" id="mobileSearch" placeholder="Search your notes..." aria-label="Search notes">
+      <ul class="note-pills" id="noteListMobile"></ul>
+    </div>
+    <div class="editor-card">
+      <input class="note-title-in" id="noteTitleIn" placeholder="Untitled" maxlength="80" aria-label="Note title">
+      <textarea class="note-body-in" id="noteBodyIn" placeholder="Start writing… it saves on its own." aria-label="Note content"></textarea>
+      <div class="note-meta">
+        <span id="noteStatus">No note selected</span>
+        <span><b id="noteWords">0</b> words · <b id="noteMins">0</b> min</span>
+        <button class="btn btn-ghost" id="noteDelBtn" type="button" disabled>Delete</button>
       </div>
     </div>
   </div></section>
@@ -902,35 +928,10 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
     </div></section>
 
   </div>
-</main>
+    </main>
+  </div>
 
-<!-- Floating feature dock -->
-<nav class="dock" aria-label="Workspace sections">
-  <a class="dock-item active" href="#sec-notes" data-sec="sec-notes" aria-current="true">
-    <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M9 13h6M9 17h4"></path></svg>
-    <span>Notes</span>
-  </a>
-  <a class="dock-item" href="#sec-home" data-sec="sec-home">
-    <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10h14V10"></path><path d="M10 20v-6h4v6"></path></svg>
-    <span>Home</span>
-  </a>
-  <a class="dock-item" href="#sec-study" data-sec="sec-study">
-    <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
-    <span>Study</span>
-  </a>
-  <a class="dock-item" href="#sec-goals" data-sec="sec-goals">
-    <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-    <span>Goals</span>
-  </a>
-  <a class="dock-item" href="#sec-files" data-sec="sec-files">
-    <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M13 2v7h7"></path></svg>
-    <span>Files</span>
-  </a>
-  <a class="dock-item" href="#sec-community" data-sec="sec-community">
-    <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-    <span>Community</span>
-  </a>
-</nav>
+</div>
 
 <div class="tour-scrim" id="tourScrim" role="dialog" aria-modal="true"
      aria-labelledby="tourTitle" hidden>
@@ -1051,26 +1052,12 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
   setTimeout(function(){ root.classList.remove('boot'); }, 100);
 
 
-  // --- PROFILE DROPDOWN (dashboard; lives inside #appView's DOM) ---
-  (function(){
-    var btn = document.getElementById('profileBtn');
-    var menu = document.getElementById('profileMenu');
-    function setOpen(o){ menu.hidden = !o; btn.setAttribute('aria-expanded', o ? 'true' : 'false'); }
-    btn.addEventListener('click', function(e){ e.stopPropagation(); setOpen(menu.hidden); });
-    document.addEventListener('click', function(e){
-      if(!menu.hidden && !menu.contains(e.target) && !btn.contains(e.target)){ setOpen(false); }
-    });
-    document.addEventListener('keydown', function(e){
-      if(e.key === 'Escape' && !menu.hidden){ setOpen(false); btn.focus(); }
-    });
-  })();
-
   // --- Onboarding tour trigger bridge: initWorkspace fills this in once ready ---
   var tourAPI = {};
 
   // --- DOCK: active state + tab navigation (scrollspy guarded, see showTab) ---
   var showTab = (function(){
-    var links = [].slice.call(document.querySelectorAll('.dock-item[data-sec]'));
+    var links = [].slice.call(document.querySelectorAll('.tab-item[data-sec]'));
     var secs = links.map(function(a){ return document.getElementById(a.dataset.sec); }).filter(Boolean);
     var ws = document.getElementById('workspace');
     var lockUntil = 0;
@@ -1389,7 +1376,7 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
 
     /* Onboarding tour */
     var TOUR_STEPS=[
-      { tab:'sec-notes',     target:'.notes-wrap',           hint:'Try it: click New note',
+      { tab:'sec-notes',     target:'.editor-card',          hint:'Try it: click New note',
         title:'Notes',
         body:'Jot things down here first. Notes autosave on this device as you type.' },
       { tab:'sec-home',      target:'.welcome',              hint:null,
@@ -1417,11 +1404,11 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
     }
     function highlightDock(tab){
       clearHighlight();
-      var el=document.querySelector('.dock-item[data-sec="'+tab+'"]');
+      var el=document.querySelector('.tab-item[data-sec="'+tab+'"]');
       if(el){ el.classList.add('tour-highlight'); }
     }
     function clearHighlight(){
-      [].slice.call(document.querySelectorAll('.dock-item.tour-highlight')).forEach(function(el){ el.classList.remove('tour-highlight'); });
+      [].slice.call(document.querySelectorAll('.tab-item.tour-highlight')).forEach(function(el){ el.classList.remove('tour-highlight'); });
     }
     function resolveTarget(step){
       try {
@@ -1520,8 +1507,8 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
       if(e.type===s.advanceOn){ tourAdvancing=true; setTimeout(nextStep,0); }
     }
     function hideChrome(hide){
-      var nodes = [document.querySelector('header.topbar'),
-                   document.querySelector('nav.dock'),
+      var nodes = [document.querySelector('.tab-bar'),
+                   document.querySelector('.sidebar-footer'),
                    document.querySelector('div.bg')];
       nodes.forEach(function(n){
         if(!n) return;
@@ -1552,7 +1539,7 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
       document.removeEventListener('click',tourObserve,true);
       document.removeEventListener('submit',tourObserve,true);
       showTab('sec-study', { instant: true });
-      var active = document.querySelector('.dock-item.active');
+      var active = document.querySelector('.tab-item.active');
       if(active){ active.focus(); }
     }
     $('tourNext').addEventListener('click',nextStep);
@@ -1654,19 +1641,26 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
     }
     function renderNoteList(){
       var ul=$('noteList'); if(!ul) return;
+      var mobileUl=$('noteListMobile');
       var q=($('noteSearch').value||'').toLowerCase();
       var filtered=notes.filter(function(n){
         if(!q) return true;
         return (n.title||'').toLowerCase().indexOf(q)>-1 || (n.body||'').toLowerCase().indexOf(q)>-1;
       });
       $('noteCount').textContent = notes.length + (notes.length===1?' note':' notes');
-      if(!filtered.length){ ul.innerHTML='<li class="empty">'+(notes.length?'No notes match your search.':'No notes yet. Press New note.')+'</li>'; return; }
-      ul.innerHTML = filtered.map(function(n){
-        var d = n.updated ? new Date(n.updated).toLocaleDateString(undefined,{month:'short',day:'numeric'}) : '';
-        var snippet = (n.body||'').trim().replace(/\s+/g,' ').slice(0,54);
-        return '<li class="note-item'+(n.id===activeNoteId?' active':'')+'" data-id="'+attr(n.id)+'" tabindex="0" role="button">'+
-          '<b>'+esc(n.title||'Untitled')+'</b><span>'+esc(d)+(snippet?' · '+esc(snippet):'')+'</span></li>';
-      }).join('');
+      var html;
+      if(!filtered.length){
+        html='<li class="empty">'+(notes.length?'No notes match your search.':'No notes yet. Press New note.')+'</li>';
+      } else {
+        html = filtered.map(function(n){
+          var d = n.updated ? new Date(n.updated).toLocaleDateString(undefined,{month:'short',day:'numeric'}) : '';
+          var snippet = (n.body||'').trim().replace(/\s+/g,' ').slice(0,54);
+          return '<li class="note-item'+(n.id===activeNoteId?' active':'')+'" data-id="'+attr(n.id)+'" tabindex="0" role="button">'+
+            '<b>'+esc(n.title||'Untitled')+'</b><span>'+esc(d)+(snippet?' · '+esc(snippet):'')+'</span></li>';
+        }).join('');
+      }
+      ul.innerHTML = html;
+      if(mobileUl){ mobileUl.innerHTML = html; }
     }
     function selectNote(id){
       activeNoteId=id||null;
@@ -1717,7 +1711,16 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
     $('noteDelBtn').addEventListener('click', deleteActiveNote);
     $('noteTitleIn').addEventListener('input', scheduleNoteSave);
     $('noteBodyIn').addEventListener('input', scheduleNoteSave);
-    $('noteSearch').addEventListener('input', renderNoteList);
+    $('noteSearch').addEventListener('input', function(){
+      if($('mobileSearch')){ $('mobileSearch').value = this.value; }
+      renderNoteList();
+    });
+    if($('mobileSearch')){
+      $('mobileSearch').addEventListener('input', function(){
+        $('noteSearch').value = this.value;
+        renderNoteList();
+      });
+    }
     $('noteList').addEventListener('click', function(e){
       var li=e.target.closest('.note-item'); if(!li||!li.dataset.id) return;
       selectNote(li.dataset.id);
@@ -1727,6 +1730,17 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
       var li=e.target.closest('.note-item'); if(!li||!li.dataset.id) return;
       selectNote(li.dataset.id);
     });
+    if($('noteListMobile')){
+      $('noteListMobile').addEventListener('click', function(e){
+        var li=e.target.closest('.note-item'); if(!li||!li.dataset.id) return;
+        selectNote(li.dataset.id);
+      });
+      $('noteListMobile').addEventListener('keydown', function(e){
+        if(e.key!=='Enter') return;
+        var li=e.target.closest('.note-item'); if(!li||!li.dataset.id) return;
+        selectNote(li.dataset.id);
+      });
+    }
     function initNotes(){
       loadNotesFromStorage();
       selectNote(notes.length ? notes[0].id : null);
