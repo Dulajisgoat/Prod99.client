@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Prod99 - create accounts and starting working</title>
+<title>Prod99</title>
+<script>
+/* Apply saved theme before first paint to avoid a flash */
+try{
+  var t = localStorage.getItem('prod99_theme');
+  if(t === 'dark' || (!t && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches))
+    document.documentElement.setAttribute('data-theme','dark');
+}catch(e){}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Patrick+Hand&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
@@ -647,9 +655,92 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
   #appView .mobile-notes-bar{display:none;}
   #appView .editor-card{min-height:calc(100dvh - 200px);}
 }
+
+/* ============================================================
+   ADDITIONS: 3D geometry backdrop (from dash.time12, re-themed)
+   + login ⇄ dashboard transition choreography
+   ============================================================ */
+#geo3d{
+  position:fixed; inset:0; z-index:0; width:100%; height:100%;
+  pointer-events:none;
+  transition:opacity .5s ease, visibility .5s ease;
+}
+#geo3d.off{ opacity:0; visibility:hidden; }
+/* keep app content painting above the 3D layer */
+#appView{ position:relative; z-index:1; }
+
+/* Optional: show ONLY the 3D shapes — uncomment to hide the flat 2D ones
+   (the .bg-shapes container must stay: the 3D layer reads its color vars)
+#authView .bg-shapes .sh{ display:none; }
+*/
+
+/* file rows + goal composer */
+#appView .goal-add{ display:flex; gap:10px; align-items:center; }
+#appView .goal-add input{ flex:1; min-width:0; }
+#appView .goal-add .btn{ flex:none; }
+#fileList li:not(.empty){ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+#fileList .fmeta{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:400 .9rem var(--body); }
+#fileList .btn{ height:auto; padding:6px 12px; font-size:.85rem; }
+#fileList .fdel{ width:30px; height:30px; flex:none; display:flex; align-items:center; justify-content:center; border:2px solid var(--ink); border-radius:var(--r3); background:var(--card); color:var(--ink); cursor:pointer; font:700 .95rem var(--lab); transition:border-color .15s ease, color .15s ease, transform .15s ease; }
+#fileList .fdel:hover{ border-color:var(--red); color:var(--red); transform:translate(-1px,-1px); }
+#appView .card-head .note-count{ margin:0; }
+
+/* ---- login → dashboard transition ---- */
+#authView.leaving{
+  position:fixed; inset:0; z-index:85; pointer-events:none;
+}
+#authView.leaving .card{
+  animation:geoCardOut .52s cubic-bezier(.5,-.03,.7,.4) forwards;
+}
+#authView.leaving .topbar{ animation:geoFadeOut .3s ease forwards; }
+#authView.leaving .sh{ animation:geoScatter .5s cubic-bezier(.4,0,.9,.55) forwards; }
+#authView.leaving::before,#authView.leaving::after{
+  content:""; position:absolute; border:2px solid var(--border); pointer-events:none;
+  animation:geoFadeOut .4s ease forwards;
+}
+#authView.leaving::before{ width:120px;height:120px;left:6%;top:14%;border-radius:var(--r1);background:var(--hl);rotate:-8deg;opacity:.35; }
+#authView.leaving::after{ width:90px;height:90px;right:8%;bottom:12%;border-radius:50%;background:var(--red);opacity:.18; }
+@keyframes geoCardOut{
+  0%  { transform:none; }
+  25% { transform:translate(-10px,6px) rotate(-2deg) scale(1.04); } /* little wind-up */
+  100%{ transform:translate(48vw,-72vh) rotate(16deg) scale(.1); opacity:0; }
+}
+@keyframes geoFadeOut{ to{ opacity:0; transform:translateY(-8px); } }
+@keyframes geoScatter{ to{ opacity:0; transform:translate(var(--sx,10vw),var(--sy,-6vh)) rotate(35deg) scale(.55); } }
+
+/* dashboard entrance (staggered) */
+#appView.entering .sidebar{ animation:geoSlideIn .55s cubic-bezier(.2,.9,.25,1) both; }
+#appView.entering .tab-bar{ animation:geoDropIn .5s .08s cubic-bezier(.2,1.1,.3,1) both; }
+#appView.entering .content{ animation:geoRiseIn .6s .16s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes geoSlideIn{ from{ opacity:0; transform:translateX(-105%); } to{ opacity:1; transform:none; } }
+@keyframes geoDropIn { from{ opacity:0; transform:translateY(-18px); } to{ opacity:1; transform:none; } }
+@keyframes geoRiseIn { from{ opacity:0; transform:translateY(26px) scale(.985); } to{ opacity:1; transform:none; } }
+
+/* dashboard → login (logout) */
+#appView.exiting{
+  position:fixed; inset:0; z-index:85; overflow:hidden;
+  animation:geoSink .42s ease forwards;
+}
+@keyframes geoSink{ to{ opacity:0; transform:translateY(26px) scale(.97); } }
+#authView.entering{
+  position:fixed; inset:0; z-index:86; display:flex; align-items:center; justify-content:center;
+  padding:96px 20px 40px; pointer-events:none;
+}
+#authView.entering .card,
+#authView.entering .topbar{ pointer-events:auto; }
+#authView.entering .card{ animation:geoCardIn .62s cubic-bezier(.2,1.25,.4,1) both; }
+#authView.entering .sh  { animation:geoBloom .55s cubic-bezier(.2,.9,.3,1) both; }
+@keyframes geoCardIn{ from{ opacity:0; transform:translateY(30px) rotate(-2.5deg) scale(.92); } to{ opacity:1; transform:none; } }
+@keyframes geoBloom { from{ opacity:0; transform:scale(.6) rotate(-20deg); } to{ opacity:1; transform:none; } }
+@media(max-width:700px){
+  #authView.leaving::before,#authView.leaving::after{ display:none; }
+}
 </style>
 </head>
 <body>
+
+<!-- 3D geometry backdrop: transparent WebGL layer, theme-colored -->
+<canvas id="geo3d" aria-hidden="true"></canvas>
 
 <div id="authView" hidden>
 <div class="topbar">
@@ -812,7 +903,7 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
     <main class="content">
 
   <!-- NOTES (first section — time12-style notebook) -->
-  <section id="sec-notes" class="section"><div class="wrap">
+  <section id="sec-notes" class="section" hidden><div class="wrap">
     <div class="mobile-notes-bar">
       <input class="note-search" id="mobileSearch" placeholder="Search your notes..." aria-label="Search notes">
       <ul class="note-pills" id="noteListMobile"></ul>
@@ -829,7 +920,7 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
   </div></section>
 
   <!-- HOME / WELCOME -->
-  <section id="sec-home" class="section home" aria-label="Welcome">
+  <section id="sec-home" class="section home" aria-label="Welcome" hidden>
     <div class="welcome">
       <span class="badge-pill">Welcome to Prod99</span>
       <h1>Get Started</h1>
@@ -842,7 +933,7 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
   </section>
 
     <!-- STUDY -->
-    <section id="sec-study" class="section"><div class="wrap">
+    <section id="sec-study" class="section" hidden><div class="wrap">
       <div class="card" id="trk"><div class="card-head"><h3>
           <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
           Study tracker</h3></div>
@@ -857,1224 +948,857 @@ html[data-theme="dark"] #appView .theme-toggle .i-moon{display:none;}
             <button class="btn btn-ghost" id="timerStopBtn" type="button" disabled>Stop</button>
             <button class="btn btn-ghost" id="timerResetBtn" type="button" disabled>Reset</button>
           </div>
-          <span class="empty" id="today" style="padding:0;"></span>
-        </div>
-        <div class="daily-wrap">
-          <div class="daily-row"><span>Daily goal</span><b><span id="dailyGoalText">120</span> mins</b></div>
-          <div class="pbar" style="height:10px;"><i id="dailyBar" style="width:0%"></i></div>
+          <span class="empty" id="today"></span>
         </div>
       </div>
     </div></section>
 
-  <div id="workspace">
-
     <!-- GOALS -->
-    <section id="sec-goals" class="section"><div class="wrap">
-      <div id="pageHeader">
-        <div class="header-row">
-          <div>
-            <h2 id="greetHeading">Welcome back</h2>
-            <p class="header-sub">Pick up where you left off.</p>
-          </div>
-          <div class="header-meta">
-            <div class="date-pill">
-              <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="3"></rect><path d="M3 10h18M8 2v4M16 2v4"></path></svg>
-              <span id="todayDate"></span>
-            </div>
-            <div class="activity-pill">
-              <span class="activity-ring" id="headerRing" style="--p:0"></span>
-              <span><b id="headerMins">0</b> min studied today</span>
-            </div>
-          </div>
+    <section id="sec-goals" class="section" hidden><div class="wrap">
+      <div class="card">
+        <div class="card-head">
+          <h3>
+            <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle></svg>
+            Goals</h3>
+          <span class="note-count" id="goalSummary">Add a goal to start tracking</span>
         </div>
-      </div>
-
-      <div class="card"><div class="card-head"><h3>
-          <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-          Goals</h3></div>
-        <form class="row" id="goalForm"><input id="goalIn" placeholder="e.g. Finish Algebra unit" maxlength="60" aria-label="New goal"><button class="btn btn-solid">Add</button></form>
+        <div class="goal-add">
+          <input id="goalName" placeholder='e.g. "read 20 pages" — numbers become targets' maxlength="80" aria-label="New goal">
+          <button class="btn btn-solid" id="goalAddBtn" type="button">Add</button>
+        </div>
+        <div class="pbar"><i id="goalBar" style="width:0%"></i></div>
         <ul id="goalList"></ul>
       </div>
     </div></section>
 
-    <!-- FILES + BACKUP -->
-    <section id="sec-files" class="section"><div class="wrap">
+    <!-- FILES -->
+    <section id="sec-files" class="section" hidden><div class="wrap">
       <div class="grid-files">
-        <div class="card"><div class="card-head"><h3>
+        <div class="card">
+          <div class="card-head"><h3>
             <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M13 2v7h7"></path></svg>
             Files</h3></div>
-          <p class="empty" style="padding:0;">Up to 10 MB per file. Private to your account.</p>
-          <div class="row"><input type="file" id="fileIn" aria-label="Choose a file to upload"><button class="btn btn-solid" id="fileUp" type="button">Upload<span class="tag beta">Beta</span></button></div>
+          <input type="file" id="fileIn" multiple aria-label="Add files">
           <ul id="fileList"></ul>
         </div>
-
-        <div class="card"><div class="card-head"><h3>
+        <div class="card">
+          <div class="card-head"><h3>
             <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>
             Backup</h3></div>
-          <p class="backup-foot">Export or import your goals, study days and posts as JSON.</p>
-          <div class="row"><button class="btn btn-ghost" id="expBtn" type="button">Export</button><button class="btn btn-ghost" id="impBtn" type="button">Import</button><input type="file" id="impIn" accept="application/json,.json" hidden></div>
+          <p class="backup-foot">Everything lives in this browser. Download a backup file to move your notes, goals and files somewhere safe, or restore one here.</p>
+          <div class="row">
+            <button class="btn btn-ghost" id="backupBtn" type="button">Download backup</button>
+            <button class="btn btn-ghost" id="restoreBtn" type="button">Restore</button>
+          </div>
+          <input type="file" id="restoreIn" accept="application/json,.json" hidden>
         </div>
       </div>
     </div></section>
 
     <!-- COMMUNITY -->
-    <section id="sec-community" class="section"><div class="wrap">
-      <div class="card"><div class="card-head"><h3>
+    <section id="sec-community" class="section" hidden><div class="wrap">
+      <div class="card">
+        <div class="card-head"><h3>
           <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-          Community posts</h3><span class="badge" id="liveBadge" hidden>Live</span></div>
-        <form id="postForm"><input id="postIn" placeholder="Share a tip or lesson update..." maxlength="200" aria-label="Write a post"><select id="postRole" aria-label="Post as"><option>Student</option><option>Teacher</option></select><button class="btn btn-solid">Post</button></form>
+          Community</h3></div>
+        <form id="postForm" novalidate>
+          <input id="postText" placeholder="Share a win, a question, a tip..." maxlength="240" aria-label="New post">
+          <select id="postTag" aria-label="Post badge">
+            <option value="">No badge</option>
+            <option>Study</option>
+            <option>Win</option>
+            <option>Help</option>
+          </select>
+          <button class="btn btn-solid" type="submit">Post</button>
+        </form>
         <ul id="feed"></ul>
       </div>
     </div></section>
 
-  </div>
     </main>
   </div>
-
 </div>
 
-<div class="tour-scrim" id="tourScrim" role="dialog" aria-modal="true"
-     aria-labelledby="tourTitle" hidden>
-  <div id="tourSpot" aria-hidden="true"></div>
-  <div class="tour-tip" id="tourTip" role="document">
-    <p class="tour-step" id="tourStep"></p>
-    <h4 id="tourTitle"></h4>
-    <p id="tourBody"></p>
-    <p class="tour-hint" id="tourHint" hidden></p>
-    <div class="tour-dots" id="tourDots" aria-hidden="true"></div>
-    <div class="tour-actions">
-      <button class="btn btn-ghost" id="tourSkip" type="button">Skip tour</button>
-      <button class="btn btn-ghost" id="tourBack" type="button">Back</button>
-      <button class="btn btn-solid" id="tourNext" type="button">Next</button>
-    </div>
-  </div>
+<div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
 </div>
 
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-(function(){
-  "use strict";
+/* ===== 3D geometry backdrop — transparent WebGL, ink outlines, theme palette ===== */
+(function () {
+  'use strict';
+  if (typeof THREE === 'undefined') return;                 // CDN blocked → 2D shapes remain
+  var canvas = document.getElementById('geo3d');
+  var auth = document.getElementById('authView');
+  if (!canvas || !auth) return;
+  var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var KEEP_IN_APP = false;   /* true → shapes keep drifting behind the dashboard too */
 
-  // --- SHARED SETUP (was duplicated in both files; declared once) ---
-  var root = document.documentElement;
-  var SB_URL = "https://bbsxacrwjezzmxqazast.supabase.co";
-  var SB_KEY = "sb_publishable_zSz54-e_PF7nS9l7lzxlCQ_XSo7Trly";
-  var LEGACY_KEY = 'prod99_profile_id';
-  var sb = null;
-  var supabaseFailed = false;
-  try{
-    if(!window.supabase || !window.supabase.createClient){ throw new Error('Supabase library not loaded'); }
-    sb = window.supabase.createClient(SB_URL, SB_KEY);
-  }catch(err){
-    console.error('Supabase init failed:', err);
-    supabaseFailed = true;
-    sb = null;
-  }
-  var P99 = window.P99 = { sb: sb, profile: null, failed: supabaseFailed };
-  var workspaceReady = false;
-  var refreshAll = function(){};   // reassigned to the real implementation inside initWorkspace()
+  var renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true }); }
+  catch (e) { canvas.remove(); return; }
+  renderer.setClearColor(0x000000, 0);                      // FULLY transparent background
 
-  document.body.classList.add('is-booting');
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
+  camera.position.set(0, 0, 40);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8f8574, 1.05));
+  var dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+  dirLight.position.set(6, 10, 8);
+  scene.add(dirLight);
 
-  function showAuthView(){
-    document.body.setAttribute('data-view', 'auth');
-    document.getElementById('authView').hidden = false;
-    document.getElementById('appView').hidden  = true;
-  }
-  function showAppView(){
-    document.body.setAttribute('data-view', 'app');
-    document.getElementById('authView').hidden = true;
-    document.getElementById('appView').hidden  = false;
-  }
-  function finishBoot(){
-    document.body.classList.remove('is-booting');
-    root.classList.remove('boot');
-  }
-
-  // --- SHARED TOAST (used by both the auth guard and the workspace) ---
-  function toast(m){
-    var t=document.createElement('div');
-    t.className='toast';
-    t.setAttribute('role','status');
-    t.textContent=m;
-    document.body.appendChild(t);
-    setTimeout(function(){
-      t.classList.add('out');
-      setTimeout(function(){ t.remove(); }, 260);
-    }, 5000);
+  /* colors come straight from your CSS variables → light/dark themes stay in sync */
+  var shapesEl = document.querySelector('#authView .bg-shapes');
+  function pal() {
+    var rs = getComputedStyle(document.documentElement);
+    var gs = shapesEl ? getComputedStyle(shapesEl) : null;
+    var v = function (src, n, f) { var x = src ? src.getPropertyValue(n).trim() : ''; return x || f; };
+    return {
+      fill: [
+        v(rs, '--red', '#A93B31'), v(rs, '--blue', '#3B5A8C'), v(rs, '--hl', '#F4E07A'),
+        v(gs, '--sh-green', '#4E8C5F'), v(gs, '--sh-teal', '#2F7E7A'),
+        v(gs, '--sh-amber', '#C9803B'), v(gs, '--sh-rose', '#C26D6D'), v(gs, '--sh-indigo', '#5F6FA8')
+      ],
+      ink: v(rs, '--ink', '#3D3732')
+    };
   }
 
-  // --- THEME ---
-  // One handler; both #themeToggle (app) and #themeToggleAuth (auth) call it.
-  // Each button keeps its own original click flourish (dashboard: root "flip"
-  // class; auth: button "pulse" class + CSS animation), but the actual
-  // data-theme + localStorage persistence logic is now a single implementation.
-  function getStoredTheme(){ try{ return localStorage.getItem('prod99-theme'); }catch(e){ return null; } }
-  function storeTheme(t){ try{ localStorage.setItem('prod99-theme', t); }catch(e){} }
+  var GEOS = [
+    new THREE.TetrahedronGeometry(1, 0), new THREE.BoxGeometry(1.25, 1.25, 1.25),
+    new THREE.OctahedronGeometry(1, 0),  new THREE.DodecahedronGeometry(1, 0),
+    new THREE.IcosahedronGeometry(1, 0), new THREE.ConeGeometry(1, 1.7, 5),
+    new THREE.TorusGeometry(1, .4, 6, 14), new THREE.CylinderGeometry(.72, .72, 1.5, 6)
+  ];
 
-  var initialTheme = getStoredTheme() || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  root.setAttribute('data-theme', initialTheme);
+  var items = [], half = { w: 10, h: 6 };
 
-  if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').addEventListener){
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e){
-      if(getStoredTheme()){ return; }
-      var next = e.matches ? 'dark' : 'light';
-      root.setAttribute('data-theme', next);
-    });
-  }
-
-  function handleThemeToggle(){
-    var btn = this;
-    var isAuthBtn = btn.id === 'themeToggleAuth';
-    var reduced = false;
-    try{ reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches; }catch(e){}
-
-    if(isAuthBtn){
-      btn.classList.add('theme-pulse');
-      setTimeout(function(){ btn.classList.remove('theme-pulse'); }, 700);
-    } else if(!reduced){
-      root.classList.add('theme-flip');
-      void document.documentElement.offsetHeight;  // force style recalc
-    }
-
-    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    root.setAttribute('data-theme', next);
-    storeTheme(next);
-
-    if(!isAuthBtn && !reduced){
-      setTimeout(function(){ root.classList.remove('theme-flip'); }, 420);
-    }
-  }
-  document.getElementById('themeToggle').addEventListener('click', handleThemeToggle);
-  document.getElementById('themeToggleAuth').addEventListener('click', handleThemeToggle);
-  setTimeout(function(){ root.classList.remove('boot'); }, 100);
-
-
-  // --- Onboarding tour trigger bridge: initWorkspace fills this in once ready ---
-  var tourAPI = {};
-
-  // --- DOCK: active state + tab navigation (scrollspy guarded, see showTab) ---
-  var showTab = (function(){
-    var links = [].slice.call(document.querySelectorAll('.tab-item[data-sec]'));
-    var secs = links.map(function(a){ return document.getElementById(a.dataset.sec); }).filter(Boolean);
-    var ws = document.getElementById('workspace');
-    var lockUntil = 0;
-    function setActive(id){
-      links.forEach(function(a){
-        var on = a.dataset.sec === id;
-        a.classList.toggle('active', on);
-        if(on){ a.setAttribute('aria-current', 'true'); } else { a.removeAttribute('aria-current'); }
+  (function build() {
+    var p = pal();
+    var n = Math.max(6, Math.min(12, Math.round(innerWidth * innerHeight / 110000)));
+    var small = innerWidth < 700;
+    for (var i = 0; i < n; i++) {
+      var gi = i % GEOS.length;
+      var mesh = new THREE.Mesh(GEOS[gi], new THREE.MeshLambertMaterial({
+        color: new THREE.Color(p.fill[i % p.fill.length]), transparent: true, opacity: .85
+      }));
+      var edge = new THREE.LineSegments(                          // hand-drawn ink outline
+        new THREE.EdgesGeometry(GEOS[gi], 14),
+        new THREE.LineBasicMaterial({ color: new THREE.Color(p.ink), transparent: true, opacity: .9 })
+      );
+      mesh.add(edge);
+      var s = (small ? .9 : 1.25) * (1.15 + Math.random() * 1.15);
+      mesh.scale.setScalar(s);
+      var nx, ny;                                                  // steer clear of the card zone
+      for (var t = 0; t < 24; t++) {
+        nx = Math.random() * 2 - 1; ny = Math.random() * 2 - 1;
+        if (Math.abs(nx) > .34 || Math.abs(ny) > .46) break;
+      }
+      items.push({
+        mesh: mesh, s: s, nx: nx * .93, ny: ny * .9, nz: (Math.random() * 2 - 1) * 5,
+        rx: (Math.random() * 2 - 1) * .45, ry: (Math.random() * 2 - 1) * .55,
+        rz: (Math.random() * 2 - 1) * .3, bob: .5 + Math.random() * .8,
+        ph: Math.random() * Math.PI * 2
       });
+      scene.add(mesh);
     }
-    function showTab(id, opts){
-      opts = opts || {};
-      var t = document.getElementById(id);
-      if(!t) return;
-
-      // No-op if the target is already visible and no explicit reset
-      if(!t.hidden && !opts.instant){ setActive(id); return; }
-
-      secs.forEach(function(s){ s.hidden = true; });
-      if(ws){ ws.hidden = true; }
-      t.hidden = false;
-      if(id === 'sec-goals' || id === 'sec-files' || id === 'sec-community'){
-        if(ws){ ws.hidden = false; }
-      }
-
-      // Instant scroll to top — tab changes reset viewport, like
-      // every tabbed UI. 'instant' overrides html{scroll-behavior:smooth}.
-      try{ window.scrollTo({top:0, left:0, behavior:'instant'}); }
-      catch(e){ window.scrollTo(0, 0); }
-
-      // Entrance animation, unless caller asked for instant
-      if(!opts.instant){
-        t.classList.remove('tab-in');
-        void t.offsetWidth;              // force reflow, re-trigger keyframe
-        t.classList.add('tab-in');
-        setTimeout(function(){ t.classList.remove('tab-in'); }, 300);
-      }
-
-      lockUntil = Date.now() + 900;
-      setActive(id);
-    }
-    links.forEach(function(a){
-      a.addEventListener('click', function(e){ e.preventDefault(); showTab(a.dataset.sec); });
-    });
-    var start = document.getElementById('startBtn');
-    if(start){ start.addEventListener('click', function(e){
-      e.preventDefault();
-      var tpid = P99.profile && P99.profile.id;
-      if(!tpid){ toast('Loading, try again in a moment…'); return; } // auth still resolving — tour must not open
-      if(localStorage.getItem('prod99_tour_' + tpid) === 'done'){ showTab('sec-study'); }
-      else if(tourAPI.startTour){ tourAPI.startTour(); }
-    }); }
-    if('IntersectionObserver' in window){
-      var io = new IntersectionObserver(function(entries){
-        if(document.body.dataset.tabs === '1'){ return; }
-        if(Date.now() < lockUntil){ return; }
-        entries.forEach(function(en){ if(en.isIntersecting){ setActive(en.target.id); } });
-      }, { rootMargin: '-45% 0px -50% 0px' });
-      secs.forEach(function(s){ io.observe(s); });
-    }
-    window.addEventListener('scroll', function(){
-      if(document.body.dataset.tabs === '1'){ return; }
-      if(Date.now() < lockUntil){ return; }
-      var atBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 4);
-      if(atBottom && secs.length){ setActive(secs[secs.length - 1].id); }
-    }, { passive: true });
-    return showTab;
   })();
-  document.body.dataset.tabs = '1';
-  showTab('sec-notes', { instant: true });
 
-  // --- HEADER: date display (independent of auth; dashboard) ---
-  (function(){
+  function layout() {
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+    renderer.setSize(innerWidth, innerHeight);
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    var hh = Math.tan(camera.fov * Math.PI / 360) * camera.position.z;
+    half.h = hh; half.w = hh * camera.aspect;
+    render();
+  }
+  function render() { renderer.render(scene, camera); }
+
+  /* gentle pointer parallax */
+  var px = 0, py = 0, tx = 0, ty = 0;
+  window.addEventListener('pointermove', function (e) {
+    tx = (e.clientX / innerWidth) * 2 - 1;
+    ty = (e.clientY / innerHeight) * 2 - 1;
+  }, { passive: true });
+
+  /* burst: shapes swell + spin fast during view transitions */
+  var burst = 0, active = !auth.hidden || KEEP_IN_APP, hideTimer = 0;
+  function doBurst() { if (!reduced) burst = 1; }
+  window.Geo3D = { burst: doBurst };
+
+  /* fade the layer in/out together with the login view */
+  new MutationObserver(function () {
+    if (KEEP_IN_APP) return;
+    var vis = !auth.hidden;
+    if (vis) { clearTimeout(hideTimer); active = true; canvas.classList.remove('off'); }
+    else { hideTimer = setTimeout(function () { active = false; }, 700); canvas.classList.add('off'); }
+    if (reduced && active) render();
+  }).observe(auth, { attributes: true, attributeFilter: ['hidden'] });
+  if (!KEEP_IN_APP && auth.hidden) canvas.classList.add('off');
+
+  var last = 0;
+  function loop(t) {
+    requestAnimationFrame(loop);
+    if (!active || document.hidden) { last = t; return; }
+    var dt = Math.min(.05, (t - last) / 1000 || .016); last = t;
+    px += (tx - px) * .04; py += (ty - py) * .04;
+    camera.position.x = px * 1.4; camera.position.y = -py * 1;
+    camera.lookAt(0, 0, 0);
+    if (burst > 0) { burst += dt; if (burst > .8) burst = 0; }
+    var boost = burst > 0 ? Math.max(0, 1 - burst / .8) : 0;
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i], ts = t / 1000;
+      var wob = 1 + Math.sin(ts * 1.7 + it.ph) * .04;
+      var swell = burst > 0 ? 1 + boost * .5 * Math.sin(Math.min(burst / .8, 1) * Math.PI) : 1;
+      it.mesh.scale.setScalar(it.s * wob * swell);
+      var sp = 1 + boost * 7;
+      it.mesh.rotation.x += it.rx * dt * sp;
+      it.mesh.rotation.y += it.ry * dt * sp;
+      it.mesh.rotation.z += it.rz * dt * sp;
+      it.mesh.position.set(
+        it.nx * half.w,
+        it.ny * half.h + Math.sin(ts * .9 + it.ph) * it.bob,
+        it.nz
+      );
+    }
+    renderer.render(scene, camera);
+  }
+
+  layout();
+  window.addEventListener('resize', layout);
+
+  /* re-tint when the theme flips */
+  new MutationObserver(function () {
+    var p = pal();
+    items.forEach(function (it, i) {
+      it.mesh.children[0].material.color.set(p.ink);
+      it.mesh.material.color.set(p.fill[i % p.fill.length]);
+    });
+    if (reduced && active) render();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  if (!reduced) requestAnimationFrame(loop);
+})();
+</script>
+
+<script>
+/* ===== Prod99 app core: theme, auth, notes, study tracker, goals, files, community =====
+   NOTE: auth + data below are a LOCAL (localStorage) build so this file runs standalone.
+   The tail of the original file was cut off in the paste, so this section was rebuilt —
+   swap the marked AUTH block for your real Prod99.pass calls if they differ. */
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var body = document.body;
+  var curNote = null;
+
+  /* ---------- tiny storage helpers ---------- */
+  var LS = {
+    get: function (k, fb) { try { var v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch (e) { return fb; } },
+    set: function (k, v) { trySave(k, v); },
+    raw: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    putRaw: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    del: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+  function trySave(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+
+  /* ---------- toast ---------- */
+  var toastT = 0;
+  function toast(t) {
+    var el = $('toast'); if (!el) return;
+    el.textContent = t; el.hidden = false; el.classList.remove('out');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () {
+      el.classList.add('out');
+      setTimeout(function () { el.hidden = true; el.classList.remove('out'); }, 300);
+    }, 2600);
+  }
+
+  /* ---------- theme ---------- */
+  function toggleTheme() {
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    LS.putRaw('prod99_theme', next);
+    var b = $('themeToggleAuth');
+    if (b) { b.classList.remove('theme-pulse'); void b.offsetWidth; b.classList.add('theme-pulse'); setTimeout(function () { b.classList.remove('theme-pulse'); }, 750); }
+  }
+  $('themeToggleAuth').addEventListener('click', toggleTheme);
+  $('themeToggle').addEventListener('click', toggleTheme);
+
+  /* ============ AUTH — local demo; swap for your Prod99.pass calls ============ */
+  function hash(s) { var h = 5381, i; for (i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return String(h); }
+  var session = LS.get('prod99_session', null);
+  var mode = 'signup';
+
+  function setMode(m) {
+    mode = m;
+    $('authSubmit').textContent = m === 'signup' ? 'Create account' : 'Log in';
+    $('authSwitch').textContent = m === 'signup' ? 'Log in' : 'Create account';
+    $('auPass').setAttribute('autocomplete', m === 'signup' ? 'new-password' : 'current-password');
+    authMsg('');
+  }
+  function authMsg(t) { $('authMsg').textContent = t; }
+
+  $('authSwitch').addEventListener('click', function () { setMode(mode === 'signup' ? 'login' : 'signup'); });
+
+  $('authForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('auName').value.trim(), pass = $('auPass').value;
+    if (name.length < 2) { authMsg('Pick a username (2+ characters).'); return; }
+    if (pass.length < 4) { authMsg('Password needs at least 4 characters.'); return; }
+    var users = LS.get('prod99_users', {});
+    if (mode === 'signup' && users[name]) { authMsg('That username is taken — try logging in.'); return; }
+    if (mode === 'login' && (!users[name] || users[name].p !== hash(pass))) { authMsg('Wrong username or password.'); return; }
+    if (mode === 'signup') { users[name] = { p: hash(pass), created: Date.now() }; LS.set('prod99_users', users); }
+    signInAs(name);
+  });
+
+  function signInAs(name) {
+    session = { user: name, at: Date.now() };
+    LS.set('prod99_session', session);
+    loadData(); renderAll(); showApp();
+    toast('Welcome, ' + name + '!');
+  }
+  function showApp() {
+    body.setAttribute('data-view', 'app');
+    $('appView').removeAttribute('hidden');
+    $('authView').setAttribute('hidden', '');
+  }
+  function showAuth() {
+    body.setAttribute('data-view', 'auth');
+    $('authView').removeAttribute('hidden');
+    $('appView').setAttribute('hidden', '');
+  }
+  $('logoutBtn').addEventListener('click', function () {
+    flushFocus();
+    LS.del('prod99_session'); session = null; curNote = null;
+    showAuth();
+  });
+  /* ========================================================================== */
+
+  /* ---------- per-user data ---------- */
+  var D = { notes: [], goals: [], files: [], posts: [] };
+  function dataKey() { return 'prod99_data_' + (session ? session.user : '_'); }
+  function save() { trySave(dataKey(), D); }
+  function loadData() {
+    var raw = LS.raw(dataKey()), d = null;
+    if (raw) { try { d = JSON.parse(raw); } catch (e) { d = null; } }
+    if (!d || typeof d !== 'object') { D = { notes: [], goals: [], files: [], posts: [] }; seed(); save(); }
+    else {
+      D = d;
+      D.notes = D.notes || []; D.goals = D.goals || []; D.files = D.files || []; D.posts = D.posts || [];
+    }
+  }
+  function seed() {
+    D.notes.push({ id: 'n' + Date.now(), title: 'Welcome to Prod99', body: 'This notebook saves on its own — just start typing.\n\nIdeas for your first note:\n- What you want to learn this month\n- One small goal for today\n- Anything you don\'t want to forget', ts: Date.now() });
+    D.posts.push({ id: 'p1', user: 'mira', text: 'Finished my first full pomodoro — that orange ring is weirdly satisfying.', tag: 'Study', likes: 2, liked: false, ts: Date.now() - 3600e3 });
+    D.posts.push({ id: 'p2', user: 'kenji', text: 'Tip: end your goal with a number, like "read 30 pages", and it tracks automatically.', tag: 'Help', likes: 1, liked: false, ts: Date.now() - 7200e3 });
+  }
+
+  /* ---------- tabs ---------- */
+  var lastSec = LS.get('prod99_sec', 'sec-home');
+  if (!/^sec-/.test(lastSec || '')) lastSec = 'sec-home';
+  function showSec(id) {
+    if (!document.getElementById(id)) id = 'sec-home';
+    lastSec = id; LS.set('prod99_sec', id);
+    Array.prototype.forEach.call(document.querySelectorAll('#appView .tab-item'), function (t) {
+      var on = t.getAttribute('data-sec') === id;
+      t.classList.toggle('active', on);
+      if (on) t.setAttribute('aria-current', 'true'); else t.removeAttribute('aria-current');
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('#appView .section'), function (s) {
+      if (s.id === id) s.removeAttribute('hidden'); else s.setAttribute('hidden', '');
+    });
+    var sec = document.getElementById(id);
+    sec.classList.remove('tab-in'); void sec.offsetWidth; sec.classList.add('tab-in');
+    var c = document.querySelector('#appView .content'); if (c) c.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href^="#sec-"]') : null;
+    if (a) { e.preventDefault(); showSec(a.getAttribute('href').slice(1)); }
+  });
+
+  /* ---------- notes ---------- */
+  var saveTimer = 0, searchQ = '';
+  function words(s) { return (String(s || '').trim().match(/\S+/g) || []).length; }
+  function timeStr(ts) { try { return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
+  function dayStr(ts) { try { return new Date(ts).toLocaleDateString([], { month: 'short', day: 'numeric' }); } catch (e) { return ''; } }
+
+  function fillNoteList(ul, list) {
+    if (!ul) return;
+    ul.innerHTML = '';
+    if (!list.length) {
+      var li = document.createElement('li'); li.className = 'empty';
+      li.textContent = D.notes.length ? 'No matches for that search.' : 'No notes yet — hit “+ New”.';
+      ul.appendChild(li); return;
+    }
+    list.forEach(function (n) {
+      var li = document.createElement('li');
+      li.className = 'note-item' + (curNote && curNote.id === n.id ? ' active' : '');
+      li.dataset.id = n.id;
+      var b = document.createElement('b'); b.textContent = n.title || 'Untitled';
+      var s = document.createElement('span');
+      s.textContent = dayStr(n.ts) + ' · ' + (words(n.body) ? String(n.body).trim().replace(/\s+/g, ' ').slice(0, 46) : 'Empty note');
+      li.appendChild(b); li.appendChild(s);
+      li.addEventListener('click', function () { showSec('sec-notes'); openNote(n.id); });
+      ul.appendChild(li);
+    });
+  }
+  function renderNotes() {
+    var list = D.notes.filter(function (n) {
+      return !searchQ || ((n.title || '') + ' ' + (n.body || '')).toLowerCase().indexOf(searchQ) !== -1;
+    });
+    fillNoteList($('noteList'), list);
+    fillNoteList($('noteListMobile'), list);
+    $('noteCount').textContent = D.notes.length + (D.notes.length === 1 ? ' note' : ' notes');
+  }
+  function openNote(id) {
+    curNote = null;
+    if (id) D.notes.some(function (n) { if (n.id === id) { curNote = n; return true; } return false; });
+    Array.prototype.forEach.call(document.querySelectorAll('#appView .note-item'), function (li) {
+      li.classList.toggle('active', !!(curNote && li.dataset.id === curNote.id));
+    });
+    $('noteTitleIn').value = curNote ? curNote.title : '';
+    $('noteBodyIn').value = curNote ? curNote.body : '';
+    $('noteDelBtn').disabled = !curNote;
+    $('noteStatus').textContent = curNote ? 'Saved · ' + timeStr(curNote.ts) : 'No note selected';
+    updateNoteMeta();
+  }
+  function updateNoteMeta() {
+    var w = curNote ? words(curNote.body) : 0;
+    $('noteWords').textContent = w;
+    $('noteMins').textContent = w ? Math.max(1, Math.ceil(w / 200)) : 0;
+  }
+  function onEdit() {
+    if (!curNote) return;
+    curNote.title = $('noteTitleIn').value;
+    curNote.body = $('noteBodyIn').value;
+    curNote.ts = Date.now();
+    $('noteStatus').textContent = 'Saving…';
+    updateNoteMeta();
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      save();
+      D.notes.sort(function (a, b) { return b.ts - a.ts; });
+      $('noteStatus').textContent = 'Saved · ' + timeStr(curNote.ts);
+      renderNotes();
+    }, 500);
+  }
+  $('noteTitleIn').addEventListener('input', onEdit);
+  $('noteBodyIn').addEventListener('input', onEdit);
+  $('noteNewBtn').addEventListener('click', function () {
+    var n = { id: 'n' + Date.now(), title: '', body: '', ts: Date.now() };
+    D.notes.unshift(n); save(); renderNotes(); openNote(n.id);
+    showSec('sec-notes'); $('noteTitleIn').focus();
+  });
+  $('noteDelBtn').addEventListener('click', function () {
+    if (!curNote) return;
+    D.notes = D.notes.filter(function (n) { return n.id !== curNote.id; });
+    save(); toast('Note deleted'); renderNotes(); openNote(null);
+  });
+  ['noteSearch', 'mobileSearch'].forEach(function (id) {
+    $(id).addEventListener('input', function () {
+      searchQ = this.value.trim().toLowerCase();
+      $('noteSearch').value = this.value; $('mobileSearch').value = this.value;
+      renderNotes();
+    });
+  });
+
+  /* ---------- study tracker ---------- */
+  var timer = { mode: 'sw', dur: 25, running: false, base: 0, startAt: 0, _ls: 0 };
+  var acc = 0, lastTick = Date.now();
+  function elapsed() { return timer.base + (timer.running ? Date.now() - timer.startAt : 0); }
+  function fmt(ms) {
+    var s = Math.max(0, Math.floor(ms / 1000)), m = Math.floor(s / 60); s %= 60;
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+  function focusKey() {
     var d = new Date();
-    var el = document.getElementById('todayDate');
-    if(el){ el.textContent = d.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' }); }
-  })();
-
-  // --- LOGIN / SIGNUP FORM LOGIC (auth; lives inside #authView's DOM) ---
-  var panelSignup = document.getElementById('panelSignup');
-  var panelLogin = document.getElementById('panelLogin');
-  var authForm = document.getElementById('authForm');
-  var auName = document.getElementById('auName');
-  var auPass = document.getElementById('auPass');
-  var auMsg = document.getElementById('authMsg');
-  var auTitle = document.getElementById('authTitle');
-  var auHint = document.getElementById('authHint');
-  var auSubmit = document.getElementById('authSubmit');
-  var auSwitch = document.getElementById('authSwitch');
-  var authMode = 'signup';
-  var busyTimer = null;
-  var inFlight = false;
-
-  function setBusy(on){ clearTimeout(busyTimer); inFlight = on; auSubmit.disabled = on; }
-  function setMode(which){
-    authMode = which === 'login' ? 'login' : 'signup';
-    var signup = authMode === 'signup';
-    authForm.classList.toggle('is-signup', signup);
-    auTitle.textContent = signup ? 'Create an account' : 'Log in';
-    auHint.textContent = signup ? 'Pick a username and a password. No email needed.' : 'Use the username and password you signed up with.';
-    auSubmit.textContent = signup ? 'Create account' : 'Log in';
-    auSwitch.textContent = signup ? 'Log in' : 'Create an account';
-    auPass.setAttribute('autocomplete', signup ? 'new-password' : 'current-password');
-    auMsg.textContent = '';
-    document.getElementById('suMsg').textContent = '';
-    document.getElementById('liMsg').textContent = '';
-    if(!inFlight){ setBusy(false); }
+    return 'prod99_focus_' + d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
   }
-
-  if(supabaseFailed){
-    auSubmit.disabled = true;
-    auName.disabled = true;
-    auPass.disabled = true;
-    auMsg.textContent = 'Login service is unavailable. Reload to try again.';
+  function flushFocus() {
+    if (acc > 0) { LS.set(focusKey(), LS.get(focusKey(), 0) + Math.round(acc)); acc = 0; }
+    updateToday();
   }
-
-  authForm.addEventListener('submit', function(e){
-    e.preventDefault();
-    if(auSubmit.disabled){ return; }
-    if(!authForm.reportValidity()){ return; }
-    var panel;
-    if(authMode === 'signup'){
-      document.getElementById('suName').value = auName.value;
-      document.getElementById('suPassword').value = auPass.value;
-      document.getElementById('suConfirm').value = auPass.value;
-      panel = panelSignup;
+  function updateToday() {
+    var m = Math.floor((LS.get(focusKey(), 0) + acc) / 60000);
+    $('today').textContent = m > 0 ? 'Focused ' + m + ' min today' : 'No focus time logged yet today';
+  }
+  function ring(p) { $('timerRing').style.setProperty('--tp', Math.max(0, Math.min(100, p))); }
+  function paintTimer() {
+    var e = elapsed();
+    if (timer.mode === 'po') {
+      var total = timer.dur * 60000, remain = Math.max(0, total - e);
+      $('clock').textContent = fmt(remain);
+      ring(remain / total * 100);
     } else {
-      document.getElementById('liEmail').value = auName.value;
-      document.getElementById('liPassword').value = auPass.value;
-      panel = panelLogin;
+      $('clock').textContent = fmt(e);
+      ring((e % 60000) / 600);
     }
-    setBusy(true);
-    panel.dispatchEvent(new Event('submit', { cancelable: true }));
+  }
+  function setRunUI() {
+    $('timerStartBtn').textContent = timer.running ? 'Pause' : 'Start';
+    $('timerStopBtn').disabled = !timer.running;
+    $('timerResetBtn').disabled = timer.running ? false : elapsed() === 0;
+    $('trk').classList.toggle('running', timer.running);
+  }
+  function pauseTimer() {
+    if (timer.running) { timer.base = elapsed(); timer.running = false; }
+    flushFocus(); setRunUI(); paintTimer();
+  }
+  $('timerStartBtn').addEventListener('click', function () {
+    if (timer.running) { pauseTimer(); return; }
+    if (timer.mode === 'po' && timer.base >= timer.dur * 60000) timer.base = 0;
+    timer.running = true; timer.startAt = Date.now(); lastTick = Date.now();
+    setRunUI(); paintTimer();
+  });
+  $('timerStopBtn').addEventListener('click', pauseTimer);
+  $('timerResetBtn').addEventListener('click', function () {
+    pauseTimer(); timer.base = 0; setRunUI(); paintTimer();
+  });
+  function setTimerMode(m) {
+    flushFocus();
+    timer.mode = m; timer.base = 0; timer.running = false;
+    $('mdSw').setAttribute('aria-pressed', String(m === 'sw'));
+    $('mdPo').setAttribute('aria-pressed', String(m === 'po'));
+    $('duSeg').hidden = m !== 'po';
+    setRunUI(); paintTimer();
+  }
+  $('mdSw').addEventListener('click', function () { setTimerMode('sw'); });
+  $('mdPo').addEventListener('click', function () { setTimerMode('po'); });
+  function setDur(d) {
+    flushFocus();
+    timer.dur = d; timer.base = 0; timer.running = false;
+    $('du25').setAttribute('aria-pressed', String(d === 25));
+    $('du50').setAttribute('aria-pressed', String(d === 50));
+    setRunUI(); paintTimer();
+  }
+  $('du25').addEventListener('click', function () { setDur(25); });
+  $('du50').addEventListener('click', function () { setDur(50); });
+  setInterval(function () {
+    var now = Date.now();
+    if (timer.running) {
+      acc += now - lastTick;
+      if (timer.mode === 'po' && elapsed() >= timer.dur * 60000) {
+        timer.running = false; timer.base = 0;
+        flushFocus();
+        toast('Pomodoro complete — take a break! ☕');
+        setRunUI(); paintTimer();
+        lastTick = now; return;
+      }
+      if (now - timer._ls > 10000) { timer._ls = now; flushFocus(); }
+    }
+    lastTick = now;
+    paintTimer();
+  }, 250);
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      flushFocus();
+      if (timer.running) { timer.base = elapsed(); timer.startAt = Date.now(); }
+    }
+    lastTick = Date.now();
+  });
+  window.addEventListener('pagehide', flushFocus);
+
+  /* ---------- goals ---------- */
+  function renderGoals() {
+    var ul = $('goalList'); ul.innerHTML = '';
+    if (!D.goals.length) {
+      var li = document.createElement('li'); li.className = 'empty';
+      li.textContent = 'No goals yet — try “read 20 pages”.';
+      ul.appendChild(li);
+    }
+    D.goals.forEach(function (g) {
+      var li = document.createElement('li');
+      li.className = 'goal-li gt'; li.dataset.id = g.id;
+      var inc = document.createElement('button');
+      inc.type = 'button'; inc.dataset.a = 'inc';
+      inc.textContent = g.target > 1 ? '+1' : (g.done ? '↺' : '✓');
+      var span = document.createElement('span');
+      span.textContent = g.text + (g.target > 1 ? ' (' + g.done + '/' + g.target + ')' : '');
+      span.title = g.text;
+      var b = document.createElement('b');
+      b.textContent = g.target > 1 ? g.done : (g.done ? '✓' : '–');
+      var del = document.createElement('button');
+      del.type = 'button'; del.dataset.a = 'del'; del.textContent = '×';
+      del.setAttribute('aria-label', 'Delete goal');
+      li.appendChild(inc); li.appendChild(span); li.appendChild(b); li.appendChild(del);
+      ul.appendChild(li);
+    });
+    var td = 0, tt = 0;
+    D.goals.forEach(function (g) { td += g.done; tt += g.target; });
+    $('goalBar').style.width = (tt ? Math.min(100, td / tt * 100) : 0) + '%';
+    $('goalSummary').textContent = tt ? td + ' of ' + tt + ' steps done' : 'Add a goal to start tracking';
+  }
+  function addGoal() {
+    var txt = $('goalName').value.trim();
+    if (!txt) { toast('Give your goal a name first.'); return; }
+    var m = txt.match(/(\d+)\s*$/);
+    var target = m ? Math.max(1, parseInt(m[1], 10)) : 1;
+    var label = m ? txt.replace(/\d+\s*$/, '').trim() : txt;
+    D.goals.push({ id: 'g' + Date.now(), text: label || txt, target: target, done: 0, ts: Date.now() });
+    $('goalName').value = '';
+    save(); renderGoals();
+  }
+  $('goalAddBtn').addEventListener('click', addGoal);
+  $('goalName').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addGoal(); } });
+  $('goalList').addEventListener('click', function (e) {
+    var btn = e.target && e.target.closest ? e.target.closest('button') : null;
+    if (!btn) return;
+    var li = btn.closest('li'), g = null;
+    D.goals.some(function (x) { if (x.id === li.dataset.id) { g = x; return true; } return false; });
+    if (!g) return;
+    if (btn.dataset.a === 'inc') {
+      if (g.target > 1) {
+        if (g.done < g.target) { g.done++; if (g.done === g.target) toast('Goal complete! 🎉'); }
+      } else { g.done = g.done ? 0 : 1; if (g.done) toast('Goal complete! 🎉'); }
+      save(); renderGoals();
+    } else if (btn.dataset.a === 'del') {
+      D.goals = D.goals.filter(function (x) { return x !== g; });
+      save(); renderGoals();
+    }
   });
 
-  function focusFirstInvalid(){
-    if(!auName.value){ auName.focus(); }
-    else if(!auPass.value){ auPass.focus(); }
-    else { auName.focus(); }
+  /* ---------- files ---------- */
+  function fmtSize(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1048576).toFixed(1) + ' MB';
   }
-  function mirrorMsg(){
-    var src = document.getElementById(authMode === 'signup' ? 'suMsg' : 'liMsg');
-    auMsg.textContent = src.textContent;
-    if(src.textContent){ setBusy(false); focusFirstInvalid(); }
-  }
-  if(window.MutationObserver){
-    var mo = new MutationObserver(mirrorMsg);
-    var moOpts = { childList: true, characterData: true, subtree: true };
-    mo.observe(document.getElementById('suMsg'), moOpts);
-    mo.observe(document.getElementById('liMsg'), moOpts);
-  }
-
-
-  auSwitch.addEventListener('click', function(){ setMode(authMode === 'signup' ? 'login' : 'signup'); auName.focus(); });
-
-  async function callAuthFn(name, username, password){
-    if(supabaseFailed || !sb){ return { ok:false, message:'Login service is unavailable. Reload the page to try again.' }; }
-    try{
-      var r = await sb.functions.invoke(name, { body: { username: username, password: password } });
-      if(r.error){
-        console.error(name, r.error);
-        var body = null;
-        try{ body = await r.error.context.json(); }catch(e){}
-        return { ok:false, code: r.error.context && r.error.context.status, message: (body && body.error) || r.error.message };
-      }
-      if(r.data && r.data.error){ return { ok:false, code: r.data.code, message: r.data.error }; }
-      return { ok:true, data: r.data };
-    }catch(err){
-      console.error(name, err);
-      return { ok:false, message: 'Network error' };
+  function renderFiles() {
+    var ul = $('fileList'); ul.innerHTML = '';
+    if (!D.files.length) {
+      var li = document.createElement('li'); li.className = 'empty';
+      li.textContent = 'No files yet — pick one above (up to 1.5 MB each).';
+      ul.appendChild(li); return;
     }
-  }
-
-  async function applySession(d){
-    if(!d || !d.access_token || !d.refresh_token || !d.profile || !d.profile.id){ throw new Error('Malformed login response'); }
-    var r = await sb.auth.setSession({ access_token: d.access_token, refresh_token: d.refresh_token });
-    if(r.error){ throw r.error; }
-  }
-
-  panelSignup.addEventListener('submit', async function(e){
-    e.preventDefault();
-    var msg = document.getElementById('suMsg');
-    var username = document.getElementById('suName').value.trim().toLowerCase();
-    var pass = document.getElementById('suPassword').value;
-    var confirm = document.getElementById('suConfirm').value;
-
-    if(!username || pass.length < 6){ msg.textContent = 'Pick a username and a password of at least 6 characters.'; setBusy(false); return; }
-    if(username.length < 3){ msg.textContent = 'Username must be at least 3 characters.'; setBusy(false); return; }
-    if(!/^[a-z0-9_]+$/.test(username)){ msg.textContent = 'Username can only use letters, numbers, and underscores.'; setBusy(false); return; }
-    if(pass !== confirm){ msg.textContent = 'Passwords don\'t match.'; setBusy(false); return; }
-
-    var res = await callAuthFn('signup', username, pass);
-    if(!res.ok){
-      if(res.message && res.message.indexOf('unavailable') > -1){ msg.textContent = res.message; }
-      else { msg.textContent = (res.code === 409 || res.message === 'Username taken') ? 'That username is already taken.' : 'Something went wrong. Try again.'; }
-      setBusy(false); return;
-    }
-    var lr = await callAuthFn('login', username, pass);
-    try{ if(!lr.ok){ throw new Error(lr.message); } await applySession(lr.data); }
-    catch(err){
-      console.error(err); msg.textContent = 'Account created, but sign-in failed. Try logging in.'; setBusy(false); return;
-    }
-    setProfile(lr.data.profile);
-    msg.textContent = '';
-    panelSignup.reset();
-    setBusy(false);
-  });
-
-  panelLogin.addEventListener('submit', async function(e){
-    e.preventDefault();
-    var msg = document.getElementById('liMsg');
-    var username = document.getElementById('liEmail').value.trim().toLowerCase();
-    var pass = document.getElementById('liPassword').value;
-    var res = await callAuthFn('login', username, pass);
-    if(!res.ok){
-      if(res.message && res.message.indexOf('unavailable') > -1){ msg.textContent = res.message; }
-      else { msg.textContent = 'No account matches that username and password.'; }
-      setBusy(false); return;
-    }
-    try{ await applySession(res.data); }
-    catch(err){
-      console.error(err); msg.textContent = 'Could not start your session. Try again.'; setBusy(false); return;
-    }
-    setProfile(res.data.profile);
-    msg.textContent = '';
-    panelLogin.reset();
-    setBusy(false);
-  });
-
-  // --- AUTH GUARD / SESSION (merges dashboard's checkAuth + login's restoreSession:
-  //     one profiles lookup instead of two; setProfile() decides which view shows) ---
-  function clearLegacyId(){ try{ localStorage.removeItem(LEGACY_KEY); }catch(e){} }
-
-  function setProfile(profile){
-    P99.profile = profile;
-    if(profile){
-      document.getElementById('accountName').textContent = profile.username;
-      var av = document.getElementById('avatarInitial');
-      if(av){ av.textContent = (profile.username||'?').trim().charAt(0).toUpperCase() || '?'; }
-      var gh = document.getElementById('greetHeading');
-      if(gh){ gh.textContent = 'Welcome back, ' + profile.username; }
-      if(!workspaceReady){
-        workspaceReady = true;
-        finishBoot();
-        showAppView();
-        initWorkspace(); // Load all the cards and logic!
-      } else {
-        showAppView();
-        refreshAll();
-      }
-    } else {
-      showAuthView();
-      finishBoot();
-    }
-  }
-
-  if(sb){
-    sb.auth.onAuthStateChange(function(ev){
-      if(ev === 'SIGNED_IN'){ /* handled by setProfile, called from the panels above / restoreSession */ }
-      if(ev === 'SIGNED_OUT' && P99.profile){
-        P99.profile = null;
-        showAuthView();
-        setMode('signup');
-      }
+    D.files.forEach(function (f) {
+      var li = document.createElement('li');
+      li.innerHTML = '<svg class="ficon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M13 2v7h7"></path></svg>';
+      var meta = document.createElement('span'); meta.className = 'fmeta';
+      meta.textContent = f.name + ' · ' + fmtSize(f.size);
+      var a = document.createElement('a'); a.className = 'btn btn-ghost';
+      a.textContent = 'Save'; a.download = f.name; a.href = f.data;
+      var del = document.createElement('button'); del.className = 'fdel'; del.type = 'button';
+      del.textContent = '×'; del.setAttribute('aria-label', 'Delete ' + f.name);
+      del.addEventListener('click', function () {
+        D.files = D.files.filter(function (x) { return x !== f; });
+        save(); renderFiles(); toast('File removed');
+      });
+      li.appendChild(meta); li.appendChild(a); li.appendChild(del);
+      ul.appendChild(li);
     });
   }
-
-  async function restoreSession(){
-    clearLegacyId();
-    if(supabaseFailed || !sb){ setProfile(null); return; }
-    try{
-      var s = await sb.auth.getSession();
-      if(s.error || !s.data || !s.data.session){ setProfile(null); return; }
-      var r = await sb.from('profiles').select('id,username').eq('auth_id', s.data.session.user.id).maybeSingle();
-      if(r.error){
-        // Transient/query error — don't sign the user out, just let them know.
-        console.error('Session restore error:', r.error);
-        toast('Something went wrong: ' + (r.error.message || 'Unknown error'));
-        setProfile(null);
-      } else if(r.data){
-        setProfile(r.data);
-      } else {
-        console.error('Auth session has no linked profile row; signing out.');
-        await sb.auth.signOut({ scope: 'local' });
-        setProfile(null);
-      }
-    }catch(err){
-      console.error('Session restore failed (likely network):', err);
-      setProfile(null);
-    }
-  }
-
-  document.getElementById('logoutBtn').addEventListener('click', async function(){
-    await sb.auth.signOut();
-    P99.profile = null;
-    showAuthView();
-    setMode('signup');
-    document.getElementById('auName').focus();
+  $('fileIn').addEventListener('change', function () {
+    var files = Array.prototype.slice.call(this.files);
+    this.value = '';
+    files.forEach(function (f) {
+      if (f.size > 1.5 * 1024 * 1024) { toast('“' + f.name + '” is over 1.5 MB — skipped.'); return; }
+      var r = new FileReader();
+      r.onload = function () {
+        D.files.unshift({ id: 'f' + Date.now() + Math.random().toString(36).slice(2, 6), name: f.name, size: f.size, ts: Date.now(), data: r.result });
+        if (!trySave(dataKey(), D)) {
+          D.files.shift();
+          toast('Storage is full — could not add “' + f.name + '”.');
+          return;
+        }
+        renderFiles(); toast('Added ' + f.name);
+      };
+      r.readAsDataURL(f);
+    });
   });
-
-  // --- WORKSPACE LOGIC (dashboard; runs once, the first time a profile is set) ---
-  function initWorkspace(){
-    var $=function(i){return document.getElementById(i)};
-    function esc(t){var d=document.createElement("div");d.textContent=t;return d.innerHTML}
-    function attr(v){return String(v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
-    function num(v){return Number(v)||0}
-    var sb=P99.sb,goals=[],logs={},posts=[];
-    var tm=null,tStart=0;
-    var busyGoalIds={},likeInFlight={};
-    function pid(){return P99.profile&&P99.profile.id}
-    function need(){if(!pid()){alert('Log in first');return false}return true}
-    function bad(r){if(r&&r.error){console.error(r.error);toast('Something went wrong: '+(r.error.message||'Unknown error'));return true}return false}
-    function pad(n){return ('0'+n).slice(-2)}
-    function key(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
-    function fmt(secs){return pad(Math.floor(secs/60))+':'+pad(secs%60)}
-
-    /* Onboarding tour */
-    var TOUR_STEPS=[
-      { tab:'sec-notes',     target:'.editor-card',          hint:'Try it: click New note',
-        title:'Notes',
-        body:'Jot things down here first. Notes autosave on this device as you type.' },
-      { tab:'sec-home',      target:'.welcome',              hint:null,
-        title:'Welcome to Prod99',
-        body:'Your space to focus, plan, and make progress. Quick tour? ~20 seconds.' },
-      { tab:'sec-study',     target:'#trk',                  hint:'Try it: click Pomodoro',
-        advanceOn:'click', advanceSel:'#mdPo',
-        title:'Study tracker',
-        body:'Stopwatch or Pomodoro (25/50 min). Time is logged automatically.' },
-      { tab:'sec-goals',     target:'#sec-goals .card',      hint:'Try it: add a goal and press Add',
-        advanceOn:'submit', advanceSel:'#goalForm',
-        title:'Goals',
-        body:'Add a goal, then bump it 10% each time you make headway.' },
-      { tab:'sec-files',     target:'#sec-files .card',      hint:null,
-        title:'Files & backup',
-        body:'Upload up to 10 MB per file. Export your data as JSON anytime.' },
-      { tab:'sec-community', target:'#sec-community .card',  hint:null,
-        title:'Community',
-        body:'Share tips with other students and teachers. Posts update live.' }
-    ];
-    var tourIndex=0,tourOpen=false,tourAdvancing=false;
-    function buildDots(idx){
-      var d=$('tourDots'); if(!d)return;
-      d.innerHTML=TOUR_STEPS.map(function(_,i){return '<i class="'+(i===idx?'on':'')+'"></i>'}).join('');
-    }
-    function highlightDock(tab){
-      clearHighlight();
-      var el=document.querySelector('.tab-item[data-sec="'+tab+'"]');
-      if(el){ el.classList.add('tour-highlight'); }
-    }
-    function clearHighlight(){
-      [].slice.call(document.querySelectorAll('.tab-item.tour-highlight')).forEach(function(el){ el.classList.remove('tour-highlight'); });
-    }
-    function resolveTarget(step){
+  $('backupBtn').addEventListener('click', function () {
+    var blob = new Blob([JSON.stringify(D)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'prod99-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    toast('Backup downloaded');
+  });
+  $('restoreBtn').addEventListener('click', function () { $('restoreIn').click(); });
+  $('restoreIn').addEventListener('change', function () {
+    var f = this.files[0]; this.value = '';
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function () {
       try {
-        var t = step.target ? document.querySelector(step.target) : null;
-        if (t && t.getBoundingClientRect().width > 0) return t;
-      } catch(e){}
-      return document.getElementById(step.tab);   // fallback: the section
-    }
-    function positionSpotlight(el){
-      var spot = $('tourSpot'); if (!spot || !el) return;
-      var r = el.getBoundingClientRect();
-      var pad = 8;
-      spot.style.top    = Math.max(0, r.top    - pad) + 'px';
-      spot.style.left   = Math.max(0, r.left   - pad) + 'px';
-      spot.style.width  = (r.width  + pad*2) + 'px';
-      spot.style.height = (r.height + pad*2) + 'px';
-      // match the target's radius if it has one, clamped
-      var radius = 16;
-      try { var cs = getComputedStyle(el); var br = parseFloat(cs.borderTopLeftRadius)||0;
-            if (br >= 4 && br <= 28) radius = br; } catch(e){}
-      spot.style.borderRadius = radius + 'px';
-    }
-    function positionTip(el){
-      var tip = $('tourTip'); if (!tip || !el) return;
-      var r = el.getBoundingClientRect();
-      var vw = window.innerWidth, vh = window.innerHeight;
-      var tw = Math.min(360, vw - 32);
-      var th = tip.offsetHeight || 200;   // measured; tip must be visible
-      var gap = 16;
-      var left = r.left + r.width/2 - tw/2;
-      left = Math.max(16, Math.min(vw - tw - 16, left));
+        var d = JSON.parse(r.result);
+        if (!d || typeof d !== 'object' || !d.notes) throw 0;
+        D = { notes: d.notes || [], goals: d.goals || [], files: d.files || [], posts: d.posts || [] };
+        save(); curNote = null; renderAll(); toast('Backup restored');
+      } catch (e) { toast('That file doesn’t look like a Prod99 backup.'); }
+    };
+    r.readAsText(f);
+  });
 
-      var belowY = r.top + r.height + gap;
-      var aboveY = r.top - gap - th;
-      var top, dir;
-      if (belowY + th + 16 <= vh)          { top = belowY; dir = 'arrow-up';   }
-      else if (aboveY >= 16)               { top = aboveY; dir = 'arrow-down'; }
-      else                                 { top = vh - th - 16; dir = 'arrow-none'; }
-
-      tip.style.left = left + 'px';
-      tip.style.top  = top  + 'px';
-      tip.classList.remove('arrow-up','arrow-down','arrow-none');
-      tip.classList.add(dir);
-
-      // re-aim the arrow at the target's horizontal center
-      var arrowX = r.left + r.width/2 - left;
-      arrowX = Math.max(16, Math.min(tw - 28, arrowX));
-      tip.style.setProperty('--arrow-x', arrowX + 'px');
+  /* ---------- community ---------- */
+  function timeAgo(ts) {
+    var s = (Date.now() - ts) / 1000;
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    return Math.floor(s / 86400) + 'd ago';
+  }
+  function renderFeed() {
+    var feed = $('feed'); feed.innerHTML = '';
+    if (!D.posts.length) {
+      var li = document.createElement('li'); li.className = 'empty';
+      li.textContent = 'Nothing posted yet — say hi!';
+      feed.appendChild(li); return;
     }
-    function positionForStep(step){
-      var el = resolveTarget(step);
-      positionSpotlight(el);
-      positionTip(el);
-    }
-    function tourReposition(){
-      if(!tourOpen) return;
-      positionForStep(TOUR_STEPS[tourIndex]);
-    }
-    function renderStep(){
-      var s=TOUR_STEPS[tourIndex];
-      showTab(s.tab, { instant: true });
-      highlightDock(s.tab);
-      var _scrim=$('tourScrim');
-      if(s.advanceOn){ _scrim.classList.add('is-interactive'); }
-      else { _scrim.classList.remove('is-interactive'); }
-      // measure AFTER layout (section was just unhidden)
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){ positionForStep(s); });
-      });
-      $('tourStep').textContent='Step '+(tourIndex+1)+' of '+TOUR_STEPS.length;
-      $('tourTitle').textContent=s.title;
-      $('tourBody').textContent=s.body;
-      var hint=$('tourHint');
-      if(s.hint){ hint.textContent=s.hint; hint.hidden=false; } else { hint.hidden=true; hint.textContent=''; }
-      buildDots(tourIndex);
-      $('tourBack').disabled=(tourIndex===0);
-      $('tourNext').textContent=(tourIndex===TOUR_STEPS.length-1)?'Finish':'Next';
-      tourAdvancing=false;
-      $('tourNext').focus();
-    }
-    function nextStep(){
-      if(tourIndex===TOUR_STEPS.length-1){ finishTour(); return; }
-      tourIndex++; renderStep();
-    }
-    function prevStep(){
-      if(tourIndex===0)return;
-      tourIndex--; renderStep();
-    }
-    function tourObserve(e){
-      if(!tourOpen||tourAdvancing)return;
-      var s=TOUR_STEPS[tourIndex];
-      if(!s.advanceOn||!s.advanceSel)return;
-      var hit=e.target&&e.target.closest&&e.target.closest(s.advanceSel);
-      if(!hit)return;
-      if (s.advanceSel === '#goalForm' && !$('goalIn').value.trim()) return;
-      if(e.type===s.advanceOn){ tourAdvancing=true; setTimeout(nextStep,0); }
-    }
-    function hideChrome(hide){
-      var nodes = [document.querySelector('.tab-bar'),
-                   document.querySelector('.sidebar-footer'),
-                   document.querySelector('div.bg')];
-      nodes.forEach(function(n){
-        if(!n) return;
-        if(hide){ n.setAttribute('aria-hidden','true'); }
-        else    { n.removeAttribute('aria-hidden'); }
-      });
-    }
-    function startTour(){
-      if(!pid())return;
-      tourOpen=true; tourIndex=0;
-      $('tourScrim').hidden=false;
-      hideChrome(true);
-      document.addEventListener('click',tourObserve,true);
-      document.addEventListener('submit',tourObserve,true);
-      window.addEventListener('resize', tourReposition);
-      window.addEventListener('scroll', tourReposition, { passive:true });
-      renderStep();
-    }
-    function finishTour(){
-      try{ localStorage.setItem('prod99_tour_'+pid(),'done'); }catch(e){}
-      tourOpen=false;
-      window.removeEventListener('resize', tourReposition);
-      window.removeEventListener('scroll', tourReposition);
-      $('tourScrim').classList.remove('is-interactive');
-      hideChrome(false);
-      $('tourScrim').hidden=true;
-      clearHighlight();
-      document.removeEventListener('click',tourObserve,true);
-      document.removeEventListener('submit',tourObserve,true);
-      showTab('sec-study', { instant: true });
-      var active = document.querySelector('.tab-item.active');
-      if(active){ active.focus(); }
-    }
-    $('tourNext').addEventListener('click',nextStep);
-    $('tourBack').addEventListener('click',prevStep);
-    $('tourSkip').addEventListener('click',finishTour);
-    document.addEventListener('keydown',function(e){
-      if(!tourOpen)return;
-      if(e.key==='Escape'){ finishTour(); return; }
-      var tip=$('tourTip');
-      if(tip&&tip.contains(document.activeElement)){
-        if(e.key==='ArrowRight'){ nextStep(); }
-        else if(e.key==='ArrowLeft'){ prevStep(); }
-      }
+    D.posts.forEach(function (p) {
+      var li = document.createElement('li'); li.className = 'post'; li.dataset.id = p.id;
+      var small = document.createElement('small');
+      var ub = document.createElement('b'); ub.textContent = p.user; small.appendChild(ub);
+      if (p.tag) { var tg = document.createElement('span'); tg.className = 'badge'; tg.textContent = p.tag; small.appendChild(tg); }
+      var dt = document.createElement('span'); dt.textContent = '· ' + timeAgo(p.ts); small.appendChild(dt);
+      var para = document.createElement('p'); para.textContent = p.text;
+      var like = document.createElement('button'); like.type = 'button';
+      like.className = 'like' + (p.liked ? ' liked' : '');
+      like.textContent = (p.liked ? '♥ ' : '♡ ') + p.likes;
+      like.setAttribute('aria-label', 'Like post by ' + p.user);
+      li.appendChild(small); li.appendChild(para); li.appendChild(like);
+      feed.appendChild(li);
     });
-    tourAPI.startTour=startTour;
+  }
+  $('postForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var txt = $('postText').value.trim();
+    if (!txt) { toast('Write something first.'); return; }
+    D.posts.unshift({ id: 'p' + Date.now(), user: session ? session.user : 'anon', text: txt, tag: $('postTag').value, likes: 0, liked: false, ts: Date.now() });
+    $('postText').value = ''; $('postTag').value = '';
+    save(); renderFeed(); toast('Posted!');
+  });
+  $('feed').addEventListener('click', function (e) {
+    var btn = e.target && e.target.closest ? e.target.closest('.like') : null;
+    if (!btn) return;
+    var li = btn.closest('li'), p = null;
+    D.posts.some(function (x) { if (String(x.id) === li.dataset.id) { p = x; return true; } return false; });
+    if (!p) return;
+    p.liked = !p.liked; p.likes = Math.max(0, p.likes + (p.liked ? 1 : -1));
+    save(); renderFeed();
+  });
 
-    /* Goals */
-    var goalsLoadState='ok';
-    async function loadGoals(){
-      goals=[];
-      if(pid()){
-        var r=await sb.from('goals').select('*').eq('profile_id',pid()).order('created_at');
-        if(r.error){console.error(r.error);goalsLoadState='error';}
-        else{goals=r.data||[];goalsLoadState='ok';}
-      } else {
-        goalsLoadState='ok';
-      }
-      drawGoals();
-    }
-    function drawGoals(){
-      var ul=$('goalList'),seen={},i,c;
-      if(goalsLoadState==='error'){ ul.innerHTML='<li class="empty">Couldn\'t load goals. <button data-a="retry">Retry</button></li>'; return; }
-      if(!goals.length){ ul.innerHTML='<li class="empty">No goals yet. Add your first.</li>'; return; }
-      var ph=ul.querySelector('li.empty'); if(ph){ ph.remove(); }
-      goals.forEach(function(g){
-        var id=String(g.id),li=null,pct=num(g.progress),busy=!!busyGoalIds[g.id];
-        seen[id]=1;
-        for(i=0;i<ul.children.length;i++){ if(ul.children[i].dataset.gid===id){ li=ul.children[i]; break; } }
-        if(!li){
-          li=document.createElement('li'); li.className='goal-li'; li.dataset.gid=id;
-          li.innerHTML='<div class="gt"><span></span><b></b><button data-a="up">+10</button><button data-a="del" aria-label="Remove">&times;</button></div><div class="pbar"><i style="width:0%"></i></div>';
-          li.querySelector('span').textContent=g.title;
-          li.querySelector('[data-a="up"]').dataset.id=id;
-          li.querySelector('[data-a="del"]').dataset.id=id;
-          ul.appendChild(li);
-          void li.offsetWidth;
-        }
-        li.querySelector('b').textContent=pct+'%';
-        li.querySelector('.pbar i').style.width=pct+'%';
-        li.style.opacity = pct>=100 ? '.72' : '1';
-        var up=li.querySelector('[data-a="up"]');
-        up.disabled=busy; up.textContent=busy?'\u2026':'+10';
-      });
-      for(i=ul.children.length-1;i>=0;i--){
-        c=ul.children[i];
-        if(!c.dataset.gid||!seen[c.dataset.gid]){ c.remove(); }
-      }
-    }
-    $('goalForm').addEventListener('submit',async function(e){e.preventDefault();var v=$('goalIn').value.trim();if(!v)return;if(!need())return;var r=await sb.from('goals').insert({profile_id:pid(),title:v,progress:0});if(bad(r))return;$('goalIn').value='';loadGoals()});
-    $('goalList').addEventListener('click',async function(e){
-      var retryBtn=e.target.closest('[data-a="retry"]');
-      if(retryBtn){ loadGoals(); return; }
-      var b=e.target.closest('button');if(!b)return;if(!need())return;var id=String(b.dataset.id),r;
-      if(b.dataset.a==='del'){
-        busyGoalIds[id]=true; b.disabled=true;
-        r=await sb.from('goals').delete().eq('id',id);
-        busyGoalIds[id]=false;
-        if(!bad(r)){ goals=goals.filter(function(x){return String(x.id)!==id;}); drawGoals(); }
-        return;
-      }
-      if(busyGoalIds[id]){ return; }
-      var g=goals.filter(function(x){return String(x.id)===id;})[0];
-      if(!g){ return; }
-      var nextVal=Math.min(100, g.progress+10);
-      busyGoalIds[id]=true; b.disabled=true; b.textContent='…';
-      g.progress=nextVal; drawGoals();
-      r=await sb.rpc('increment_goal_progress',{goal_id:id,delta:10});
-      if(r.error&&(r.error.code==='PGRST202'||r.error.code==='42883')){
-        r=await sb.from('goals').update({progress:nextVal}).eq('id',id);
-      }
-      busyGoalIds[id]=false;
-      if(!bad(r)){ loadGoals(); }
-      else { loadGoals(); }
-    });
-
-    /* Notes — time12-style notebook: list + editor, saved on this device */
-    var notes=[],activeNoteId=null,noteSaveTimer=null;
-    function notesKey(){ return 'prod99_notes_'+(pid()||'guest'); }
-    function loadNotesFromStorage(){
-      notes=[];
-      try{ var raw=localStorage.getItem(notesKey()); if(raw){ notes=JSON.parse(raw)||[]; } }catch(e){ notes=[]; }
-      notes.sort(function(a,b){ return (b.updated||0)-(a.updated||0); });
-    }
-    function saveNotesToStorage(){ try{ localStorage.setItem(notesKey(), JSON.stringify(notes)); }catch(e){} }
-    function wordStats(text){
-      var words=(text||'').trim().split(/\s+/).filter(Boolean);
-      var n=words.length;
-      return { n:n, mins:n?Math.max(1,Math.round(n/200)):0 };
-    }
-    function renderNoteList(){
-      var ul=$('noteList'); if(!ul) return;
-      var mobileUl=$('noteListMobile');
-      var q=($('noteSearch').value||'').toLowerCase();
-      var filtered=notes.filter(function(n){
-        if(!q) return true;
-        return (n.title||'').toLowerCase().indexOf(q)>-1 || (n.body||'').toLowerCase().indexOf(q)>-1;
-      });
-      $('noteCount').textContent = notes.length + (notes.length===1?' note':' notes');
-      var html;
-      if(!filtered.length){
-        html='<li class="empty">'+(notes.length?'No notes match your search.':'No notes yet. Press New note.')+'</li>';
-      } else {
-        html = filtered.map(function(n){
-          var d = n.updated ? new Date(n.updated).toLocaleDateString(undefined,{month:'short',day:'numeric'}) : '';
-          var snippet = (n.body||'').trim().replace(/\s+/g,' ').slice(0,54);
-          return '<li class="note-item'+(n.id===activeNoteId?' active':'')+'" data-id="'+attr(n.id)+'" tabindex="0" role="button">'+
-            '<b>'+esc(n.title||'Untitled')+'</b><span>'+esc(d)+(snippet?' · '+esc(snippet):'')+'</span></li>';
-        }).join('');
-      }
-      ul.innerHTML = html;
-      if(mobileUl){ mobileUl.innerHTML = html; }
-    }
-    function selectNote(id){
-      activeNoteId=id||null;
-      var n=notes.filter(function(x){return x.id===activeNoteId;})[0];
-      $('noteTitleIn').value = n ? (n.title||'') : '';
-      $('noteBodyIn').value = n ? (n.body||'') : '';
-      $('noteTitleIn').disabled = !n;
-      $('noteBodyIn').disabled = !n;
-      $('noteDelBtn').disabled = !n;
-      var st=wordStats(n ? n.body : '');
-      $('noteWords').textContent = st.n;
-      $('noteMins').textContent = st.mins;
-      $('noteStatus').textContent = n ? 'Synced to this device' : 'No note selected';
-      renderNoteList();
-    }
-    function newNote(){
-      var n={ id:Date.now().toString(36)+Math.random().toString(36).slice(2,7), title:'', body:'', updated:Date.now() };
-      notes.unshift(n);
-      saveNotesToStorage();
-      selectNote(n.id);
-      $('noteTitleIn').focus();
-    }
-    function deleteActiveNote(){
-      if(!activeNoteId) return;
-      if(!confirm('Delete this note?')) return;
-      notes=notes.filter(function(x){return x.id!==activeNoteId;});
-      saveNotesToStorage();
-      selectNote(notes.length ? notes[0].id : null);
-    }
-    function scheduleNoteSave(){
-      if(!activeNoteId) return;
-      clearTimeout(noteSaveTimer);
-      $('noteStatus').textContent='Saving…';
-      noteSaveTimer=setTimeout(function(){
-        var n=notes.filter(function(x){return x.id===activeNoteId;})[0];
-        if(!n) return;
-        n.title=$('noteTitleIn').value;
-        n.body=$('noteBodyIn').value;
-        n.updated=Date.now();
-        saveNotesToStorage();
-        var st=wordStats(n.body);
-        $('noteWords').textContent=st.n; $('noteMins').textContent=st.mins;
-        $('noteStatus').textContent='Synced to this device';
-        renderNoteList();
-      }, 400);
-    }
-    $('noteNewBtn').addEventListener('click', newNote);
-    $('noteDelBtn').addEventListener('click', deleteActiveNote);
-    $('noteTitleIn').addEventListener('input', scheduleNoteSave);
-    $('noteBodyIn').addEventListener('input', scheduleNoteSave);
-    $('noteSearch').addEventListener('input', function(){
-      if($('mobileSearch')){ $('mobileSearch').value = this.value; }
-      renderNoteList();
-    });
-    if($('mobileSearch')){
-      $('mobileSearch').addEventListener('input', function(){
-        $('noteSearch').value = this.value;
-        renderNoteList();
-      });
-    }
-    $('noteList').addEventListener('click', function(e){
-      var li=e.target.closest('.note-item'); if(!li||!li.dataset.id) return;
-      selectNote(li.dataset.id);
-    });
-    $('noteList').addEventListener('keydown', function(e){
-      if(e.key!=='Enter') return;
-      var li=e.target.closest('.note-item'); if(!li||!li.dataset.id) return;
-      selectNote(li.dataset.id);
-    });
-    if($('noteListMobile')){
-      $('noteListMobile').addEventListener('click', function(e){
-        var li=e.target.closest('.note-item'); if(!li||!li.dataset.id) return;
-        selectNote(li.dataset.id);
-      });
-      $('noteListMobile').addEventListener('keydown', function(e){
-        if(e.key!=='Enter') return;
-        var li=e.target.closest('.note-item'); if(!li||!li.dataset.id) return;
-        selectNote(li.dataset.id);
-      });
-    }
-    function initNotes(){
-      loadNotesFromStorage();
-      selectNote(notes.length ? notes[0].id : null);
-    }
-
-    /* Study tracker */
-    var logsLoadState='ok';
-    async function loadLogs(){
-      logs={};
-      if(pid()){
-        var s=new Date();s.setDate(s.getDate()-6);
-        var r=await sb.from('study_logs').select('date,minutes').eq('profile_id',pid()).gte('date',key(s));
-        if(r.error){console.error(r.error);logsLoadState='error';}
-        else{(r.data||[]).forEach(function(x){logs[x.date]=x.minutes});logsLoadState='ok';}
-      } else {
-        logsLoadState='ok';
-      }
-      drawToday();
-    }
-    var DAILY_GOAL=120;
-    function drawToday(){
-      if(logsLoadState==='error'){
-        $('today').innerHTML='Couldn\'t load study time. <button data-a="retry">Retry</button>';
-        return;
-      }
-      var m=logs[key(new Date())]||0;
-      var pct=Math.min(100,(m/DAILY_GOAL)*100);
-      var bar=$('dailyBar'); if(bar){ bar.style.width=pct+'%'; }
-      var gt=$('dailyGoalText'); if(gt){ gt.textContent=DAILY_GOAL; }
-      $('today').textContent=m+' min today';
-      var hr=$('headerRing'); if(hr){ hr.style.setProperty('--p', String(pct)); }
-      var hm=$('headerMins'); if(hm){ hm.textContent=m; }
-    }
-    $('trk').addEventListener('click',function(e){
-      var retryBtn=e.target.closest('[data-a="retry"]');
-      if(retryBtn){ loadLogs(); }
-    });
-    var POMO_KEY='prod99_pomo',MODE_KEY='prod99_mode',tMode='stopwatch',pomoMin=25,endAt=0;
-    var tState='idle',pausedElapsedMs=0,pausedRemainSecs=0; // tState: idle | running | paused
-    try{var pv=parseInt(localStorage.getItem(POMO_KEY),10);if(pv===25||pv===50)pomoMin=pv}catch(e){}
-    try{var mv=localStorage.getItem(MODE_KEY);if(mv==='pomodoro'||mv==='stopwatch')tMode=mv}catch(e){}
-    function currentSecs(){
-      if(tMode!=='stopwatch') return 0;
-      var running=(tState==='running')?(Date.now()-tStart):0;
-      return Math.floor((pausedElapsedMs+running)/1000);
-    }
-    function remainSecs(){
-      if(tMode!=='pomodoro') return 0;
-      if(tState==='running'){ return Math.max(0, Math.ceil((endAt-Date.now())/1000)); }
-      if(tState==='paused'){ return pausedRemainSecs; }
-      return pomoMin*60;
-    }
-    function ringPct(){
-      if(tMode==='pomodoro'){
-        var total=pomoMin*60; if(tState==='idle') return 0;
-        var left=remainSecs();
-        return Math.min(100, Math.max(0, ((total-left)/total)*100));
-      }
-      // stopwatch: loop the ring every 60s of elapsed time, purely decorative
-      return tState==='idle' ? 0 : ((currentSecs()%60)/60)*100;
-    }
-    function tickClock(){
-      $('clock').textContent = tMode==='pomodoro' ? fmt(remainSecs()) : fmt(currentSecs());
-      var ring=$('timerRing'); if(ring){ ring.style.setProperty('--tp', String(ringPct())); }
-    }
-    function lockSegs(b){ ['mdSw','mdPo','du25','du50'].forEach(function(id){ $(id).disabled=b; }); }
-    function syncSegs(){
-      $('mdSw').setAttribute('aria-pressed',tMode==='stopwatch'); $('mdPo').setAttribute('aria-pressed',tMode==='pomodoro');
-      $('du25').setAttribute('aria-pressed',pomoMin===25); $('du50').setAttribute('aria-pressed',pomoMin===50);
-      $('duSeg').hidden = tMode!=='pomodoro';
-    }
-    function syncTimerBtns(){
-      $('timerStartBtn').disabled = tState==='running';
-      $('timerStartBtn').textContent = tState==='paused' ? 'Resume' : 'Start';
-      $('timerStopBtn').disabled = tState!=='running';
-      $('timerResetBtn').disabled = tState==='idle';
-    }
-    function resetState(){
-      if(tm){ clearInterval(tm); tm=null; }
-      pausedElapsedMs=0; pausedRemainSecs=0; tStart=0; endAt=0; tState='idle';
-      var t=$('trk'); if(t){ t.classList.remove('running'); }
-      lockSegs(false); tickClock(); syncTimerBtns();
-    }
-    async function logMinutes(min,mode){ var t=key(new Date()),r=await sb.from('study_logs').select('id,minutes').eq('profile_id',pid()).eq('date',t).maybeSingle();if(bad(r))return;if(r.data)r=await sb.from('study_logs').update({minutes:r.data.minutes+min}).eq('id',r.data.id);else r=await sb.from('study_logs').insert({profile_id:pid(),date:t,minutes:min});if(!bad(r))loadLogs()}
-    function finishPomo(){
-      var m=pomoMin;
-      if(tm){ clearInterval(tm); tm=null; }
-      if(pid()){ logMinutes(m,'pomodoro'); }
-      try{ if('Notification' in window && Notification.permission==='granted'){ new Notification('Pomodoro complete',{body:m+' minutes logged. Time for a break.'}); } }catch(e){}
-      resetState();
-    }
-    function pomoTick(){ if(remainSecs()<=0){ finishPomo(); } else { tickClock(); } }
-    function startTimer(){
-      if(tState==='running') return;
-      var t=$('trk'); if(t){ t.classList.add('running'); }
-      lockSegs(true);
-      if(tMode==='pomodoro'){
-        var remain = tState==='paused' ? pausedRemainSecs : pomoMin*60;
-        endAt=Date.now()+remain*1000;
-        try{ if('Notification' in window && Notification.permission==='default'){ Notification.requestPermission(); } }catch(e){}
-        tm=setInterval(pomoTick,500);
-      } else {
-        tStart=Date.now();
-        tm=setInterval(tickClock,1000);
-      }
-      tState='running';
-      tickClock(); syncTimerBtns();
-    }
-    function stopTimer(){ // pause: freezes elapsed/remaining, no logging yet
-      if(tState!=='running') return;
-      if(tMode==='pomodoro'){ pausedRemainSecs=remainSecs(); }
-      else { pausedElapsedMs += (Date.now()-tStart); }
-      if(tm){ clearInterval(tm); tm=null; }
-      tState='paused';
-      var t=$('trk'); if(t){ t.classList.remove('running'); }
-      tickClock(); syncTimerBtns();
-    }
-    function resetTimer(){ // clears back to the start; logs any stopwatch time first
-      if(tMode==='stopwatch'){
-        var secs=currentSecs();
-        if(secs>0 && need()){ logMinutes(Math.max(1,Math.round(secs/60))); }
-      }
-      resetState();
-    }
-    $('timerStartBtn').addEventListener('click',startTimer);
-    $('timerStopBtn').addEventListener('click',stopTimer);
-    $('timerResetBtn').addEventListener('click',resetTimer);
-    $('mdSw').addEventListener('click',function(){ if(tState!=='idle')return; tMode='stopwatch'; try{ localStorage.setItem(MODE_KEY,tMode); }catch(e){} syncSegs(); tickClock(); });
-    $('mdPo').addEventListener('click',function(){ if(tState!=='idle')return; tMode='pomodoro'; try{ localStorage.setItem(MODE_KEY,tMode); }catch(e){} syncSegs(); tickClock(); });
-    [25,50].forEach(function(n){ $('du'+n).addEventListener('click',function(){ if(tState!=='idle')return; pomoMin=n; try{ localStorage.setItem(POMO_KEY,String(n)); }catch(e){} syncSegs(); tickClock(); }); });
-    document.addEventListener('visibilitychange',function(){ if(!document.hidden && tState==='running'){ if(tMode==='pomodoro'){ pomoTick(); } else { tickClock(); } } });
-    syncSegs();
-    tickClock();
-    syncTimerBtns();
-
-    /* Posts */
-    var likedPosts=[],likesPidLoaded=null,postsLoadState='ok',postBusy=false;
-    function likesKey(p){return 'prod99_likes_'+p}
-    function ensureLikesLoaded(){
-      var p=pid();
-      if(p===likesPidLoaded)return;
-      likesPidLoaded=p;
-      if(!p){likedPosts=[];return}
-      try{var raw=JSON.parse(localStorage.getItem(likesKey(p))||'[]');likedPosts=Array.isArray(raw)?raw:[]}catch(e){likedPosts=[]}
-    }
-    function saveLikes(){var p=pid();if(!p)return;try{localStorage.setItem(likesKey(p),JSON.stringify(likedPosts))}catch(e){}}
-    async function loadPosts(){
-      ensureLikesLoaded();
-      var r=await sb.from('posts').select('*').order('created_at',{ascending:false});
-      if(r.error){ console.error(r.error); postsLoadState='error'; }
-      else { posts=r.data||[]; postsLoadState='ok'; }
-      drawFeed();
-    }
-    function drawFeed(){
-      if(postsLoadState==='error'){ $('feed').innerHTML='<li class="empty">Couldn\'t load posts. <button data-a="retry">Retry</button></li>'; return; }
-      // Liked state is styled by the .liked class in CSS (replaces the old inline style).
-      $('feed').innerHTML=posts.map(function(p){var on=likedPosts.indexOf(String(p.id))>-1;return '<li class="post"><small><b>'+esc(p.name)+'</b><span class="badge">'+esc(p.role)+'</span></small><p>'+esc(p.content)+'</p><button class="like'+(on?' liked':'')+'" data-id="'+attr(p.id)+'" aria-pressed="'+(on?'true':'false')+'"'+(likeInFlight[String(p.id)]?' disabled':'')+'>'+(on?'&#9829;':'&#9825;')+' '+num(p.likes)+'</button></li>'}).join('')||'<li class="empty">No posts yet. Start the conversation.</li>';
-    }
-    $('postForm').addEventListener('submit',async function(e){
-      e.preventDefault();
-      if(postBusy)return;
-      var v=$('postIn').value.trim();
-      if(!v)return;
-      if(!need())return;
-      var btn=$('postForm').querySelector('button');
-      postBusy=true; if(btn)btn.disabled=true;
-      $('postIn').value='';
-      try{
-        var r=await sb.from('posts').insert({profile_id:pid(),name:P99.profile.username||'Guest',role:$('postRole').value,content:v,likes:0});
-        if(bad(r)){ $('postIn').value=v; return; }
-        loadPosts();
-      } finally {
-        postBusy=false; if(btn)btn.disabled=false;
-      }
-    });
-    $('feed').addEventListener('click',async function(e){
-      var retryBtn=e.target.closest('[data-a="retry"]');
-      if(retryBtn){ loadPosts(); return; }
-      var b=e.target.closest('.like');if(!b)return;if(!need())return;
-      var id=String(b.dataset.id);
-      if(likeInFlight[id]){ return; }
-      var wasLiked=likedPosts.indexOf(id)>-1,delta=wasLiked?-1:1;
-      likeInFlight[id]=true; b.disabled=true;
-      if(wasLiked){ likedPosts=likedPosts.filter(function(x){return x!==id;}); }
-      else { likedPosts.push(id); }
-      saveLikes();
-      var p=posts.filter(function(x){return String(x.id)===id;})[0];
-      if(p){ p.likes=Math.max(0,(p.likes||0)+delta); }
-      drawFeed();
-      try{
-        var r=await sb.rpc('increment_like',{post_id:id,delta:delta});
-        if(r.error&&(r.error.code==='PGRST202'||r.error.code==='42883')&&p){
-          r=await sb.from('posts').update({likes:p.likes}).eq('id',id);
-        }
-        if(r.error){ throw r.error; }
-      }catch(err){
-        if(wasLiked){ if(likedPosts.indexOf(id)<0){ likedPosts.push(id); } }
-        else { likedPosts=likedPosts.filter(function(x){return x!==id;}); }
-        if(p){ p.likes=Math.max(0,(p.likes||0)-delta); }
-        saveLikes();
-        bad({error:err});
-      } finally {
-        likeInFlight[id]=false;
-      }
-      loadPosts();
-    });
-
-    /* Export/Import */
-    async function fetchAll(t,ord){var all=[],f=0,r,q;while(true){q=sb.from(t).select('*').eq('profile_id',pid());if(ord)q=q.order(ord);r=await q.order('id').range(f,f+999);if(r.error)return r;all=all.concat(r.data||[]);if(!r.data||r.data.length<1000)return{data:all};f+=1000}}
-    async function exportAll(){
-      if(!need())return;
-      var out={version:1,exportedAt:new Date().toISOString()},sp=[['goals','created_at'],['study_logs','date'],['posts','created_at'],['tasks',null]],i,r;
-      for(i=0;i<sp.length;i++){
-        r=await fetchAll(sp[i][0],sp[i][1]);
-        if(r.error){
-          if(sp[i][0]==='tasks'&&(r.error.code==='42P01'||r.error.code==='PGRST205')){out.tasks=[];continue}
-          bad(r);return;
-        }
-        out[sp[i][0]]=r.data||[];
-      }
-      var url=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}));
-      var a=document.createElement('a');a.href=url;a.download='prod99-export-'+key(new Date())+'.json';document.body.appendChild(a);a.click();a.remove();
-      setTimeout(function(){URL.revokeObjectURL(url)},1000);
-      toast('Exported '+out.goals.length+' goals, '+out.study_logs.length+' study days, '+out.posts.length+' posts.');
-    }
-    var UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,DATE_RE=/^\d{4}-\d{2}-\d{2}$/;
-    function cut(v,n){return typeof v==='string'?v.slice(0,n):''}
-    function stamp(v){var t=typeof v==='string'?Date.parse(v):NaN;return isNaN(t)?null:new Date(t).toISOString()}
-    function cleanRow(t,x){
-      if(!x||typeof x.id!=='string'||!UUID_RE.test(x.id))return null;
-      var b={id:x.id,profile_id:pid()},c=stamp(x.created_at),v;
-      if(t==='goals'){v=cut(x.title,60).trim();if(!v)return null;b.title=v;b.progress=Math.min(100,Math.max(0,Math.round(Number(x.progress)||0)));if(c)b.created_at=c}
-      else if(t==='study_logs'){if(typeof x.date!=='string'||!DATE_RE.test(x.date))return null;b.date=x.date;b.minutes=Math.min(1440,Math.max(0,Math.round(Number(x.minutes)||0)))}
-      else if(t==='posts'){v=cut(x.content,200).trim();if(!v)return null;b.content=v;b.name=P99.profile.username||'Guest';b.role=(x.role==='Teacher'?'Teacher':'Student');b.likes=0;if(c)b.created_at=c}
-      else return null;
-      return b;
-    }
-    async function importJson(file){
-      if(!need()||!file)return;
-      if(file.size>5*1024*1024){toast('Import refused: file is over 5 MB.');return}
-      var d;try{d=JSON.parse(await file.text())}catch(e){toast('Import refused: not valid JSON.');return}
-      if(!d||d.version!==1){toast('Import refused: unsupported file version.');return}
-      var imp=0,skp=0,order=['goals','study_logs','posts'],have={},i,j,t,src,ok,batch,r;
-      r=await sb.from('study_logs').select('date').eq('profile_id',pid());if(bad(r))return;
-      (r.data||[]).forEach(function(x){have[x.date]=1});
-      for(i=0;i<order.length;i++){
-        t=order[i];src=Array.isArray(d[t])?d[t]:[];ok=[];
-        skp+=Math.max(0,src.length-5000);
-        src.slice(0,5000).forEach(function(x){var b=cleanRow(t,x);if(b&&t==='study_logs'){if(have[b.date])b=null;else have[b.date]=1}if(b)ok.push(b);else skp++});
-        for(j=0;j<ok.length;j+=200){
-          batch=ok.slice(j,j+200);
-          r=await sb.from(t).upsert(batch,{onConflict:'id',ignoreDuplicates:true}).select('id');
-          if(r.error){console.error(r.error);refreshAll();toast('Import stopped: '+r.error.message+' ('+imp+' imported before the error).');return}
-          imp+=(r.data||[]).length;skp+=batch.length-(r.data||[]).length;
-        }
-      }
-      refreshAll();
-      toast('Imported '+imp+', skipped '+skp+'.'+(Array.isArray(d.tasks)&&d.tasks.length?' Tasks are not imported yet.':''));
-    }
-
-    /* File storage */
-    var BUCKET='user-files',MAX_FILE=10*1024*1024,fileBusy=false,live=null,liveTimer=null;
-    function fileLabel(n){return n.replace(/^\d+-/,'')}
-    function fmtSize(b){return b>=1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB'}
-    async function loadFiles(){
-      var ul=$('fileList');
-      if(!pid()){ul.innerHTML='';return}
-      var r=await sb.storage.from(BUCKET).list(String(pid()),{limit:100,sortBy:{column:'created_at',order:'desc'}});
-      if(r.error){console.error(r.error);ul.innerHTML='<li class="empty">File storage is not available yet.</li>';return}
-      var f=(r.data||[]).filter(function(x){return x.id});
-      ul.innerHTML=f.map(function(x){
-        var sz=x.metadata&&x.metadata.size;
-        var ico='';
-        return '<li><div class="gt">'+ico+'<span>'+esc(fileLabel(x.name))+'</span><b>'+(sz?fmtSize(sz):'')+'</b><button data-a="get" data-n="'+attr(x.name)+'">Open</button><button data-a="rm" data-n="'+attr(x.name)+'" aria-label="Delete">&times;</button></div></li>';
-      }).join('')||'<li class="empty">No files yet.</li>';
-    }
-    $('fileUp').addEventListener('click',async function(){
-      if(!need()||fileBusy)return;
-      var f=$('fileIn').files[0];
-      if(!f){toast('Choose a file first.');return}
-      if(f.size>MAX_FILE){toast('That file is over 10 MB.');return}
-      var btn=this;fileBusy=true;btn.disabled=true;
-      var safe=f.name.replace(/[^\w.\-]+/g,'_').slice(-80);
-      var r=await sb.storage.from(BUCKET).upload(pid()+'/'+Date.now()+'-'+safe,f,{contentType:f.type||'application/octet-stream'});
-      fileBusy=false;btn.disabled=false;
-      if(bad(r))return;
-      $('fileIn').value='';toast('Uploaded '+f.name+'.');loadFiles();
-    });
-    $('fileList').addEventListener('click',async function(e){
-      var b=e.target.closest('button');if(!b||!need())return;
-      var p=pid()+'/'+b.dataset.n,r;
-      if(b.dataset.a==='get'){
-        var w=window.open('about:blank','_blank');
-        r=await sb.storage.from(BUCKET).createSignedUrl(p,60);
-        if(r.error){if(w)w.close();bad(r);return}
-        if(w){w.opener=null;w.location.href=r.data.signedUrl}
-        return;
-      }
-      if(!confirm('Delete this file?'))return;
-      b.disabled=true;
-      r=await sb.storage.from(BUCKET).remove([p]);
-      if(bad(r)){b.disabled=false;return}
-      loadFiles();
-    });
-
-    function subscribeLive(){
-      if(live||!pid())return;
-      live=sb.channel('posts-live')
-        .on('postgres_changes',{event:'*',schema:'public',table:'posts'},function(){
-          clearTimeout(liveTimer);liveTimer=setTimeout(loadPosts,250);
-        })
-        .subscribe(function(s){var bd=$('liveBadge');if(bd)bd.hidden=(s!=='SUBSCRIBED')});
-    }
-    function unsubscribeLive(){
-      clearTimeout(liveTimer);
-      if(live){sb.removeChannel(live);live=null}
-      var bd=$('liveBadge');if(bd)bd.hidden=true;
-    }
-
-    $('expBtn').addEventListener('click',exportAll);
-    $('impBtn').addEventListener('click',function(){$('impIn').click()});
-    $('impIn').addEventListener('change',function(){var f=this.files[0];this.value='';if(f)importJson(f)});
-
-    refreshAll = function(){ loadGoals(); loadLogs(); loadPosts(); loadFiles(); initNotes(); subscribeLive(); };
-    P99.stop=function(){ resetTimer(); unsubscribeLive(); };
-    window.addEventListener('pagehide', function(){ try{ P99.stop(); }catch(e){} });
-    refreshAll();
+  /* ---------- render all + boot ---------- */
+  function renderAll() {
+    $('accountName').textContent = session ? session.user : '·';
+    $('avatarInitial').textContent = session ? (session.user[0] || '·').toUpperCase() : '·';
+    D.notes.sort(function (a, b) { return b.ts - a.ts; });
+    renderNotes(); renderGoals(); renderFiles(); renderFeed();
+    openNote(D.notes[0] ? D.notes[0].id : null);
+    showSec(lastSec);
+    updateToday(); setRunUI(); paintTimer();
   }
 
-  // --- INIT ---
-  setMode('signup');
-  auName.focus();
-  showAuthView();        // default hidden-state target while restoreSession() resolves
-  restoreSession();      // async; will call setProfile(), which shows the right view
+  (function boot() {
+    if (session && session.user) { loadData(); renderAll(); showApp(); }
+    else { setMode('signup'); showAuth(); }
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { document.documentElement.classList.remove('boot'); });
+    });
+  })();
+})();
+</script>
+
+<script>
+/* ===== login ⇄ dashboard transition — auto-hooks the view swap above =====
+   Watches #authView/#appView [hidden] and body[data-view]. When the auth code
+   swaps them, it replays the swap as a choreography, pre-paint, so there is
+   never a flash: the card launches away while the dashboard staggers in. */
+(function () {
+  'use strict';
+  var auth = document.getElementById('authView');
+  var app = document.getElementById('appView');
+  if (!auth || !app) return;
+  var body = document.body;
+  var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var busy = false;
+  var shown = (!app.hidden || body.getAttribute('data-view') === 'app') ? 'app' : 'auth';
+
+  function intended() {
+    return (!app.hidden || body.getAttribute('data-view') === 'app') ? 'app' : 'auth';
+  }
+  function setState(to) {
+    if (to === 'app') { auth.setAttribute('hidden', ''); app.removeAttribute('hidden'); }
+    else              { app.setAttribute('hidden', ''); auth.removeAttribute('hidden'); }
+    body.setAttribute('data-view', to);
+    shown = to;
+  }
+  function scatter() {   /* fling each 2D shape away from the screen center */
+    var cx = innerWidth / 2, cy = innerHeight / 2;
+    Array.prototype.forEach.call(auth.querySelectorAll('.sh'), function (el) {
+      var r = el.getBoundingClientRect();
+      var x = r.width ? r.left + r.width / 2 : cx, y = r.width ? r.top + r.height / 2 : cy;
+      var dx = (x - cx) / (cx || 1), dy = (y - cy) / (cy || 1), m = Math.hypot(dx, dy) || 1;
+      el.style.setProperty('--sx', (dx / m * 48).toFixed(1) + 'vw');
+      el.style.setProperty('--sy', (dy / m * 42).toFixed(1) + 'vh');
+    });
+  }
+
+  function toApp() {
+    busy = true;
+    var card = auth.querySelector('.card');
+
+    /* restore the login layout for one pre-paint beat to measure the card exactly */
+    app.setAttribute('hidden', '');
+    body.setAttribute('data-view', 'auth');
+    auth.removeAttribute('hidden');
+    var r = card.getBoundingClientRect();
+    scatter();
+
+    /* pin the card where it was… */
+    card.style.position = 'fixed';
+    card.style.left = r.left + 'px';
+    card.style.top = r.top + 'px';
+    card.style.width = r.width + 'px';
+    card.style.margin = '0';
+
+    /* …then launch it away while the dashboard rises underneath */
+    auth.classList.add('leaving');
+    body.setAttribute('data-view', 'app');
+    app.removeAttribute('hidden');
+    app.classList.add('entering');
+    window.scrollTo(0, 0);
+    if (window.Geo3D) Geo3D.burst();
+
+    setTimeout(function () {
+      auth.setAttribute('hidden', '');
+      auth.classList.remove('leaving');
+      card.style.cssText = '';
+      shown = 'app'; busy = false;
+      setTimeout(function () { app.classList.remove('entering'); }, 750);
+    }, 560);
+  }
+
+  function toAuth() {
+    busy = true;
+    app.removeAttribute('hidden');
+    app.classList.add('exiting');
+    auth.removeAttribute('hidden');
+    body.setAttribute('data-view', 'auth');
+    auth.classList.add('entering');
+    if (window.Geo3D) Geo3D.burst();
+    window.scrollTo(0, 0);
+    setTimeout(function () {
+      app.setAttribute('hidden', '');
+      app.classList.remove('exiting');
+      shown = 'auth'; busy = false;
+      setTimeout(function () { auth.classList.remove('entering'); }, 750);
+    }, 430);
+  }
+
+  var mo = new MutationObserver(function () {
+    if (busy) return;
+    var want = intended();
+    if (want === shown) return;
+    if (reduced) { setState(want); return; }
+    if (want === 'app') toApp(); else toAuth();
+  });
+  mo.observe(body, { attributes: true, attributeFilter: ['data-view'] });
+  mo.observe(auth, { attributes: true, attributeFilter: ['hidden'] });
+  mo.observe(app,  { attributes: true, attributeFilter: ['hidden'] });
 })();
 </script>
 
